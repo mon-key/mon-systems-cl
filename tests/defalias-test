@@ -1,0 +1,85 @@
+;;; :FILE mon-systems/tests/defalias-test
+;;; ==============================
+
+(in-package #:mon)
+;; *package*
+
+(defun boolean-to-bit (boolean &optional no-error)
+  (declare (optimize (speed 3)))
+  (multiple-value-bind (boolp boolval) (booleanp boolean)    
+    (if no-error
+        (values
+         (or (and boolp (or (and boolp 1) 0))
+             (and (typep boolval '(integer 0 1)) boolval))
+         boolval)
+        (values-list
+         (ecase boolval
+           (0      '(0 0))
+           (1      '(1 1))
+           ((nil)  '(0 (quote nil)))
+           ((t)    '(1 t)))))))
+
+
+
+#|
+  
+ (progn (fmakunbound 'boolean-to-bit) 
+        (unintern 'boolean-to-bit)
+        (fmakunbound 'boolean-from-bit)
+        (unintern 'boolean-from-bit))
+|#
+
+;; (setf *break-on-signals* nil)
+(function (lambda () "buba"))
+(defmacro tt--mac ()
+  "bubba")
+
+(define-compiler-macro tt--mac (&whole form)
+  `(,form "bubba"))
+;; (function tt--mac)
+(defalias 'subsetp 'tt--mac  "alternative docstring for boolean-from-bit")
+(setf (compiler-macro-function 'tt--mac) nil)
+TT--MAC, MACRO-FUNCTION, COMPILER-MACRO-FUNCTION
+
+
+(package-name (find-package "COMMON-LISP"))
+(compiler-macro-function 'byte-request-integer)
+(find-symbol (symbol-name 'progn))
+
+(symbol-package ,source-fun-symbol)
+
+(or (symbol-package (symbol-name ,source-fun-symbol) (find-package "COMMON-LISP")
+(or (eq (symbol-package ,source-fun-symbol) ,cl-pkg)
+    (eq (symbol-package ,dest-fun-symbol) ,cl-pkg)
+    (setf 
+    
+
+(symbol-name 'progn))
+;=> NIL, (SYMBOL-PACKAGE #<PACKAGE "COMMON-LISP">)
+;=> BOOLEAN-FROM-BIT, SYMBOL-FUNCTION
+;=> BOOLEAN-FROM-BIT, SYMBOL-FUNCTION
+;=> BOOLEAN-FROM-BIT, MACRO-FUNCTION
+;=> BOOLEAN-FROM-BIT, SYMBOL-FUNCTION, COMPILER-MACRO-FUNCTION
+
+
+;;"docstring")
+;; (boolean-from-bit t)
+;;
+;; (where-is "boolean-from-bit")
+;;
+;; (boolean-to-bit t)
+;; (boolean-from-bit t)
+;; (fboundp 'boolean-from-bit)
+
+#|
+ 
+ (progn (fmakunbound 'boolean-to-bit) 
+        (unintern 'boolean-to-bit)
+        (fmakunbound 'boolean-from-bit)
+        (unintern 'boolean-from-bit))
+
+|#
+
+
+;;; ==============================
+;;; EOF

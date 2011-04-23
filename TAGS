@@ -1,0 +1,671 @@
+
+alist.lisp,176
+(defun assq 21,541
+(define-compiler-macro assq 25,627
+(defun alist-eql 29,763
+(defun alist-sort-keys 38,1141
+(defun alist-to-plist 43,1381
+(defun nalist-to-plist 47,1524
+
+macros.lisp,1562
+(defun and-so 48,1976
+(defun dequote 53,2160
+(defmacro eval-when-all 60,2360
+(defmacro eval-when-compile 65,2526
+(defmacro w-debug-declared 68,2626
+(defmacro w-fast-declared 74,2915
+(defmacro with-gensyms 92,3433
+(defmacro with-gensyms 96,3525
+(defmacro retaining-value 100,3668
+(defmacro multiple-value-setf 109,4087
+(defmacro %compose 130,4924
+(defmacro ref-bind 147,5528
+(defmacro ref-it-if 158,5879
+(defmacro bound-and-true-p 166,6063
+(defmacro defsubst 171,6229
+(defmacro defalias 214,7919
+(defmacro type-and 281,11138
+(defmacro type-not 291,11500
+(defmacro string-case 301,11783
+(defmacro string-case-fast 329,13214
+(defmacro to-percent 342,13635
+(defmacro number-to-double-float 346,13732
+(defmacro byte-octets-for-integer 349,13793
+(defmacro string-get 365,14283
+(defmacro string-set 369,14409
+(defmacro string-append-into 375,14553
+(defmacro output-stream-normalize 388,15068
+(defmacro list-sift 415,16270
+(define-modify-macro sortf 427,16784
+(define-modify-macro stable-sortf 429,16842
+(defmacro popn 433,16951
+(defmacro assoc-create 450,17505
+(defmacro for 480,18639
+(defmacro do-until 489,18886
+(defmacro do-while 492,18959
+(defmacro until 497,19094
+(defmacro while 502,19298
+(defmacro dosequence 507,19484
+(defmacro dosublists 523,20060
+(defmacro doenumerated 531,20336
+(defmacro dorange 540,20738
+(defmacro aset 559,21393
+(defmacro mk-array 568,21674
+(defmacro vector-insert-element 576,22067
+(defmacro vector-remove-element 601,22930
+(defmacro vector-map 609,23206
+(defmacro condition-case 613,23360
+
+compose.lisp,54
+(defun compose-fun 14,236
+(defun compose-all 21,480
+
+format.lisp,214
+(defun format-delimited-english-list 80,2578
+(defvar *format-delimited-english-list-templates*118,4608
+(defun format-emit-tab 151,6275
+(defun %format-list-items 162,6675
+(defun format-list-items-by-n 172,6938
+
+chronos.lisp,204
+(defun current-time 54,1246
+(defun time-zone-to-string 62,1486
+(defun time-string-yyyy-mm-dd 75,2120
+(defun time-string-right-now 83,2527
+(defun timestamp 95,3104
+(defun timestamp-for-file 106,3635
+
+file-dir.lisp,1295
+(defun file-name-directory 271,7233
+(defun file-truename 274,7308
+(defun file-directory-p 277,7365
+(defun directory-file-name 282,7553
+(defun pathname-directory-merged 292,7876
+(defun pathname-directory-append 296,8069
+(defun to-directory 304,8373
+(defun expand-file-name 308,8495
+(defun unix-dot-directory-p 312,8691
+(defun directorize-namestring 327,9269
+(defun rename-file* 333,9508
+(defun replace-file 340,9787
+(defun ensure-file-exists 378,10952
+(defun delete-file-if-exists 385,11185
+(defun copy-file 412,12326
+(defun pathname-strip-filespec 423,12780
+(defun directory-parent 431,13010
+(defun find-file-search-path 443,13657
+(defun logical-hosts 456,14154
+(defun directory-files 469,14454
+(defun pathname-directory-pathname 489,15190
+(defun make-pathname-directory-wildcard 493,15328
+(defun make-pathname-directory-w-type-wild 498,15533
+(defun substitute-in-file-name 576,18535
+(defun pathname-components 625,20491
+(defun file-newer-than-file-p 636,20886
+(defun remove-directory 642,21043
+(defun probe-directory 646,21116
+(defun pathname-directory-system 663,21774
+(defun pathname-directory-system-ensure 692,23095
+(defun pathname-system 698,23296
+(defun namestring-system 703,23456
+(defun default-directory 709,23603
+(defun pathname-absolute-p 713,23764
+
+conditions.lisp,1445
+(define-condition error-mon 28,865
+(define-condition simple-error-mon 58,1810
+(define-condition case-error 90,3047
+(define-condition proper-list-error 131,5052
+(define-condition circular-list-error 159,6083
+(define-condition slot-non-existent-error 201,8395
+(define-condition package-error-not 241,10236
+(define-condition symbol-not-null-or-string-not-empty-error 259,11004
+(define-condition plist-error 278,12001
+(define-condition plist-not-null-error 297,12904
+(define-condition open-stream-output-stream-error 320,14047
+(defun ensure-one-of 345,15333
+(defun ensure-signal-or-only 358,16040
+(defun signal-error-or-condition 365,16337
+(defun simple-error-mon-report 386,17366
+(defun format-error-symbol-type 412,18676
+(defun simple-error-mon 422,19095
+(defun circular-list-error 458,21361
+(defun proper-list-error-report 466,21795
+(defun proper-list-error 476,22230
+(defun symbol-not-null-or-error 499,23250
+(defun string-empty-error 515,24144
+(defun package-error-not-report 544,26017
+(defun package-error-not 563,27083
+(defun plist-error-report 583,28412
+(defun plist-not-null-error 607,29853
+(defun plist-error 632,31305
+(defun symbol-not-null-or-string-not-empty-error-report 658,32757
+(defun symbol-not-null-or-string-not-empty-error 680,34154
+(defun open-stream-output-stream-error-report 719,36662
+(defun open-stream-output-stream-error 747,38473
+(defun format-error 779,40455
+(defun eval-code 785,40653
+
+class-utils.lisp,530
+(defun class-subclasses 102,3821
+(defun class-slot-list 137,4971
+(defun class-slot-list-direct 145,5237
+(defun class-slot-initargs 148,5302
+(defun structure-slots 156,5586
+(defgeneric class-instance-p 169,5910
+(defmethod class-instance-p 171,6022
+(defmethod class-instance-p 172,6069
+(defun slot-value-or 174,6128
+(defun class-name-of 179,6254
+(defun find-class-name-as-string 184,6393
+(defun copy-instance-of-class-shallowly 235,9143
+(defun slot-definition-and-name 252,9827
+(defun class-bound-slot-names 271,10626
+
+bit-twiddle.lisp,706
+(defun boolean-to-bit 40,1332
+(defalias 'bit-from-boolean bit-from-boolean55,1803
+(defun octet-logbitp-1-or-0 63,2138
+(defun octet-set-bit-vector-index 73,2578
+(defun octet-set-bit-vector-index-xor 94,3385
+(defun octet-set-bit-vector-index-xor-if 103,3766
+(defun octet-bit-vector-zeroed 112,4112
+(defun octet-bit-vector-initialize 117,4294
+(defun octet-to-bit-vector 123,4539
+(defun make-array-of-octet-bit-vectors 135,4967
+(defun bit-vector-octets 146,5331
+(defun byte-request-integer 271,10382
+(define-compiler-macro byte-request-integer 288,11104
+(defun byte-swap 322,12615
+(defun bytes-to-int 329,12819
+(defun number-to-byte-array 333,13008
+(defun string-to-sha1-byte-array 364,14308
+
+numbers.lisp,462
+(defun coerce-int-float 18,330
+(defun number-sequence-loop 24,440
+(defun number-sequence 64,1766
+(defun random-number-pairs 87,2408
+(defun parse-integer-list 95,2745
+(defun number-to-string 113,3445
+(defun %radix-values 120,3645
+(defun parse-float 133,4066
+(defun string-to-number 203,7330
+(defun value-in-range-p 253,9314
+(defun % 273,10190
+(defun length-unit-get 278,10353
+(defun length-unit-convert 285,10626
+(defun average-number-seq 295,10913
+
+chars.lisp,772
+(defun whitespace-char-p 93,3863
+(defun hexadecimal-char-p 100,4160
+(defun char-code-integer-to-string 103,4248
+(defun char-to-string 113,4720
+(defun char-code-integer-to-char 124,5281
+(defun char-numeric=140,5991
+(defun char-list-to-string 164,7108
+(defun char-position 185,8099
+(defun chars-not-in-string-p 192,8379
+(defun max-char 206,8833
+(defun ascii-string-p 209,8872
+(defun ascii-simple-string-p 216,9139
+(defun ascii-char-p 219,9217
+(defun ascii-downcase 223,9313
+(defun ascii-equal 237,9833
+(defun ascii-control-p 245,10092
+(defun latin-1-char-p 250,10251
+(defun latin-1-string-p 264,10777
+(defun latin-1-simple-string-p 269,10935
+(defun char-invert-case-maybe 274,11117
+(defun char-for-readtable-case 287,11646
+(defun char-length 305,12641
+
+seqs.lisp,1669
+(defun car-eq 35,889
+(defun position-eq 40,979
+(defun position-eq 48,1129
+(defun positions 54,1313
+(defun not-eq 76,1909
+(defun %ensure-both-cars 80,2004
+(defun car-less-than-car 104,3282
+(defun car-greater-than-car 113,3601
+(defun list-length-n-p 131,4342
+(defun memq 182,5912
+(defun union-eq-keep-first 205,7022
+(defun list-elt 231,7689
+(defsetf list-elt 236,7806
+(defun last-elt 242,7966
+(defalias 'list-last list-last246,8039
+(defun last-cons 249,8079
+(defun nth-sane 253,8149
+(defun list-from-singleton 258,8332
+(defun list-get-singleton 265,8520
+(defun car-safe 271,8647
+(defun cdr-safe 275,8738
+(defun list-dotted-p-destructure 283,9043
+(defun delq 313,10220
+(define-compiler-macro delq 318,10308
+(defun delete-dups 322,10425
+(defun delq-one 327,10567
+(defun delete-all-elts-eq 345,11106
+(defun delete-w-count 352,11351
+(defun remq 375,12251
+(defun nth-remove 383,12531
+(defun nsublist 389,12744
+(defun setcar 397,12965
+(defun setcdr 402,13074
+(defun add-to-list 406,13158
+(defun add-to-nth-list 412,13391
+(defun list-take 427,13881
+(defun list-drop 436,14156
+(defun copy-sequence 447,14489
+(defun adjoinq 453,14642
+(defun list-quote-elts 459,14856
+(defun interleave 465,15054
+(defun flatten 483,15776
+(defun list-transpose 496,16160
+(defun list-subsets 502,16349
+(defun list-to-array 513,16694
+(defun freqs 544,17805
+(defun group-by-w-hash 562,18629
+(defun group-by-w-seq 573,18980
+(defun list-group-by 586,19385
+(defun subseq-count 607,20246
+(defun split-seq 621,20846
+(defun list-split-odd-even 637,21593
+(defun list-to-intervals 648,21986
+(defun %sharing-cons 659,22447
+(defun mapcar-sharing 664,22651
+
+io.lisp,413
+(defun toggle-print-case 14,210
+(defun eof-p 21,457
+(defun query-string 25,567
+(defun read-next-term-char 48,1375
+(defun read-new-random-state-seed 111,3851
+(defun stream-file-descriptor 140,5153
+(defun press-enter-to-continue 151,5592
+(defun print-spaces 157,5793
+(defun princ-16 162,5950
+(defun indent-by 166,6083
+(defun read-string-with-escapes 176,6438
+(defun open-stream-output-stream-p 214,7758
+
+specials.lisp,709
+(defmacro defconst 9,185
+(defmacro defconst* 13,335
+(defun doc-set 24,697
+(defun fundoc 42,1386
+(defun vardoc 46,1533
+(defun type-specifier-p 53,1772
+(defun typedoc 64,2306
+(defvar *user-name* 75,2595
+(defvar *search-path* 80,2879
+(defvar *default-class-documentation-table* 82,2907
+(defconst* *standard-test-functions* 84,2971
+(defconst* *error-table* 90,3108
+(defconst* *documentation-types* 97,3435
+(defconst* *whitespace-chars* 115,4073
+(defconst* *hexadecimal-chars* 128,4372
+(defconst* *vowel-chars* 132,4507
+(defconst* *roman-numeral-map* 136,4650
+(defconst* *time-zones* 143,4909
+(defconst* *month-names* 148,5099
+(defconst* *week-days* 153,5318
+(defconst* *length-unit* 158,5530
+
+package.lisp,25
+(defpackage #:mon 9,192
+
+types.lisp,5443
+(deftype not-null 14,278
+(deftype not-t 17,315
+(deftype not-boolean 20,362
+(deftype boolean-integer 23,405
+(deftype boolean-or-boolean-integer 26,446
+(defun not-boolean-p 29,518
+(defun boolean-integer-p 32,580
+(defun not-boolean-integer-p 35,650
+(deftype not-boolean-integer 38,728
+(deftype standard-test-function 41,787
+(deftype string-or-symbol 48,1004
+(deftype string-or-symbol-not-boolean 51,1057
+(deftype string-or-symbol-not-empty-nor-boolean 54,1140
+(defun vector-with-fill-pointer-p 59,1324
+(deftype string-with-fill-pointer 64,1472
+(deftype stream-or-boolean 68,1610
+(deftype stream-or-boolean-or-string-with-fill-pointer 71,1665
+(deftype pathname-designator 75,1825
+(deftype filename-designator 79,1980
+(deftype string-or-null 145,4393
+(deftype string-not-null 157,4904
+(deftype string-empty 160,4959
+(deftype string-not-empty 167,5163
+(deftype string-null-or-empty 170,5229
+(deftype string-not-null-or-empty 173,5303
+(deftype simple-string-or-null 176,5377
+(deftype simple-string-not-null 185,5583
+(deftype simple-string-empty 188,5652
+(deftype simple-string-null-or-empty 195,5844
+(deftype simple-string-not-empty 198,5919
+(deftype simple-string-not-null-or-empty 201,6008
+(deftype ascii-string 204,6110
+(deftype simple-ascii-string 207,6167
+(deftype simple-latin-1-string 213,6447
+(deftype integer-or-null 218,6588
+(deftype standard-char-or-null 221,6640
+(deftype digit-char-0-or-1 224,6703
+(deftype string-all-digit-char-0-or-1 227,6770
+(deftype proper-list 231,6893
+(deftype proper-plist 234,6959
+(deftype proper-plist-not-null 237,7027
+(deftype dotted-list 240,7094
+(deftype circular-list 244,7203
+(deftype proper-list-not-null 247,7262
+(deftype each-a-string 257,7573
+(deftype each-a-simple-string 260,7659
+(deftype each-a-string-of-length-1 263,7759
+(deftype bool-vector 270,8008
+(deftype bit-vector-octet 273,8083
+(deftype byte-array 276,8133
+(deftype %byte-vector 281,8291
+(defun %byte-vector-each-an-unsigned-byte-8 286,8478
+(deftype index 294,8796
+(deftype index-or-minus-1 299,8942
+(deftype array-index 304,9105
+(deftype array-length 308,9230
+(deftype fixnum-exclusive 317,9606
+(deftype fixnum-0-or-over 321,9788
+(deftype unsigned-byte-128 345,10908
+(deftype unsigned-byte-96 354,11144
+(deftype unsigned-byte-64 362,11332
+(deftype unsigned-byte-56 371,11565
+(deftype unsigned-byte-48 379,11717
+(deftype unsigned-byte-32 388,11919
+(deftype unsigned-byte-29 397,12090
+(deftype unsigned-byte-24 406,12259
+(deftype unsigned-byte-16 415,12415
+(deftype unsigned-byte-8 424,12556
+(deftype octet 434,12722
+(deftype nibble 442,12821
+(deftype code-point 451,12960
+(deftype char-code-integer 459,13180
+(deftype each-a-char-code-integer 462,13250
+(deftype each-a-character 465,13358
+(deftype each-a-character-or-char-code-integer 468,13450
+(deftype string-all-whitespace 471,13584
+(deftype whitespace-char 474,13659
+(deftype hexadecimal-char 477,13723
+(deftype string-or-char 480,13809
+(deftype string-symbol-or-char 483,13906
+(deftype string-or-char-or-code-point-integer 486,13974
+(deftype string-symbol-or-char-or-code-point-integer 491,14173
+(deftype symbol-not-a-constant 496,14390
+(deftype symbol-not-null 499,14477
+(deftype symbol-not-null-or-string-not-empty 502,14532
+(deftype closure-obj 507,14669
+(defmacro define-list-of-predicate 517,14976
+(defun make-list-of-predicate-name 538,15944
+(defun type-specifier-valid-p 549,16316
+(defun type-equal 553,16474
+(defun booleanp 558,16617
+(defun symbol-not-a-constantp 568,16836
+(defun symbol-not-null-or-string-not-empty-p 573,16951
+(defun type-any 580,17156
+(defun type-any 589,17457
+(defun type-every 592,17531
+(defun type-every 601,17860
+(defun type-expand-all 611,18067
+(defun type-expand 615,18175
+(defun type-expand-1 619,18275
+(defun list-circular-p 652,19566
+(defun list-dotted-p 662,19876
+(defun list-proper-p 688,20961
+(defun plist-proper-p 700,21361
+(defun plist-proper-not-null-p 704,21455
+(defun list-proper-not-null-p 708,21566
+(defun sequencep 711,21645
+(defun sequence-zerop 716,21783
+(defun sequence-type 727,22184
+(defun singleton-p 753,23174
+(defun each-a-string-p 762,23326
+(defun each-a-simple-string-p 768,23517
+(defun each-a-string-of-length-1-p 774,23723
+(defun string-or-null-p 781,24011
+(defun string-empty-p 784,24073
+(defun string-not-empty-p 787,24131
+(defun string-not-null-or-empty-p 792,24279
+(defun string-null-or-empty-p 795,24361
+(defun simple-string-or-null-p 798,24435
+(defun simple-string-empty-p 801,24511
+(defun simple-string-null-or-empty-p 804,24583
+(defun simple-string-not-null-or-empty-p 807,24671
+(defun simple-string-not-null-p 810,24767
+(defun string-not-null-p 813,24845
+(defun string-with-fill-pointer-p 816,24909
+(defun string-all-whitespace-p 830,25363
+(defun string-contains-whitespace-p 845,25927
+(defun string-no-whitespace-p 860,26501
+(defun each-a-character-or-char-code-integer-p 875,27056
+(defun each-a-character-p 883,27364
+(defun each-a-char-code-integer-p 889,27559
+(defun char-code-integer-p 895,27836
+(defun base-char-p 898,27924
+(defun digit-char-0-or-1-p 901,27976
+(defun string-all-digit-char-0-or-1-p 905,28113
+(defun string-all-hex-char-p 916,28559
+(defun fixnump 932,29041
+(defun bignump 935,29104
+(defun standard-test-function-p 945,29366
+(defun closure-p 950,29501
+(defun variable-special-p 954,29566
+(defun declared-special-p 960,29770
+(defun featurep 980,30545
+
+introspect.lisp,601
+(defun fset 8,109
+(defun keyword-prune 34,1259
+(defun function-arglist 76,3205
+(defun intern-soft 79,3278
+(defun symbol-string-name-check 139,5802
+(defun symbol-string-name-chk-whitespace 150,6361
+(defun read-symbol-name-preserving-case-if 171,7461
+(defun make-keyword-sanely 179,7896
+(defun read-symbol-name-preserving-case 183,8068
+(defun find-package* 202,8874
+(defun where-is 222,9726
+(defun where-is-local 230,10095
+(defun symbol-external-p 254,11358
+(defun package-external-symbols 280,12976
+(defun do-all-symbols-to-stream 313,14138
+(defun print-symbol-name-qualified 344,15786
+
+plist.lisp,388
+(defun nplist-to-alist 10,157
+(defun plist-to-alist 26,665
+(defun plist-eql 42,1123
+(defun put 60,1939
+(defun putf 63,2014
+(defun plist-get 68,2171
+(defun plist-put 88,2895
+(defun plist-remove 121,4020
+(defun plist-delete 137,4677
+(define-modify-macro plist-removef 147,4990
+(define-modify-macro plist-deletef 150,5056
+(defun plist-keys 155,5191
+(defun plist-values 173,5704
+
+tests/test.lisp,283
+(defvar *random-chars* 9,180
+(defun make-random-inverted-number-array 19,582
+(defun make-random-char-array 38,1215
+(defun make-random-string 47,1572
+(defun string-insert-char-test-VALS 61,2160
+(defun string-insert-char-test-VALS 71,2487
+(defun string-insert-char-TEST 86,2998
+
+tests/timings.lisp,215
+(defun timing-number-to-byte-array 9,198
+(defun timing-number-to-bits 16,425
+(defun timing-octet-to-bit-vector 23,630
+(defun timing-tt--octet-to-bit-vector 28,753
+(defun timing-tt--octet-to-bit-vector-3 33,892
+
+tests/testing.lisp,30
+(defun mapconcat-TEST 16,481
+
+tests/timing.lisp,216
+(defparameter *timing-data* 60,2472
+(defmacro with-timing 63,2574
+(defmacro with-timing-collected 102,4113
+(defun timing-data-clear 108,4354
+(defun timing-data-show 112,4446
+(defun timing-data-compile 118,4680
+
+tests/package.lisp,30
+(defpackage #:mon-test 7,184
+
+file-io.lisp,639
+(defmacro with-opened-file 17,458
+(defmacro with-temp-file 28,945
+(defmacro with-each-stream-line 36,1340
+(defmacro with-output-to-string-or-stream 68,2412
+(defmacro with-input-file 85,3071
+(defmacro with-new-file 97,3524
+(defmacro with-new-file-renaming-old 107,3851
+(defmacro with-file-overwritten 119,4321
+(defun write-file 131,4972
+(defun read-file-to-string 137,5247
+(defun read-file-forms 147,5560
+(defun write-string-to-file-gzip 168,6503
+(defun read-file-gunzip-to-string 198,8215
+(defun read-file-gzip-to-gunzip-file 208,8771
+(defun username-for-system-var-p 219,9393
+(defun username-for-system-var-bind 237,10339
+
+arrays.lisp,900
+(defun bool-vector-p 14,256
+(defun make-bool-vector 17,318
+(defun bit-vector-to-string 27,656
+(defun string-to-bit-vector 38,1124
+(defun byte-array-to-hex-string 63,2439
+(defun string-ascii-to-byte-array 96,4084
+(defun byte-array-to-string 130,5738
+(defun string-to-byte-array 139,6089
+(defun vector-shrink 151,6586
+(define-compiler-macro vector-shrink 155,6674
+(defun vector-grow 159,6843
+(defun vector-remove-elts 172,7292
+(defun vector-copy-extend 188,7840
+(defun nshuffle-vector 195,8049
+(defun shuffle-vector 203,8306
+(defun make-adjustable-string 211,8567
+(defun array-get-undisplaced 222,9009
+(defun bit-vector-clear 264,10815
+(defun bit-vector-set 271,11055
+(defun bit-vector-copy 277,11287
+(defun bit-vector-replace 282,11462
+(defun vector-positions 306,12540
+(defun vector-split-indices 328,13306
+(defun vector-split 360,14740
+(defun vector-binary-search 389,16049
+
+strings.lisp,1903
+(defun string-delimited-to-list 9,184
+(defun string-from-delimited-list 33,1096
+(defun string-explode 36,1240
+(defun symbol-name-explode 50,1658
+(defun string-elt 63,2081
+(defun string-length 68,2229
+(defun string-begins 72,2335
+(defun string-coerce-from 86,2791
+(defun string-to-char 101,3194
+(defun string-first-char 108,3422
+(defun string-replace-all 114,3593
+(defun string-implode 128,4260
+(defun string-reduce 137,4478
+(defun string-cat 155,5033
+(defun string-convert-to-readable 167,5458
+(defun string-split-spaces 175,5713
+(defun make-string* 234,7868
+(defun string-split-on-chars 283,9453
+(defun string-trim-whitespace 319,11301
+(defun string-split-newline 367,13892
+(defun string-split-on-column 376,14171
+(defun string-split-multi 390,14809
+(defun substring 399,15080
+(defun string-insert-char 436,16691
+(defun string-insert-char-3b 477,18529
+(defun concat 508,19500
+(defun mapconcat 633,25389
+(defun string-join-strings 665,26815
+(defun string-map 681,27456
+(defun string-or-char-or-code-point-integer-if 706,28233
+(defun string-symbol-or-char-or-code-point-integer-if 719,28828
+(defun string-symbol-or-char-if 733,29488
+(defun downcase 747,30025
+(defun upcase 754,30252
+(defun capitalize 761,30468
+(defun capitalize-loosely 771,30812
+(defun downcase-loosely 783,31302
+(defun upcase-loosely 793,31736
+(defun string-invert-case 803,32155
+(defun string-for-readtable-case 829,33180
+(defun string-no-upper-p 847,34231
+(defun string-remove-backslashes 853,34379
+(defun string-upto-char 870,35029
+(defun string-starts-with 878,35282
+(defun string-longest-common-prefix 884,35514
+(defun flatten-list-to-string 894,35918
+(defun string-lines-to-array 899,36095
+(defun string-substitute 908,36401
+(defun string-last-word 921,36994
+(defun string-convert-tabs 928,37178
+(defun string-is-nil-like 951,38142
+(defun string-or-symbol-first-char 958,38417
+
+char-numeric.lisp,29
+(defun %char-numeric=25,932
+
+hash.lisp,615
+(defun prime-plusp 35,840
+(defun prime-plusp 45,1194
+(defun prime-or-next-greatest 61,1687
+(defun prime-or-next-greatest 66,1804
+(defun hash-get-keys 77,2203
+(defun hash-to-alist 101,3235
+(defun hash-from-alist 111,3608
+(defun hash-pop 150,5000
+(defun hash-map-sorted 157,5294
+(defun hash-merge 186,6631
+(defun hash-resize 195,6862
+(defun hash-mapcar 224,8153
+(defun hash-car 233,8446
+(defun hash-print 262,9478
+(defun hash-pprint 273,10040
+(defun hash-print-key-value-pairs 290,10676
+(defun hash-or-symbol-p 302,11242
+(defun hash-or-symbol-ensured 310,11615
+(defun hash-invert-key-val 324,12392
+
+class-doc.lisp,481
+(defgeneric documented-class-doc 83,3052
+(defgeneric documented-class-slot-doc 92,3421
+(defclass documented-class-with-docs 101,3834
+(defmethod initialize-instance 107,4078
+(defmethod documented-class-doc 113,4420
+(defmethod documented-class-slot-doc 116,4579
+(defmethod documented-class-slot-doc 124,4996
+(defun documented-class-verify-init 137,5718
+(defun %verify-hash-table-for-documented-class 164,7080
+(defun make-documented-class 170,7408
+(defun classdoc 183,8064
+
+regexp.lisp,76
+(defun string-underscore-to-dash 9,162
+(defun string-find-matching 17,525
+
+tests/usec-tests.lisp,0
+
+loadtime-bind.lisp,0
