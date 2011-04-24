@@ -7,7 +7,7 @@ alist.lisp,176
 (defun alist-to-plist 43,1381
 (defun nalist-to-plist 47,1524
 
-macros.lisp,1562
+macros.lisp,1589
 (defun and-so 48,1976
 (defun dequote 53,2160
 (defmacro eval-when-all 60,2360
@@ -19,42 +19,43 @@ macros.lisp,1562
 (defmacro retaining-value 100,3668
 (defmacro multiple-value-setf 109,4087
 (defmacro %compose 130,4924
-(defmacro ref-bind 147,5528
-(defmacro ref-it-if 158,5879
-(defmacro bound-and-true-p 166,6063
-(defmacro defsubst 171,6229
-(defmacro defalias 214,7919
-(defmacro type-and 281,11138
-(defmacro type-not 291,11500
-(defmacro string-case 301,11783
-(defmacro string-case-fast 329,13214
-(defmacro to-percent 342,13635
-(defmacro number-to-double-float 346,13732
-(defmacro byte-octets-for-integer 349,13793
-(defmacro string-get 365,14283
-(defmacro string-set 369,14409
-(defmacro string-append-into 375,14553
-(defmacro output-stream-normalize 388,15068
-(defmacro list-sift 415,16270
-(define-modify-macro sortf 427,16784
-(define-modify-macro stable-sortf 429,16842
-(defmacro popn 433,16951
-(defmacro assoc-create 450,17505
-(defmacro for 480,18639
-(defmacro do-until 489,18886
-(defmacro do-while 492,18959
-(defmacro until 497,19094
-(defmacro while 502,19298
-(defmacro dosequence 507,19484
-(defmacro dosublists 523,20060
-(defmacro doenumerated 531,20336
-(defmacro dorange 540,20738
-(defmacro aset 559,21393
-(defmacro mk-array 568,21674
-(defmacro vector-insert-element 576,22067
-(defmacro vector-remove-element 601,22930
-(defmacro vector-map 609,23206
-(defmacro condition-case 613,23360
+(defmacro if-not 143,5408
+(defmacro ref-bind 154,5668
+(defmacro ref-it-if 165,6019
+(defmacro bound-and-true-p 173,6203
+(defmacro defsubst 178,6369
+(defmacro defalias 221,8059
+(defmacro type-and 288,11278
+(defmacro type-not 298,11640
+(defmacro string-case 308,11923
+(defmacro string-case-fast 336,13354
+(defmacro to-percent 349,13775
+(defmacro number-to-double-float 353,13872
+(defmacro byte-octets-for-integer 356,13933
+(defmacro string-get 372,14423
+(defmacro string-set 376,14549
+(defmacro string-append-into 382,14693
+(defmacro output-stream-normalize 395,15208
+(defmacro list-sift 422,16410
+(define-modify-macro sortf 434,16924
+(define-modify-macro stable-sortf 436,16982
+(defmacro popn 440,17091
+(defmacro assoc-create 457,17645
+(defmacro for 487,18779
+(defmacro do-until 496,19026
+(defmacro do-while 499,19099
+(defmacro until 504,19234
+(defmacro while 509,19438
+(defmacro dosequence 514,19624
+(defmacro dosublists 530,20200
+(defmacro doenumerated 538,20476
+(defmacro dorange 547,20878
+(defmacro aset 566,21533
+(defmacro mk-array 575,21814
+(defmacro vector-insert-element 583,22207
+(defmacro vector-remove-element 608,23070
+(defmacro vector-map 616,23346
+(defmacro condition-case 620,23500
 
 compose.lisp,54
 (defun compose-fun 14,236
@@ -318,7 +319,7 @@ specials.lisp,709
 package.lisp,25
 (defpackage #:mon 9,192
 
-types.lisp,5443
+types.lisp,5470
 (deftype not-null 14,278
 (deftype not-t 17,315
 (deftype not-boolean 20,362
@@ -462,6 +463,7 @@ types.lisp,5443
 (defun variable-special-p 954,29566
 (defun declared-special-p 960,29770
 (defun featurep 980,30545
+(defun featurep 990,31032
 
 introspect.lisp,601
 (defun fset 8,109

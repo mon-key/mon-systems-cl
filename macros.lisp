@@ -138,6 +138,13 @@
     (with-gensyms (arg)
       `(lambda (,arg) ,(rec functions arg)))))
 
+
+;;; ==============================
+(defmacro if-not (test-form then &optional else)
+  `(if (not ,test-form) 
+       ,then 
+       ,else))
+
 
 ;;; ==============================
 ;;; :ANAPHORIC-STYLE-MACROS

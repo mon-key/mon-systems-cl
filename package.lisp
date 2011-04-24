@@ -118,6 +118,7 @@
    #:ref-bind
    #:it             ;; `it' won't be accessible otherwise.
    #:ref-it-if
+   #:if-not
    ;;
    #:unitl
    #:while

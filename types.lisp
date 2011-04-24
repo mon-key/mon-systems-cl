@@ -986,9 +986,9 @@
 	    (:or  (some #'featurep (rest feature-expression)))
 	    (:not (assert (= 2 (length feature-expression)))
 		  (not (featurep (second feature-expression))))))))
-;; #+sbcl 
-;; (defun featurep (feature-expression)
-;;   (sb-int:featurep feature-expression))
+#+sbcl 
+(defun featurep (feature-expression)
+  (sb-int:featurep feature-expression))
 
 
 ;;; ==============================
