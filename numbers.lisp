@@ -21,6 +21,11 @@
     (float   num)
     (t (float num 0d0))))
 
+;; :SOURCE sbcl/src/code/target-extensions.lisp :WAS `power-of-two-ceiling'
+(defun number-power-of-two-ceiling (unsigned-int)
+  (declare (mon:index unsigned-int))
+  (ash 1 (integer-length (1- unsigned-int))))
+
 (defun number-sequence-loop (from-n &optional to-n (inc-by 1))
   (declare ;;(optimize (speed 0) (space 1) (compilation-speed 0) (debug 3))
    (type real from-n) 
@@ -454,6 +459,14 @@ since it will perform a multiplication on the average on every step.~%~@
  ;=> 2.1362305e-4~%~@
 :SEE-ALSO `cl:most-positive-double-float', `cl:most-positive-long-float',
 `cl:most-positive-short-float', `cl:most-positive-single-float'.~%►►►")
+
+(fundoc 'number-power-of-two-ceiling
+        "The smallest power of two that is equal to or greater than UNSIGNED-INT.~%~@
+UNSIGNED-INT should be of type `mon:index'.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `prime-plusp', `prime-or-next-greatest'.~%►►►")
+
 
 ;;; ==============================
 

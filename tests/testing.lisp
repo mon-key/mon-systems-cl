@@ -39,6 +39,27 @@
 ;;
 ;; (mapconcat-TEST)
 
+(sb-rt:deftest string-split-on-chars-TEST
+    (values 
+     (mon:string-split-on-chars "bub ba	bubba")
+     (mon:string-split-on-chars "bubba	bubba" "b")
+     (mon:string-split-on-chars "bubba" #\b)
+     (mon:string-split-on-chars " b u bba " 32)
+     (equal (mon:string-split-on-chars (format nil "~{~C~}" mon:*whitespace-chars*))
+            (format nil "~{~C~}" mon:*whitespace-chars*))
+     (mon:string-split-on-chars (format nil "~{~C~}" mon:*whitespace-chars*) nil t))
+  ("bub" "ba" "bubba")
+  ("" "u" "" "a	" "u" "" "a")
+  ("" "u" "" "a")
+  ("" "b" "u" "bba")
+  t
+  ("" "" "" "" "" "" ""))
+;; sb-rt:assert-
+;; (rt:rem-all-tests)
+;; sb-rt:*test*
+;; (sb-rt:do-test)
+;; (sb-rt:do-tests) 
+
 ;;; ==============================
 
 

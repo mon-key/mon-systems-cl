@@ -37,6 +37,7 @@ class-doc.lisp
 class-utils.lisp
 compose.lisp
 conditions.lisp
+environ.lisp
 file-dir.lisp
 file-io.lisp
 format.lisp

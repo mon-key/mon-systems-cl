@@ -630,6 +630,43 @@
 		       ,@(cdr cl)))
 	   clauses))))
 
+(defmacro multiple-value-nth-p (expr nth-list &key (test 'equal))
+  (with-gensyms (m-v-rest)
+    `(destructuring-bind (&rest ,m-v-rest) (multiple-value-list ,expr)
+       (if (or (null ,m-v-rest)
+               (< (length ,m-v-rest) 2))
+           nil
+           (,test ',nth-list
+                  (list (car ,m-v-rest) (cadr ,m-v-rest)))))))
+
+(defmacro multiple-value-nil-nil-p (expr)
+  `(multiple-value-nth-p ,expr (nil nil)))
+
+(defmacro multiple-value-nil-t-p (expr)
+  `(multiple-value-nth-p ,expr (nil t)))
+
+(defmacro multiple-value-t-nil-p (expr)
+  `(multiple-value-nth-p ,expr (t nil)))
+
+(defmacro multiple-value-t-t-p (expr)
+  `(multiple-value-nth-p ,expr (t t)))
+
+;;; ==============================
+;;: :ASSERT-MACROS
+;;; ==============================
+;;; #:assert-nil-nil
+;;; #:assert-nil-t
+;;; #:assert-t-t
+
+;; :SOURCE sbcl/tests/type.impure.lisp
+;; (defmacro assert-nil-nil (expr)
+;;   `(assert (equal '(nil nil) (multiple-value-list ,expr))))
+
+;; (defmacro assert-nil-t (expr)
+;;   `(assert (equal '(nil t) (multiple-value-list ,expr))))
+
+;; (defmacro assert-t-t (expr)
+;;   `(assert (equal '(t t) (multiple-value-list ,expr))))
 
 
 ;;; ==============================
@@ -638,7 +675,7 @@
 
 
 ;;; ==============================
-;;; EVAL-WHEN-MACROS
+;;; :EVAL-WHEN-MACROS
 ;;; ==============================
 
 (fundoc 'eval-when-all
@@ -1309,6 +1346,86 @@ accessed as `mon:it' by external calling forms.
                      #x00\)
  collect \(list \(byte-octets-for-integer ints\) \(integer-length ints\) ints\)\)~%~@
 :SEE-ALSO `byte-request-integer'.~%►►►")
+
+(fundoc 'multiple-value-nth-p 
+"Whether first two values returned by EXPR are `cl:equal' NTH-LIST.~%~@
+When keyword TEST is non-nil it is an unquoted symbol naming a two valued
+predicate, e.g.:~%~% :test equalp~%~@
+:EXAMPLE~%
+ \(multiple-value-nth-p \(values nil nil\) \(nil nil\)\)~%
+ \(multiple-value-nth-p \(values #\(a\) #\(b\) #\(c\)\) \(#\(a\) #\(b\)\) :test equalp\)~%
+ \(macroexpand-1 '\(multiple-value-nth-p \(values nil nil\) \(nil nil\)\)\)~%~@
+:SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
+`mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
+`mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
+`cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
+`cl:multiple-value-list'.~%►►►")
+
+(fundoc 'multiple-value-nil-nil-p
+"Whether first two values returned by EXPR are both null.~%~@
+Tests that both (nth-value 0 <EXPR>) and (nth-value 1 <EXPR>) are nil e.g. 
+ (equal '(nil nil) ((nth-value 0 <EXPR>) (nth-value 1 <EXPR>)))
+If expr does not return at least two values return nil.
+:EXAMPLE~%
+ \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
+ \(multiple-value-nil-nil-p \(values nil nil 8\)\)~%
+ \(multiple-value-nil-nil-p \(values nil nil\)\)~%
+ \(multiple-value-nil-nil-p \(values\)\)~%
+ \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+:SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
+`mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
+`mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
+`cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
+`cl:multiple-value-list'.~%►►►")
+
+(fundoc 'multiple-value-nil-t-p
+"Whether first two values returned by EXPR are null an t.~%~@
+If expr does not return at least two values return nil.~%
+:EXAMPLE~%
+ \(multiple-value-nil-nil-p \(values nil t\)\)~%
+ \(multiple-value-nil-nil-p \(values nil t 8\)\)~%
+ \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
+ \(multiple-value-nil-nil-p \(values t nil\)\)~%
+ \(multiple-value-nil-nil-p \(values nil nil\)\)~%
+ \(multiple-value-nil-nil-p \(values\)\)~%
+ \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+:SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
+`mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
+`mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
+`cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
+`cl:multiple-value-list'.~%►►►")
+
+(fundoc 'multiple-value-t-nil-p
+        "Whether first two values returned by EXPR are t and null.~%~@
+If expr does not return at least two values return nil.~%~@
+:EXAMPLE~%
+ \(multiple-value-nil-nil-p \(values t nil\)\)~%
+ \(multiple-value-nil-nil-p \(values t nil 8\)\)~%
+ \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
+ \(multiple-value-nil-nil-p t\)~%
+ \(multiple-value-nil-nil-p \(values\)\)~%
+ \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+:SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
+`mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
+`mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
+`cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
+`cl:multiple-value-list'.~%►►►")
+
+(fundoc 'multiple-value-t-t-p
+        "Whether first two values returned by EXPR are both t.~%~@
+If expr does not return at least two values return nil.~%~@
+:EXAMPLE~%
+ \(multiple-value-nil-nil-p \(values t t\)\)~%
+ \(multiple-value-nil-nil-p \(values t nil 8\)\)~%
+ \(multiple-value-nil-nil-p t\)
+ \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
+ \(multiple-value-nil-nil-p \(values\)\)~%
+ \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+:SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
+`mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
+`mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
+`cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
+`cl:multiple-value-list'.~%►►►")
 
 ;;; ==============================
 

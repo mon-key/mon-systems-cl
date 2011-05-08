@@ -20,12 +20,12 @@
   :version "1.0.0"
   :pathname  "tests/"
   :serial t
+  :depends-on (:mon :rt)
   :components 
   ((:file "package")
    (:file "test")
    (:file "timing")
-   (:file "testing"))
-  :depends-on (:mon))
+   (:file "testing")))
 
 (defmethod asdf:perform :after ((op asdf:load-op) (system (eql (asdf:find-system :mon-test))))
   (pushnew :mon-test cl:*features*))

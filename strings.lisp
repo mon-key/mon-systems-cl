@@ -290,30 +290,60 @@
                                         (null white-on-white))
                                    (return-from string-split-on-chars string)
                                    (map 'string #'identity *whitespace-chars*)))
-                      (string-null-or-empty (return-from string-split-on-chars string))
+                      (mon:string-null-or-empty (return-from string-split-on-chars string))
                       (simple-string  separators)
                       (string         (copy-seq separators))
-                      ((or character char-code-integer) (char-to-string separators))
-                      (proper-list 
+                      ((or character mon:char-code-integer) (char-to-string separators))
+                      (mon:proper-list
                        (etypecase separators
-                         (each-a-string-of-length-1
+                         (mon:each-a-string-of-length-1
                           (with-standard-io-syntax (format nil "~{~A~}" separators)))
                          (each-a-character-or-char-code-integer (char-list-to-string separators))))))
+        ;; (chunks (make-array 0 :adjustable t :fill-pointer 0))
         (chunks   ())
         (position 0)
         (nextpos  0)
         (strlen   (length string)))
-    (declare (type simple-string string separators))
+    (declare (type simple-string string separators)
+             (index-plus-1 position nextpos)
+             (array-index strlen)
+             ;;(array chunks)
+             )
     (loop 
        :while (< position strlen)
        :do (loop 
               :while (and (< nextpos strlen)
                           (not (position (char string nextpos) separators)))
+              ;; :NOTE Don't change this to:  :do (incf nextpos))
               :do (setq nextpos (1+ nextpos)))
+       ;; :WAS 
        (push (subseq string position nextpos) chunks)
+       ;; (vector-push-extend (subseq string position nextpos) chunks)
+       ;; :NOTE Don't change this to:  (incf position (1+ nextpos))
        (setq position (1+ nextpos))
        (setq nextpos  position))
+    ;; :WAS 
+    ;; (coerce chunks 'list)))
     (nreverse chunks)))
+
+
+
+;; (string-split-on-chars "bub ba	bubba")
+;; => ("bub" "ba" "bubba")
+;; (string-split-on-chars "bubba	bubba" "b")
+;; => ("" "u" "" "a	" "u" "" "a")
+;; (string-split-on-chars "bubba" #\b)
+;; ("" "u" "" "a")
+;; (string-split-on-chars " b u bba " 32)
+;; ("" "b" "u" "bba")
+;; (string-split-on-chars (format nil "~{~C~}" *whitespace-chars*))
+;; => " 
+;; 	 "
+;; (string-split-on-chars (format nil "~{~C~}" *whitespace-chars*) nil t)
+;; ("" "" "" "" "" "" "")
+
+;; 
+
 
 ;;; :SOURCE chunga-1.1.1/read.lisp :WAS `trim-whitespace'
 (defun string-trim-whitespace (string &key (start 0) (end (length string)))
@@ -1265,11 +1295,11 @@ empty string between them.~%~@
 "Split STRING into substrings where there are matches for SEPARATORS.~%~@
 Return a list of substrings \(sans seaparator\(s\)\).~%~@
 SEPARATORS may be any of the following:~%
- - a string satisfying `string-not-empty';
- - a list of strings satisfying `each-a-string-of-length-1-p';
- - a character;
- - a list of characters;
- - a list of char-codes;
+ - a string satisfying `string-not-empty';~%
+ - a list of strings satisfying `each-a-string-of-length-1-p';~%
+ - a character;~%
+ - a list of characters;~%
+ - a list of char-codes;~%~@
 Defaults to a string built from characters of `mon:*whitespace-chars*'.~%~@
 When SEPARATORS is ommitted and optional arg WHITE-ON-WHITE is non-nil allow
 splitting STRING when `string-all-whitespace-p'. Defualt is to return STRING unmodified.~%~@

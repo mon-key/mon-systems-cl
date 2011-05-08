@@ -20,10 +20,11 @@
                                           (:conditions file-error))))
            (,abort-on-close? 't))
        (unwind-protect
-           (multiple-value-prog1 
-               (progn ,@body)
-             (setq ,abort-on-close? nil))
-         (when (streamp ,stream) (close ,stream :abort ,abort-on-close?))))))
+            (multiple-value-prog1 
+                (progn ,@body)
+              (setq ,abort-on-close? nil))
+         (when (streamp ,stream) 
+           (close ,stream :abort ,abort-on-close?))))))
 
 (defmacro with-temp-file ((stream-name file-name) &body body)
   `(alexandria:with-output-to-file  (,stream-name ,file-name 
@@ -35,13 +36,13 @@
 ;;; :SOURCE texinfo-docstrings/colorize.lisp
 (defmacro with-each-stream-line ((var stream) &body body)
   (let ((eof (gensym))
-    (eof-value (gensym))
-    (strm (gensym)))
+        (eof-value (gensym))
+        (strm (gensym)))
     `(let ((,strm ,stream)
-       (,eof ',eof-value))
-      (do ((,var (read-line ,strm nil ,eof) (read-line ,strm nil ,eof)))
-      ((eql ,var ,eof))
-    ,@body))))
+           (,eof ',eof-value))
+       (do ((,var (read-line ,strm nil ,eof) (read-line ,strm nil ,eof)))
+           ((eql ,var ,eof))
+         ,@body))))
 
 ;;; ==============================
 ;; :SOURCE (URL `git://github.com/Hexstream/com.hexstreamsoft.lib.git')
@@ -65,6 +66,9 @@
 ;;        (IF ,VAR
 ;;            (,SHARED ,VAR)
 ;;            (WITH-OUTPUT-TO-STRING (,VAR) (,SHARED ,VAR))))))
+;; 
+;; (with-output-to-string-or-stream (i) (princ "bubba" i))
+;; (with-output-to-string-or-stream (i) (princ "bubba" i) (princ "bubba2" i))
 (defmacro with-output-to-string-or-stream ((var &optional (string-or-stream var)) &body body)
   ;; (macroexpand-1 '(with-output-to-string-or-stream (i) "bubba"))
   (#-sbcl alexandria:with-unique-names
@@ -216,64 +220,6 @@
       (chipz:decompress gunz-stream 'chipz:gzip gzstream)
       gunzip-output-pathname)))
 
-(defun username-for-system-var-p (verify-with)
-  #-sbcl(and (format t "~%:FUNCTION `username-for-system-var-p' -- Current implementation not SBCL~%~
-                    Declining further verification of argument VERIFY-WITH~%") nil)
-  #+sbcl
-  (if (find-package "SB-POSIX")
-      (let* ((verify-nm verify-with)
-             (verify-home (elt (pathname-directory (namestring (user-homedir-pathname))) 2))
-             (verify-getpwnam (sb-posix:getpwnam (car verify-nm))))
-        (and 
-         (string-equal (or (and verify-getpwnam (sb-posix:passwd-name verify-getpwnam)) "") (car verify-nm))
-         (string-equal verify-home  (car verify-nm))
-         verify-nm))
-      (and (format t 
-                   "~%:FUNCTION `username-for-system-var-p' -- Current implementation is SBCL~%~
-                    need SB-POSIX:PASSWD-NAME but did not find-package SB-POSIX")
-           nil)))
-
-;; :NOTE (translate-logical-pathname "MON:MON-SYSTEMS;")
-(defun username-for-system-var-bind (bind-it)
-  (declare (special bind-it))
-  (let ((val-of (symbol-value bind-it))
-        (msg-if ":FUNCTION `username-for-system-var-bind' value of arg BIND-IT "))
-    (setf msg-if
-          (with-output-to-string (msg)
-            (typecase val-of
-              (null (format msg "~%~Anull at loadtime~% ~
-                                    arg: ~S~%" msg-if bind-it))
-              (cons (format msg "~%~Aalready bound~% ~
-                                    arg: ~S~% ~
-                                    binding: ~S~%" msg-if bind-it val-of))
-              (pathname 
-               (with-input-file (unm val-of)
-                 (let ((rd-nm-pair (read unm)))
-                   (or (and rd-nm-pair 
-                            (consp rd-nm-pair)
-                            (or (and (username-for-system-var-p rd-nm-pair)
-                                     (progn (setf (symbol-value bind-it) rd-nm-pair)
-                                            (format msg "~%~Anow bound~% ~
-                                                   arg: ~S~% ~
-                                                   binding:~% ~S~%" msg-if bind-it rd-nm-pair)
-                                            t))
-                                (progn (format msg "~%~A not bound~% ~
-                                                      failed to satisfy `username-for-system-var-p' ~% ~
-                                                      arg: ~S~% ~
-                                                      failed-with:~% ~S~%" msg-if bind-it rd-nm-pair)
-                                       t)))
-                       (format msg "~%~A not bound file empty or value not `cl:consp'~% ~
-                                       arg: ~S~% ~
-                                       got: ~S~%" msg-if bind-it rd-nm-pair)))))
-              (t (format msg "~%~Ais neither `cl:consp' nor `cl:pathnamep'~% ~
-                                 arg: ~S~% ~
-                                 got: ~S~% ~
-                                 type-of: ~S~%" msg-if bind-it val-of (type-of val-of))))
-            msg))
-    (setf val-of (symbol-value  bind-it))
-    (or (and (consp val-of)
-             (prog1 val-of (princ msg-if *standard-output*)))
-        (prog1 nil (princ msg-if *standard-output*)))))
 
 
 ;;; ==============================
@@ -472,26 +418,6 @@ GZIP-OUTPUT-PATHNAME is a pathname-designator to output the decompressed file co
 `flex:with-output-to-sequence', `chipz:decompress', `sb-ext:octets-to-string',
 `sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%►►►")
 
-(fundoc 'username-for-system-var-p
-"Verify value of consed pair VERIFY-WITH before setting value of `mon:*user-name*'.~%~@
-Return VERIFY-WITH if its car matches `sb-posix:passwd-name' and the final
-directory component of `cl:user-homedir-pathname'.~%~@
-Evaluated at system loadtime by `mon:username-for-system-var-bind'.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-posix:getpwnam', `sb-posix:passwd-name', `cl:user-homedir-pathname'.~%►►►")
-
-(fundoc 'username-for-system-var-bind
-        "Bind and return symbol-value of BIND-IT if `mon:username-for-system-var-p' returns non-nil.~%~@
-If BIND-IT is not bound retrun NIL and print a message to *standard-output*.~%~@
-Evaluated at system loadtime with value 
-:EXAMPLE~%~@
- \(setf *user-name* \(probe-file 
-                   \(merge-pathnames 
-                    \(make-pathname :name \"loadtime-bind\"\) 
-                    *default-pathname-defaults*\)\)\)~%
- \(username-for-system-var-bind '*user-name*\)~%~@
-:SEE-ALSO `sb-posix:getpwnam', `sb-posix:passwd-name', `cl:user-homedir-pathname'.~%►►►")
 
 ;;; ==============================
 

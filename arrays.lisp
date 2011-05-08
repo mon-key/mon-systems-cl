@@ -15,9 +15,8 @@
   (typep object 'bool-vector))
 
 (defun make-bool-vector (length init)
-  (declare 
-   (array-length length)
-   ((or bit boolean) init))
+  (declare (array-length length)
+           ((or bit boolean) init))
   (make-array length 
               :element-type 'bit 
               :initial-element (etypecase init
@@ -191,6 +190,24 @@
       (setf (svref result i) (svref oldarray i)))
     result))
 
+;; sbcl/src/code/target-extensions.lisp
+(defun vector-binary-search (value seq &key (key #'identity))
+  ;; Binary search for simple vectors
+  (declare (simple-vector seq))
+  #+sbcl (sb-impl::binary-search value seq key)
+  #-sbcl (labels ((recurse (start end)
+             (when (< start end)
+               (let* ((i (+ start (truncate (- end start) 2)))
+                      (elt (svref seq i))
+                      (key-value (funcall key elt)))
+                 (cond ((< value key-value)
+                        (recurse start i))
+                       ((> value key-value)
+                        (recurse (1+ i) end))
+                       (t
+                        elt))))))
+    (recurse 0 (length seq))))
+
 ;; :SOURCE PCL Chapter 23 p 305
 (defun nshuffle-vector (vector)
   (declare ((simple-array *) vector))
@@ -208,9 +225,9 @@
 ;;       (sb-int::dovector elt vector result) ;body))
 
 ;;; :SOURCE ltk-0.91/ltk.lisp
-(defun make-adjustable-string (&optional (string ""))
+(defun make-string-adjustable (&optional (string ""))
   (declare (string string))
-  (make-array (length string)
+  (make-array (or (and string  (length string)) 0)
               :element-type 'character
               :initial-contents string 
               :adjustable t 
@@ -222,6 +239,7 @@
 (defun array-get-undisplaced (array)  
   (let ((length (length array))
         (start 0))
+    (declare (length (array-length)))
     (loop
        (multiple-value-bind (to offset) (array-displacement array)
          (if to
@@ -528,6 +546,23 @@ a displaced array.~%
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
 
+(fundoc 'make-string-adjustable 
+"Convenience feature for `cl:make-array' specialized for strings.~%~@
+Optional arg STRING is when non-nil is a string to use as :initial-contents for returned array.
+Specs of returned array are as follows:
+ :element-type     'character 
+ :initial-contents [<STRING> | \"\"]
+ :fill-pointer     [0 | (length <STRING>)]
+ :adjustable       t~%~@
+:EXAMPLE~%~@
+ \(array-has-fill-pointer-p \(make-string-adjustable\)\)
+ \(adjustable-array-p \(make-string-adjustable\)\) 
+ \(fill-pointer \(make-string-adjustable \"bubba\"\)\)
+ \(fill-pointer \(make-string-adjustable\)\)
+ \(let \(\(v-p-e-string \(make-string-adjustable\)\)\)
+   \(vector-push-extend #\\a v-p-e-string\)
+   \(values v-p-e-string \(fill-pointer v-p-e-string\)\)\)~%~@
+:SEE-ALSO `cl:make-string', `cl:with-output-to-string', `cl:format'.~%►►►")
 
 ;; #+sbcl (setf (documentation 'dovector 'function)
 ;;       #.(format nil

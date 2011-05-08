@@ -75,6 +75,7 @@
    (:file "types"        ) 
    (:file "macros"       ) 
    (:file "file-io"      ) 
+   (:file "environ"      ) 
    (:file "char-numeric" ) ; :BEFORE chars.lisp!
    (:file "chars"        ) 
    (:file "seqs"         ) 

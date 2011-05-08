@@ -155,6 +155,13 @@
    ;;
    #:byte-octets-for-integer
    ;;
+   #:multiple-value-nth-p
+   #:multiple-value-nil-nil-p
+   #:multiple-value-t-t-p
+   #:multiple-value-t-nil-p
+   #:multiple-value-nil-t-p
+   #:multiple-value-nil-nil-p
+   ;;
    #:condition-case
    ;;
  ;; file-io.lisp
@@ -170,9 +177,6 @@
    #:write-file
    #:read-file-to-string
    #:read-file-forms
-   #:username-for-system-var-p      ;; sb-posix:getpwnam sb-posix:passwd-name
-   #:username-for-system-var-bind
-   #+sbcl #:logical-hosts
    ;;
    ;; following three functions require:
    ;; flex:with-output-to-sequence, chipz:decompress 
@@ -182,6 +186,12 @@
    #:read-file-gunzip-to-string     
    #:write-string-to-file-gzip      
    #:read-file-gzip-to-gunzip-file
+   
+ ;; environ.lisp
+   #:username-for-system-var-p      ;; sb-posix:getpwnam sb-posix:passwd-name
+   #:username-for-system-var-bind   
+   #:lisp-implementation-description
+   ;; #:
    ;; 
  ;; introspect.lisp
    ;;
@@ -282,6 +292,7 @@
    #:array-index
    #:array-length
    #:index
+   #:index-plus-1
    #:index-or-minus-1
    #:fixnum-0-or-over
    #:fixnum-exclusive 
@@ -550,6 +561,7 @@
    #:value-in-range-p
    #:random-number-pairs
    #:average-number-seq
+   #:number-power-of-two-ceiling
    ;; 
  ;; char-numeric.lisp
    ;;
@@ -662,6 +674,7 @@
    #:find-file-search-path
    #+sbcl #:remove-directory  ;; sb-posix:rmdir
    #+sbcl #:probe-directory   ;; sb-impl::native-file-kind
+   #+sbcl #:logical-hosts
    #:rename-file*
    #:replace-file
    #:delete-file-if-exists
@@ -707,7 +720,7 @@
  ;; arrays.lisp
    ;;
    #:array-get-undisplaced
-   #:make-adjustable-string
+   #:make-string-adjustable
    #:make-bool-vector
    #:bool-vector-p
    #:string-to-bit-vector

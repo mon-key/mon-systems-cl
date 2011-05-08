@@ -345,7 +345,7 @@
 :EXAMPLE~%
  \(prime-plusp 104723\)~%
  \(prime-plusp \(1+ most-positive-fixnum\)\)~%~@
-:SEE-ALSO `mon:prime-or-next-greatest'.~%►►►")
+:SEE-ALSO `mon:prime-or-next-greatest', `mon:number-power-of-two-ceiling'.~%►►►")
 
 (fundoc 'prime-or-next-greatest
 "Given any non-negative integer, return it or the next nearest prime.~%~@

@@ -291,11 +291,19 @@
      always (typep (svref byte-array chk-byte ) 'unsigned-byte-8)))
 
 ;;; :SOURCE sbcl/src/code/early-extensions.lisp
-(deftype index  ()
+(deftype index ()
   #-sbcl '(integer 0 #x1FFFFFFD)
   #+sbcl `(integer 0 ,array-dimension-limit))
 
+(deftype index-plus-1 ()
+  #-sbcl '(integer 0 #x1FFFFFFE)
+  #+sbcl `(integer 0 ,(1+ array-dimension-limit)))
+
 ;; :SOURCE sbcl/src/code/early-extensions.lisp
+;; :NOTE most-positive-fixnum is specified as being:
+;;  (and (<= (1- (expt 2 15)) <M-P-F>)
+;;       (<= array-dimension-limit <M-P-F>))
+;;
 (deftype index-or-minus-1 ()
   #+sbcl `(integer -1 ,array-dimension-limit)
   #-sbcl `(integer -1  ,(- most-positive-fixnum 2)))
@@ -1561,9 +1569,23 @@ LENGTH defaults to ARRAY-DIMENSION-LIMIT.~%~@
 (typedoc 'array-index
   "Type designator for an index into array.~%~@
 When provided LENGTH an integer between 0 (inclusive) and LENGTH (exclusive).
-LENGTH defaults to `cl:array-dimension-limit'.
-For SBCL on a 32bit system LENGTH defaults to the integer range between 0 and
-\(- most-positive-fixnum 3\).~%~@
+LENGTH defaults to `cl:array-dimension-limit'.~%~@
+For SBCL on a 32bit system LENGTH defaults to the integer range:~%
+ [0,\(- most-positive-fixnum 2\)]~%~@
+Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
+This type def is courtesy SBCL, which says:~%
+ ,----
+ | It's intentionally limited to one less than the
+ | `array-dimension-limit' for efficiency reasons, because in SBCL
+ | `array-dimension-limit' is `most-positive-fixnum', and staying below
+ | that lets the system know it can increment a value of this type
+ | without having to worry about using a bignum to represent the
+ | result.
+ |  
+ | \(It should be safe to use ARRAY-DIMENSION-LIMIT as an exclusive
+ |  bound because ANSI specifies it as an exclusive bound.\)
+ |  
+ `---- :SEE :FILE sbcl/src/code/early-extensions.lisp~%~@
 :EXAMPLE~%
  \(typep 0 'array-index\)~%
  \(typep -1 'array-index\)~%
@@ -1577,21 +1599,34 @@ For SBCL on a 32bit system LENGTH defaults to the integer range between 0 and
 
 (typedoc 'index
 "Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
-This type def is courtesy SBCL, which says:~%
- 
-  It's intentionally limited to one less than the
-  `array-dimension-limit' for efficiency reasons, because in SBCL
-  `array-dimension-limit' is `most-positive-fixnum', and staying below
-  that lets the system know it can increment a value of this type
-  without having to worry about using a bignum to represent the
-  result.
-  
-  \(It should be safe to use ARRAY-DIMENSION-LIMIT as an exclusive
-   bound because ANSI specifies it as an exclusive bound.\)
-  :FILE sbcl/src/code/early-extensions.lisp~%~@
-
+On SBCL, an index this is integer range:~%
+ [0,CL:ARRAY-DIMENSION-LIMIT]~%~@
+On non-SBCL systems this is the integer range:~%~@
+ [0,#x1FFFFFFD]~%~@
+:EXAMPLE
+ \(typep cl:array-dimension-limit 'index\)~%
+ \(typep \(1+ cl:array-dimension-limit\) 'index\)~%
+ \(typep #x1FFFFFFD 'index\)~%
+ \(typep \(1+ #x1FFFFFFD\) 'index\)~%~@
 :SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:fixnump',
 `mon:bignump', `cl:array-dimension-limit' `cl:most-positive-fixnum'.~%►►►")
+
+(typedoc 'index-plus-1 
+"Type for indexing into arrays in cl:loop forms where the stepped quantity may
+increment from 0 \(or above\) by 1 to a value one beyond `cl:array-dimension-limit'~%~@
+On SBCL this is the range:~%
+ [0,\(1+ array-dimension-limit\)]~%~@
+On non-SBCL systems this is the range:~%
+ [0,#x1FFFFFFE]~%~@
+:EXAMPLE~%
+ \(typep cl:array-dimension-limit 'index-plus-1\)~%
+ \(typep \(1+ cl:array-dimension-limit\) 'index-plus-1\)~%
+ \(typep #x1FFFFFFE 'index-plus-1\)~%
+ \(typep \(1- #x1FFFFFFF\) 'index\)~%
+ \(typep #x1FFFFFFF 'index\)~%~@
+:SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:index',
+`mon:array-length', `mon:fixnump', `mon:bignump', `cl:array-dimension-limit'
+`cl:most-positive-fixnum'.~%►►►")
 
 (typedoc 'index-or-minus-1
 "Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
@@ -1600,7 +1635,10 @@ Useful when stepping an index by count downwards to 0, e.g.:~%
  \(loop for (the index-or-minus-1 i) from n downto 0\)~%~@
 where the implementation might terminate the loop by testing an index
 leaving the loop range.~%~@
-:SEE-ALSO `mon:fixnump', `mon:bignump', `mon:array-index'.~%►►►")
+:NOTE `cl:most-positive-fixnum' is specified as being:~%~
+  \(and \(<= \(1- \(expt 2 15\)\) <M-P-F>\)
+       \(<= array-dimension-limit <M-P-F>\)\)~%~@
+:SEE-ALSO `mon:index-plus-1', `mon:array-index', `mon:index', `mon:fixnump', `mon:bignump'.~%►►►")
 
 (typedoc 'fixnum-exclusive
 "A bounded range of integer values one less than unary stepping iterators can access.~%~@

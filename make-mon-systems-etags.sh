@@ -31,6 +31,7 @@ etags ./alist.lisp \
 ./completion.lisp \
 ./compose.lisp \
 ./conditions.lisp \
+./environ.lisp \
 ./docs.lisp \
 ./file-dir.lisp \
 ./file-io.lisp \
