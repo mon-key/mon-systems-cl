@@ -363,6 +363,32 @@
         for high = 8 then (+ x 8)
         collect (list (list 'integer low high) cnt))))
 
+;; :SOURCE sbcl/src/code/run-program.lisp :WAS `round-bytes-to-words'
+;; SB-IMPL::ROUND-BYTES-TO-WORDS
+#+sbcl
+(defmacro bytes-round-to-words (n-bytes)
+  ;; N-MACHINE-WORD-BITS the natural width of a machine word (as seen in e.g. register width,
+  ;; address space)
+  ;;
+  ;; N-BYTE-BITS the number of bits per byte, where a byte is the smallest addressable object
+   ;; 
+  ;; :WAS 
+  ;; (let ((bytes-per-word (/ sb-vm:n-machine-word-bits sb-vm:n-byte-bits)))
+  ;;   `(logandc2 (the fixnum (+ (the fixnum ,n-bytes)
+  ;;                             (1- ,bytes-per-word))) (1- ,bytes-per-word))))
+  (with-gensyms (bytes-per-word per-word-less-1)
+    `(let* ((,bytes-per-word (/ sb-vm:n-machine-word-bits sb-vm:n-byte-bits)) ;; => (/ 32 8) on x86-32
+            (,per-word-less-1 (the fixnum (1- ,bytes-per-word)))) 
+       (declare (fixnum ,per-word-less-1))
+       (logandc2 (the fixnum 
+                   (+ 
+                    ;; This declaration is faulty b/c N-BYTES could be a value
+                    ;; somewhere greater than (- most-positive-fixnum
+                    ;; per-word-less-1) Although the likelihood of this occuring
+                    ;; is less than realistic...
+                    (the (integer 0 ,most-positive-fixnum) ,n-bytes) 
+                    ,per-word-less-1)) ,per-word-less-1))))
+
 
 ;;; ==============================
 ;;; :STRING-MACROS
@@ -1345,7 +1371,23 @@ accessed as `mon:it' by external calling forms.
                      #xFF
                      #x00\)
  collect \(list \(byte-octets-for-integer ints\) \(integer-length ints\) ints\)\)~%~@
-:SEE-ALSO `byte-request-integer'.~%►►►")
+:SEE-ALSO `mon:bytes-round-to-words', `mon:bytes-to-int',
+`mon:byte-request-integer', `cl:byte-size', `cl:byte-position'.~%►►►")
+
+(fundoc 'bytes-round-to-words
+"Return the number of word bytes required to represent N-BYTES.~%~@
+Return value is rounded upward to the next word length required to hold N-BYTES.~%~@
+For example, on a machine with 32 bit words (what Intel calls double-words, or
+dwords), where a byte is an 8 bit octet if N-BYTES is in the range [1,4] it can
+be represented in 4 bytes, e.g.:~%
+ \(loop for x from 1 below 5 collect `\(,x . ,\(bytes-round-to-words x\)\)\)~%~@
+Comparatively when N-BYTES is in the range [11,17] it can be represented in 12,
+16, or 20 4 bytes, e.g.:~%
+ \(loop for x from 11 below 18 collect `\(,x . ,\(bytes-round-to-words x\)\)\)~%~@
+:EXAMPLE~%~@
+ \(macroexpand '\(bytes-round-to-words 17\)\)
+:SEE-ALSO `byte-octets-for-integer', `mon:bytes-to-int', `cl:byte-size',
+`cl:byte-position'.~%►►►")
 
 (fundoc 'multiple-value-nth-p 
 "Whether first two values returned by EXPR are `cl:equal' NTH-LIST.~%~@
@@ -1371,7 +1413,8 @@ If expr does not return at least two values return nil.
  \(multiple-value-nil-nil-p \(values nil nil 8\)\)~%
  \(multiple-value-nil-nil-p \(values nil nil\)\)~%
  \(multiple-value-nil-nil-p \(values\)\)~%
- \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+ \(multiple-value-nil-nil-p \(values nil\)\)~%
+ \(macroexpand-1 '\(multiple-value-nil-nil-p \(values nil nil 8\)\)\)~%~@
 :SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
@@ -1379,16 +1422,17 @@ If expr does not return at least two values return nil.
 `cl:multiple-value-list'.~%►►►")
 
 (fundoc 'multiple-value-nil-t-p
-"Whether first two values returned by EXPR are null an t.~%~@
+        "Whether first two values returned by EXPR are null an t.~%~@
 If expr does not return at least two values return nil.~%
 :EXAMPLE~%
- \(multiple-value-nil-nil-p \(values nil t\)\)~%
- \(multiple-value-nil-nil-p \(values nil t 8\)\)~%
- \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
- \(multiple-value-nil-nil-p \(values t nil\)\)~%
- \(multiple-value-nil-nil-p \(values nil nil\)\)~%
- \(multiple-value-nil-nil-p \(values\)\)~%
- \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+ \(multiple-value-nil-t-p \(values nil t\)\)~%
+ \(multiple-value-nil-t-p \(values nil t 8\)\)~%
+ \(multiple-value-nil-t-p \(values 8 8 3\)\)~%
+ \(multiple-value-nil-t-p \(values t nil\)\)~%
+ \(multiple-value-nil-t-p \(values nil nil\)\)~%
+ \(multiple-value-nil-t-p \(values\)\)~%
+ \(multiple-value-nil-t-p \(values nil\)\)~%
+ \(macroexpand-1 '\(multiple-value-nil-t-p \(values nil t 8\)\)\)~%~@
 :SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
@@ -1399,12 +1443,13 @@ If expr does not return at least two values return nil.~%
         "Whether first two values returned by EXPR are t and null.~%~@
 If expr does not return at least two values return nil.~%~@
 :EXAMPLE~%
- \(multiple-value-nil-nil-p \(values t nil\)\)~%
- \(multiple-value-nil-nil-p \(values t nil 8\)\)~%
- \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
- \(multiple-value-nil-nil-p t\)~%
- \(multiple-value-nil-nil-p \(values\)\)~%
- \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+ \(multiple-value-t-nil-p \(values t nil\)\)~%
+ \(multiple-value-t-nil-p \(values t nil 8\)\)~%
+ \(multiple-value-t-nil-p \(values 8 8 3\)\)~%
+ \(multiple-value-t-nil-p t\)~%
+ \(multiple-value-t-nil-p \(values\)\)~%
+ \(multiple-value-t-nil-p \(values nil\)\)~%
+ \(macroexpand-1 '\(multiple-value-t-nil-p \(values t nil 8\)\)\)~%~@
 :SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
@@ -1415,12 +1460,13 @@ If expr does not return at least two values return nil.~%~@
         "Whether first two values returned by EXPR are both t.~%~@
 If expr does not return at least two values return nil.~%~@
 :EXAMPLE~%
- \(multiple-value-nil-nil-p \(values t t\)\)~%
- \(multiple-value-nil-nil-p \(values t nil 8\)\)~%
- \(multiple-value-nil-nil-p t\)
- \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
- \(multiple-value-nil-nil-p \(values\)\)~%
- \(multiple-value-nil-nil-p \(values nil\)\)~%~@
+ \(multiple-value-t-t-p \(values t t\)\)~%
+ \(multiple-value-t-t-p \(values t t 8\)\)~%
+ \(multiple-value-t-t-p t\)~%
+ \(multiple-value-t-t-p \(values 8 8 3\)\)~%
+ \(multiple-value-t-t-p \(values\)\)~%
+ \(multiple-value-t-t-p \(values nil\)\)~%
+ \(macroexpand-1 '\(multiple-value-t-t-p \(values t nil 8\)\)\)~%~@
 :SEE-ALSO `mon:multiple-value-nth-p', `mon:multiple-value-nil-nil-p',
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',

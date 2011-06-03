@@ -9,9 +9,8 @@
 (defun string-delimited-to-list (string &optional (separator #\space)
                                  skip-terminal)
   (declare
-   (type string string)    (type character separator)
-   ;; (optimize (speed 3) (safety 0) (space 0) (compilation-speed 0))
-   ) 
+   (type string string)
+   (type character separator)) 
   (do* ((len (length string))
         (output '())
         (pos 0)
@@ -32,6 +31,13 @@
 
 (defun string-from-delimited-list (list &optional (separator " "))
   (format nil (concatenate 'string "~{~A~^" (string separator) "~}") list))
+
+(defun simple-string-ensure (thing)
+;; Signals an error if THING cannot be coerced with `cl:string'.
+  (let ((s (string thing)))
+    (make-array (length s)
+                :element-type 'character
+                :initial-contents s)))
 
 (defun string-explode (str)
   (declare (type string str))
@@ -66,7 +72,8 @@
 
 ;;; :COURTESY Drew Mcdermott's ytools/base.lisp
 (defun string-length (str) 
-  (length (the string str)))
+  (declare (string str))
+  (the array-length (length str)))
 
 ;;; :COURTESY Drew Mcdermott's ytools/misc.lisp
 (defun string-begins (str putative-start)
@@ -280,7 +287,11 @@
 	  :do (replace result string :start1 index))
        result))))
 
+;;; :NOTE Has sb-rt test `string-split-on-chars-TEST'
+;; string-split-on-chars
 (defun string-split-on-chars (string &optional separators white-on-white)
+  (declare (string string)
+           (optimize (speed 3)))
   (let ((string     (etypecase string
                       (string-empty (return-from string-split-on-chars string))
                       (simple-string string)
@@ -293,22 +304,20 @@
                       (mon:string-null-or-empty (return-from string-split-on-chars string))
                       (simple-string  separators)
                       (string         (copy-seq separators))
-                      ((or character mon:char-code-integer) (char-to-string separators))
+                      ((or character mon:char-code-integer) (char-to-string separators :allow-integers t))
                       (mon:proper-list
                        (etypecase separators
                          (mon:each-a-string-of-length-1
                           (with-standard-io-syntax (format nil "~{~A~}" separators)))
                          (each-a-character-or-char-code-integer (char-list-to-string separators))))))
-        ;; (chunks (make-array 0 :adjustable t :fill-pointer 0))
-        (chunks   ())
+        (chunks (make-array 0 :adjustable t :fill-pointer 0))
         (position 0)
         (nextpos  0)
         (strlen   (length string)))
     (declare (type simple-string string separators)
              (index-plus-1 position nextpos)
              (array-index strlen)
-             ;;(array chunks)
-             )
+             (array chunks))
     (loop 
        :while (< position strlen)
        :do (loop 
@@ -316,35 +325,15 @@
                           (not (position (char string nextpos) separators)))
               ;; :NOTE Don't change this to:  :do (incf nextpos))
               :do (setq nextpos (1+ nextpos)))
-       ;; :WAS 
-       (push (subseq string position nextpos) chunks)
-       ;; (vector-push-extend (subseq string position nextpos) chunks)
+       (vector-push-extend (subseq string position nextpos) chunks)
        ;; :NOTE Don't change this to:  (incf position (1+ nextpos))
        (setq position (1+ nextpos))
-       (setq nextpos  position))
-    ;; :WAS 
-    ;; (coerce chunks 'list)))
-    (nreverse chunks)))
+       (setq nextpos  position)
+       ;; :finally (return (coerce (the array chunks) 'list))
+       :finally (return (map 'list #'identity (the array chunks))))))
 
-
-
-;; (string-split-on-chars "bub ba	bubba")
-;; => ("bub" "ba" "bubba")
-;; (string-split-on-chars "bubba	bubba" "b")
-;; => ("" "u" "" "a	" "u" "" "a")
-;; (string-split-on-chars "bubba" #\b)
-;; ("" "u" "" "a")
-;; (string-split-on-chars " b u bba " 32)
-;; ("" "b" "u" "bba")
-;; (string-split-on-chars (format nil "~{~C~}" *whitespace-chars*))
-;; => " 
-;; 	 "
-;; (string-split-on-chars (format nil "~{~C~}" *whitespace-chars*) nil t)
-;; ("" "" "" "" "" "" "")
-
-;; 
-
-
+;; mon:string-trim-whitespace
+;; (map 'list #'identity #(a b c)) 
 ;;; :SOURCE chunga-1.1.1/read.lisp :WAS `trim-whitespace'
 (defun string-trim-whitespace (string &key (start 0) (end (length string)))
   ;; optimized version to replace STRING-TRIM, suggested by Jason Kantz
@@ -359,7 +348,7 @@
                   type-of: ~S~%"
                  arg (type-of arg))
   (if (or (string-empty-p string) 
-          (and (= (length string) 1)
+          (and (= (the array-length (length string)) 1)
                (whitespace-char-p (char (the string-not-null-or-empty string) 0))))
       ;; :NOTE Are the consequences/benefits to doing this instead:
       ;; (make-string 0 :element-type 'standard-char)
@@ -369,18 +358,24 @@
                    (array-index start)
                    (index-or-minus-1 end)
                    (optimize (speed 3)))
-        (let* ((start% (loop 
-                          :with str = (the string string)
+        (let* ((str-ghost (copy-seq string)) ;; copy-seq returns a simple-string.
+               (start% (loop 
+                          ;; :WAS :with str = (the string string)
+                          :with str = (the simple-string str-ghost)
                           :for i :of-type index-or-minus-1 :from start :below end :by 1
-                          :while  (whitespace-char-p (char str i))
+                          ;; :WAS :while (whitespace-char-p (char str i))
+                          :while  (whitespace-char-p (schar str i))
                           :finally (return i)))
                (end% (loop
-                        :with str = (the string string)
+                        ;; :WAS :with str = ;; :WAS (the string string)
+                        :with str = (the simple-string str-ghost)
                         :for i :of-type index-or-minus-1 :downfrom (1- end) :downto start :by 1
-                        :while (whitespace-char-p (char str i))
-                        :finally (return (1+ i)))))
+                        ;; :WAS :while (whitespace-char-p (char str i))
+                        :while (whitespace-char-p (schar str i))
+                        :finally (return (1+ i))))
+               )
           (declare (index-or-minus-1 start% end%))
-          (cond ((and (zerop start%) (= end% (length string)))
+          (cond ((and (zerop start%) (= end% (the array-length (length string))))
                  ;; (break "with string: ~S start was: 0 end% was: ~d" string end%)
                  (make-array end% :element-type (array-element-type string) :initial-contents string))
                 ((> start% end%) 
@@ -388,10 +383,12 @@
                 (t ;; (break "with string: ~S start was: ~d end% was: ~d" string start% end%)
                  (loop 
                     with new-str = (make-array (- end% start%) :element-type (array-element-type string))
-                    with str = (the string string)                      
+                    ;; :WAS with str = (the string string)
+                    with str = (the simple-string string)
                     for idx-new upfrom 0 to end% by 1
                     for idx-old from start% below end% by 1
-                    do  (setf (char new-str idx-new) (char str idx-old))
+                    ;; :WAS do  (setf (char new-str idx-new) (char str idx-old))
+                    do  (setf (char new-str idx-new) (schar str idx-old))
                     finally (return new-str)) ))))))
 
 (defun string-split-newline (string)
@@ -529,37 +526,69 @@
 ;; (string-insert-char "m" #\a 1)
 ;; (string-insert-char "mb" #\a 0)
 ;; (string-insert-char "vmamb" #\a 5)
-;; 
 
 ;;; ==============================
 ;;; :NOTE lice/fns.lisp had this which arnesi says is slow.
 ;;;  (apply 'concatenate 'string strings))
 ;;; :COURTESY arnesi/string.lisp
-(defun concat (&rest strings) ;;  &key convert-chars &allow-other-keys)
-  (let* ((length (reduce #'+ strings :key #'length))
+;;; :NOTE Issue 155 REST-LIST-ALLOCATION CLTL2 p 77-78 
+;;; :SEE info node (info "(ansicl)Ordinary Lambda Lists")
+;;; :SEE (URL `http://www.lispworks.com/documentation/HyperSpec/Issues/iss297_w.htm')
+;; ,----
+;; | the value of an &REST parameter is permitted, but not required,
+;; | to share (top-level) structure with the last argument to APPLY.
+;; `----
+;; This means we must not: (setf (do thing to strings) strings)
+;; without first copying the &rest list
+;; :NOTE Has regression test `mon-test:concat-TEST'
+(defun concat (&rest strings)
+  (declare (each-a-sequence-proper-or-character strings)
+           (optimize (speed 3)))
+  (let* ((strings-cln   
+          (if (or (null strings) (every #'null strings))
+              (return-from concat (make-string 0))
+              (string-seqs-convert-chars-if
+               (if (some #'null strings)
+                   (remove-if #'null strings)
+                   (copy-seq strings)))))
+         (length (reduce #'+ strings-cln :key #'length))
          (result (make-string length)))
     (declare ((integer 0 *) length)
-             ((simple-array character (*)) result))
-    (setf result
-          (loop
-             ;; for string in list
-             :for string :in strings
-             :for start = 0 :then end
-             ;; What if we want to do: 
-             ;;  (concat #(#\a #\b #\c) "a")
-             ;; If we constrain the type as `simple-string' with:
-             ;;  :for end = (+ start (length (the simple-string string)))
-             ;; then this will fail:
-             ;; (concat #(#\a #\b #\c) "a")
-             :for end = (+ start (length string))
-             :while string
-             :do (replace result string :start1 start :end1 end)
-             :finally  (return result) ))))
+             ((simple-array character (*)) result)
+             (each-a-sequence strings-cln))
+    (loop
+       :for string :in strings-cln
+       :for start = 0 :then end
+       :for end = (+ start (the array-length (length string)))
+       :while string
+       :do (replace result string :start1 start :end1 end)
+       :finally  (return result))))
+
+;;; ==============================
+;; Initial version used a stepping iterator over each elt
+;; (defun string-seqs-convert-chars-if (string-seq)
+;;   (declare (list string-seq))
+;;   (if (notany #'characterp string-seq)
+;;       string-seq
+;;       (loop 
+;;          for char-psn in string-seq
+;;          for cnt from 0
+;;          when (characterp char-psn) 
+;;          do (setf (elt string-seq cnt) (string char-psn))
+;;          finally (return string-seq))))
 ;;
-;;; :TEST-ME (concat "a" "b" "c" "d")
-;;; :TEST-ME (concat "a" "b" "c" "d" :convert-chars t) nil)
-;;; :TEST-ME (concat #(#\a #\b #\c) "a") ;=> "abca"
-;;; :TEST-ME (concat (format nil "~a~%~T" "a") "b" "c")
+(defun string-seqs-convert-chars-if (string-seq)
+  (declare (each-a-sequence-proper-or-character string-seq)
+           (optimize (speed 3)))
+  (if (notany #'characterp string-seq)
+      string-seq
+      (loop 
+         for char-psn = (position-if #'characterp string-seq)
+         then (position-if #'characterp string-seq :start char-psn)
+         for char = (and char-psn (string (elt string-seq char-psn)))   
+         while char
+         do (setf (elt string-seq char-psn) char)
+         finally (return string-seq))))
 
 ;;; ==============================
 ;;; :COURTESY PJB 
@@ -732,7 +761,6 @@
                 (t
                  (funcall fun c))))))))
 
-
 (defun string-or-char-or-code-point-integer-if (obj)
   (if (typep obj 'string-or-char-or-code-point-integer)
       (typecase obj 
@@ -762,7 +790,8 @@
 
 (defun string-symbol-or-char-if (obj)
   (if (typep obj 'string-symbol-or-char)
-      (typecase obj
+      ;; :WAS (typecase obj
+      (etypecase obj
         (symbol (string obj))
         (string (copy-seq obj))
         (character obj))
@@ -906,18 +935,28 @@
 
 ;;; :SOURCE texinfo-docstrings/colorize.lisp
 (defun string-starts-with (starts-w str)
-  (declare (type string str starts-w))
-  (and (>= (length str) (length starts-w))
-       (string-equal starts-w str :end2 (length starts-w))))
+  (declare (type string str starts-w)
+           (optimize (speed 3)))
+  (let ((stw-len (length starts-w)))
+    (declare (array-length stw-len))
+    (and (>= (the array-length (length str)) stw-len)
+         (string-equal starts-w str :end2 stw-len))))
 
 ;;; :SOURCE mcclim/Drei/lisp-syntax-swine.lisp
-(defun string-longest-common-prefix (strings)
-  (if (null strings)
-      ""
-      (flet ((common-prefix (s1 s2)
-               (let ((diff-pos (mismatch s1 s2)))
-                 (if diff-pos (subseq s1 0 diff-pos) s1))))
-        (reduce #'common-prefix strings))))
+(defun string-longest-common-prefix (strings &optional null-as-nil)
+  (declare (each-a-string-or-null strings)
+           (optimize (speed 3)))
+  (when (null strings) 
+    (return-from string-longest-common-prefix 
+      (if null-as-nil 
+          nil 
+          (make-string 0))))  
+  (locally (declare (each-a-string strings))
+    (flet ((common-prefix (s1 s2)
+             (declare (string s1 s2))
+             (let ((diff-pos (mismatch s1 s2)))
+               (if diff-pos (subseq s1 0 diff-pos) s1))))
+      (reduce #'common-prefix strings))))
 
 ;;; :SOURCE texinfo-docstrings/docstrings.lisp :WAS `flatten-to-string'
 ;;; :SOURCE /mcclim/Doc/docstrings.lisp :WAS `flatten-to-string'
@@ -1024,16 +1063,28 @@ When keyword W-CODE-CHAR is supplied convert car.~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
 
 (fundoc 'concat
-  "Concatenate all the arguments and make the result a string.~%~@
+        "Concatenate all the arguments and make the result a string.~%~@
 The result is a string whose elements are the elements of all the arguments.~%~@
 Each argument must be a string.~%~@
 :EXAMPLE~%
  \(concat \"a\" \"b\" \"c\"\)~%
  \(concat \"~~%\" \"a\"\)~%
+ \(concat \"a\" #\(#\\a\) \"b\"\)~%
+ \(concat \"a\" '\(#\\a\) \"b\"\)~%
+ \(concat #\\a nil #\\b nil #\\c\)~%
+ \(concat  nil\)~%
+ \(concat \"a\" nil \"b\" nil\)~%
+ \(concat \"a\" nil #\(#\\b\) nil\)~%
+ \(concat \"a\" nil #\(\) nil\)~%
+ \(concat nil #\(\) \(\)\)~%
  \(concat \(format nil \"~~a~~%\" \"a\"\) \"b\" \"c\"\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :NOTE Unlike Emacs' concat where \(concat \"\\n\" \"a\"\) returns the #\\a char
-on the second line, . this concat does not know about `~~%' \(#\\Newline\).~%~@
+on the second line, this concat does not interpolate format directives as
+chararacter literals e.g.:~%
+ `~~%' as \(#\\Newline\)~%~@
+:NOTE Unlike Emacs' concat it is permissible to pass chararacter literals, e.g.:~%~@
+ \(concat #\\a nil #\\b nil #\\c\)~%~@
 :SEE-ALSO `mon:mapconcat', `mon:string-cat'.~%►►►")
 
 (fundoc 'downcase
@@ -1365,10 +1416,17 @@ Keyword END is a bounding index to trim from STRING. Default to STRING length.~%
 :SEE-ALSO `<XREF>'.~%►►►")
 
 (fundoc 'string-longest-common-prefix
-  "Return the longest string that is a common prefix of STRINGS.~%~@
-STRINGS is a list of strings.~%~@
+        "Return the longest string that is a common prefix of STRINGS.~%~@
+STRINGS is a list of strings or nil.~%~@
+When STRINGS is null return \"\".
+When optional arg NULL-AS-NIL is non-nil and STRINGS is null return nil.~%~@
 :EXAMPLE~%
- \(string-longest-common-prefix '\(\"abc\" \"abcd\" \"abcdefg\" \"abcdefgh\"\)\)~%~@
+ \(string-longest-common-prefix '\(\"abc\" \"abcd\" \"abcdefg\" \"abcdefgh\"\)\)~%
+ \(string-longest-common-prefix '\(\"abqe\" \"abqef\" \"abqcd\"\)\)~%
+ \(string-longest-common-prefix nil\)~%
+ \(string-longest-common-prefix nil t\)~%~@
+;; Following fails succesfully:~%
+ \(string-longest-common-prefix '\(\"abqe\" . \"abqef\")\)~%~@
 :SEE-ALSO `mon:substring', `mon:string-starts-with', `mon:string-begins',
 `mon:string-upto-char', `mon:string-or-symbol-first-char'.~%►►►")
 
@@ -1401,6 +1459,17 @@ the trailing whitespace-chars trimmed.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
+
+(fundoc 'string-seqs-convert-chars-if
+        "Destrutively modify STRING-SEQ by replacing characterp elts with with string equivalent.~%~@
+STRING-SEQ is a proper list satisfying `mon:each-a-sequence-proper-or-character'.~%~@
+:EXAMPLE~%
+ \(string-seqs-convert-chars-if '\(\"a\" #\\b #\\c #\(#\\d #\\e\) #\\f\)\)~%
+ \(string-seqs-convert-chars-if '\(\"a\" nil \"b\" nil \"c\" #\(#\\d #\\e\) \"f\"\)\)~%
+ \(string-seqs-convert-chars-if nil\)~%
+:SEE-ALSO `mon:concat', `mon:mapconcat', `mon:string-coerce-from',
+`mon:string-convert-tabs', `mon:string-substitute', `mon:make-string*',
+`mon:make-string-adjustable' .~%►►►")
 
 (fundoc 'string-convert-tabs
 "Convert all occurences of #\Tab char in TABBY-STR to their equivalent in #\\Space chars.~%~@

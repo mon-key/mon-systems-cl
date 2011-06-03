@@ -72,10 +72,7 @@
 ;;; :VARIABLES-CONSTANTS
 ;;; ==============================
 
-(defvar *user-name* 
-  #-IS-MON #.((probe-file (merge-pathnames (make-pathname :name "loadtime-bind") 
-                                           (load-time-value *default-pathname-defaults*))))
-  #+IS-MON #.(probe-file (translate-logical-pathname "MON:MON-SYSTEMS;loadtime-bind")))
+(defvar *user-name* nil)
 
 (defvar *search-path* nil)
 
@@ -167,6 +164,21 @@
     (:pc . 12/72)
     (:mm . 254/10)))
 
+(defconst* *keyword-hash-inverted*  hash-table
+  (let ((inverted-pairs '((:pathname-host      . :host)
+                          (:pathname-device    . :device)
+                          (:pathname-directory . :directory)
+                          (:pathname-name      . :name)
+                          (:pathname-type      . :type)
+                          (:pathname-version   . :version)))
+        (hash-pairs (make-hash-table)))
+    (dolist (pairs inverted-pairs 
+             (progn 
+               (maphash #'(lambda (dest-key src-key)
+                            (setf (gethash src-key hash-pairs) dest-key))
+                        hash-pairs)
+               hash-pairs))    
+      (setf (gethash (car pairs) hash-pairs) (cdr pairs)))))
 
 
 ;;; ==============================
@@ -535,6 +547,14 @@ of symbols that are acceptable as <DOC-TYPE>.~%~@
 :SEE info node `(ansicl)documentation'~%~@
 :SEE :FILE sbcl/src/pcl/documentation.lisp
 :SEE-ALSO `mon:fundoc', `mon:doc-set', `cl:describe'.~%►►►")
+
+(vardoc '*keyword-hash-inverted*
+        "Inverted hash-table of keywords appearing in the COMMON-LISP package.~%~@
+:EXAMPLE~%
+ \(gethash :name *keyword-hash-inverted*\)~%
+ \(gethash :pathname-name *keyword-hash-inverted*\)~%~@
+:SEE-ALSO `mon:keyword-property-to-function', 
+`mon:pathname-components-funcallable-pairs'.~%►►►")
 
 ;;; ==============================
 

@@ -48,7 +48,6 @@
 
 (in-package #:mon-build-system)
 
-;; (asdf:defsystem #:mon-system
 (defsystem :mon
   ;; :name ""
   :author  "MON KEY"
@@ -98,17 +97,24 @@
    (:file "class-doc"    ) 
    ))
 
+;; This used to work... is something funny with latest SBCL 1.0.47.1?
+;; (asdf:perform (asdf:
 (defmethod asdf:perform :after ((op asdf:load-op) (system (eql (asdf:find-system :mon))))
   (pushnew :mon cl:*features*)
-  (let* ((chk-cons-file (and mon:*user-name*
-                             (pathnamep mon:*user-name*)
-                             (probe-file mon:*user-name*)))
+  (let* ((chk-cons-file 
+          #-IS-MON #.((probe-file (merge-pathnames (make-pathname :name "loadtime-bind") 
+                                                   (load-time-value *default-pathname-defaults*))))
+          #+IS-MON #.(probe-file (translate-logical-pathname "MON:MON-SYSTEMS;loadtime-bind")))
          (chk-lb-file 
           (and chk-cons-file
                (probe-file (merge-pathnames chk-cons-file (make-pathname :type "lisp"))))))
-    (and chk-lb-file (load chk-lb-file)))
-  (asdf:operate 'asdf:load-op 'mon-test))
+    (and chk-lb-file 
+         ;; *load-print* *load-verbose* 
+         (load chk-lb-file :verbose t :print t)))
+  (asdf:operate 'asdf:load-op 'mon-test)  
+  )
 
+;; asdf:load-op 
 ;;; ==============================
 
 

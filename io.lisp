@@ -151,6 +151,7 @@
 (defun press-enter-to-continue ()
   (format *query-io* "~&Press Enter to continue.~%")
   (let ((result (read-line *query-io*)))
+    ;; (force-output)
     (zerop (length result))))
 
 ;;; :SOURCE D. Mcdermott ytools/base.lisp
@@ -167,8 +168,36 @@
   (dotimes (i indent (* indent 3))
     (write-string "   ")))
 
+;; :COURTESY Zach Beane :SOURCE (URL `http://xach.livejournal.com/289652.html') :WAS `spam-repl'
+;; ,----
+;; | I've used the with-simple-restart technique a few times now. It's especially
+;; | handy when working on a list of things, some of which might take a long time to
+;; | process. If there's an error processing a particular thing, I either want to
+;; | keep going with the rest (so I don't lose my work on the ones that processed
+;; | fine), or give up and start afresh later.
+;; `----
+;; (defun query-read-while (&key (show-stack nil))
+;;   ;; (query-read-while)
+;;   ;; (query-read-while :show-stack t) *standard-output*
+;;   (let ((gthr-while '()))
+;;     (with-simple-restart (quit-repl "Leave current-query REPL")
+;;       (progn 
+;;         (format t "Entering query REPL~% Continue providing new values when finshied type quit~%")
+;;         (force-output)
+;;         (loop
+;;            (with-simple-restart (continue-un-phased "continue un-phased")
+;;              (format t "~%> ")
+;;              (force-output)
+;;              (let ((url (read-line)))
+;;                (when (string-equal url "quit")
+;;                  (return (setf gthr-while (nreverse gthr-while))))
+;;                (push url gthr-while)
+;;                (format t "GOT: ~S" url)
+;;                (fresh-line)
+;;                (when show-stack (format t "STACK: ~S" gthr-while) ))))))))
+
 ;;; ==============================
-;;; LiCE handles a few escape codes like GNU Emacs
+;;; Lice handles a few escape codes like GNU Emacs
 ;;;  (set-macro-character #\" #'read-string-with-escapes)
 ;;; 
 ;;; :TODO Needs an alias `read-string-with-escapes' -> `string-read-with-escapes'

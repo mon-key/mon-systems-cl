@@ -71,6 +71,22 @@
        unless (memq key keys)
        nconc (list  key val))))
 
+;; (declaim (inline keyword-property-to-function))
+(defun keyword-property-to-function (property &key (constantly nil))
+  (declare (symbol property)
+           (optimize (speed 3)))
+  (let* ((cl-pkg #.(find-package "COMMON-LISP"))
+         (maybe-sym (multiple-value-list (find-symbol (string property) cl-pkg))))
+    (if (and (car maybe-sym)
+             (eql (cadr maybe-sym) :external)
+             (fboundp (car maybe-sym)))
+        ;; (ignore-errors (symbol-function (car maybe-sym))))))
+        (if (macro-function (car maybe-sym))
+            (constantly constantly)
+            (handler-case (symbol-function (car maybe-sym))
+              (undefined-function () (constantly constantly))))
+        (constantly constantly))))
+
 ;; :SOURCE sbcl/contrib/sb-introspect/introspect.lisp
 #+sbcl 
 (defun function-arglist (fn)
@@ -541,6 +557,35 @@ Second value is a list of the form:~%~@
  \(symbol-external-p \" \"\)~%
  \(symbol-external-p \"consp\" \"bubba\"\)~%~@
 :SEE-ALSO `mon:package-external-symbols', `mon:find-package*'.~%►►►")
+
+(fundoc 'keyword-property-to-function
+        "Return the `cl:symbol-function' associated with PROPERTY.~%~@
+Property is a keyword with a `cl:symbol-name' which `cl:find-symbol' can find in
+the package COMMON-LISP, and which is `cl:fboundp', and for which
+`cl:macro-function' does not return, and for which `cl:symbol-function' returns a
+`cl:funcall'able function object.~%
+Keyword arg CONSTANTLY names a value to give to `cl:constantly' if PROPERTY is
+not found in the package COMMON-LISP. Default is nil.~%~@
+:EXAMPLE~%
+ \(keyword-property-to-function :pathname-host\)~%
+ \(keyword-property-to-function :*compile-file-pathname*\)~%
+ \(keyword-property-to-function :*compile-file-pathname* :constantly \"bubba\"\)~%
+ \(functionp \(keyword-property-to-function :pathname-host\)\)~%
+ \(funcall \(keyword-property-to-function :pathname-host\)
+          #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)~%
+ \(funcall \(keyword-property-to-function ':*not-gonna-be-there
+                                        :constantly \"bubba\"\)\)~%
+ \(map 'list #'keyword-property-to-function
+      \(list :pathname-host      :pathname-device :pathname-name
+            :pathname-directory :pathname-type   :pathname-version\)\)~%
+ \(let* \(\(path \(translate-logical-pathname
+              #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)\)
+       \(funs \(remove-if #'null 
+                        \(map 'list #'keyword-property-to-function
+                             \(plist-keys 
+                              \(pathname-components path :list-or-plist :plist\)\)\)\)\)\)
+  \(mapcar #'\(lambda \(x\) \(funcall x path\)\) funs\)\)~%~@
+:SEE-ALSO `mon:keyword-prune', `mon:plist-keys'.~%►►►")
 
 (fundoc 'package-external-symbols
 "Return the symbols :external to PACKAGE.~%~@

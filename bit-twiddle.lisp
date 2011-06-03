@@ -372,7 +372,6 @@
                             #+sbcl (sb-ext:string-to-octets string :external-format :UTF-8))
     (ironclad:produce-digest digester)))
 
-
 
 ;;; ==============================
 ;;; :BIT-TWIDDLE-DOCUMENTATION

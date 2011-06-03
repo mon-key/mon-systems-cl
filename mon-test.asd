@@ -20,7 +20,9 @@
   :version "1.0.0"
   :pathname  "tests/"
   :serial t
-  :depends-on (:mon :rt)
+  :depends-on (:mon #+sbcl :sb-rt
+                    ;; :NOTE Need to add a package-nickname for :sb-rt for following:
+                    #-sbcl :rt)
   :components 
   ((:file "package")
    (:file "test")

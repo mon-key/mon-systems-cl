@@ -190,6 +190,45 @@
         (values rtn-path cnt-byte)
         (values nil 'non-local-exit))))
 
+;; :NOTE :SEE Nathan Froyd's archive for working with cpio/tar data
+;; (URL `https://github.com/froydnj/archive.git')
+;; (archive::create-tar-file  <PATHNAME> '(<FILELIST>))
+;; (salza2:gzip-file Russian_Olympics-0.bmp
+;;; ==============================
+;; :NOTE Rudiments of a $> tar cvzf file.tgz file
+;; (defun gzip-file-tgz (tar-pathname file &key (if-tar-does-not-exist :create)
+;;                                              (tarball-extension { tgz | tar.gz }
+;; (archive::create-tar-file 
+;; (let ((archiving (make-pathname <TAR-PATHNAME> (...) ))
+;;       (file-to-compress <FILE>))
+;; (progn
+;;   (archive::create-tar-file archiving '(<FILE>))
+;;   (salza2:gzip-file  archiving   ... 
+;;    (merge-pathnames arhiving ... tarball-extension))
+
+(defun gzip-file-and-delete-source (file)
+  (let ((file-gz (concatenate 'string (namestring file) ".gz"))
+        (delete-rtn '()))
+    ;; gzip-file returns a pathaname
+    (setf file-gz (salza2:gzip-file file file-gz))
+    (setf delete-rtn (and (delete-file file) (pathname file)))
+    (values file-gz delete-rtn)))
+
+;;; ==============================
+;; :NOTE `mon:pathname-file-list-if' doesn't catch symlinks when non-SBCL!
+#+sbcl 
+(defun gzip-files-and-delete-source (files-list) 
+  (let ((cln-dirs-syms (pathname-file-list-if files-list :as-pathnames nil)))
+    (flet  ((gzip-file-and-delete (in-file)
+              (declare (string in-file))
+              (let ((file-gz (concatenate 'string in-file ".gz"))
+                    (delete-rtn '()))
+                (setf file-gz (salza2:gzip-file in-file file-gz))
+                (setf delete-rtn (and (delete-file in-file) (pathname in-file)))
+                (list file-gz delete-rtn))))
+      (loop 
+         for file in cln-dirs-syms collect (gzip-file-and-delete file)))))
+
 ;;; ==============================
 ;; :SOURCE restas-wiki/src/storage.lisp :WAS `read-gzip-file-into-string'
 ;; :WAS (defun read-gzip-file-into-string (path)
@@ -417,6 +456,21 @@ GZIP-OUTPUT-PATHNAME is a pathname-designator to output the decompressed file co
 `salza2:compress-octet-vector', `salza2:make-stream-output-callback',
 `flex:with-output-to-sequence', `chipz:decompress', `sb-ext:octets-to-string',
 `sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%►►►")
+
+(fundoc 'gzip-files-and-delete-source
+        "Compress each file as if by `salza2:gzip-file' each file in FILES-LIST
+and `cl:delete-file' the source.~%~@
+For each file in list return a list of the form:~%
+ \(#P<FILE>.gz #P<FILE>\)~%~@
+The car of each list is the pathname of the gzipped file.
+The cadr of each list is the pathname of the deleted file.~%~@
+It is assumed that each file in files-list exists.~%~@
+The compressed file is given a \".gz\" extension. e.g. if a file is named has
+the `cl:file-namestring' \"file.bmp\" its compressed file-namestring is \"file.bmp.gz\".~%~@
+If an existing file with a \".gz\" extension exists for a given file-namestring it is superseded.
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%►►►")
 
 
 ;;; ==============================

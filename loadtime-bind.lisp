@@ -30,6 +30,11 @@
 (in-package #:mon)
 ;; *package*
 
+(setq *user-name*
+      #-IS-MON (probe-file (merge-pathnames (make-pathname :name "loadtime-bind") 
+                                            (load-time-value *default-pathname-defaults*)))
+      #+IS-MON (probe-file (translate-logical-pathname "MON:MON-SYSTEMS;loadtime-bind")))
+
 (username-for-system-var-bind 'mon:*user-name*)
 
 ;;; ==============================

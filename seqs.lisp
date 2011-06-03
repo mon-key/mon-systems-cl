@@ -300,6 +300,49 @@
                         :finally (return (values terminator
                                                  (if terminator new-list object))))))))
 
+
+
+;; :SOURCE PJB common-lisp/cesarum/list.lisp :WAS `dotted-list-length' :LICENSE GPL
+(defun list-dotted-length (dotted-list)
+  (declare (list dotted-list))
+  (loop
+     :for length :from 0
+     :for current = dotted-list :then (cdr current)
+     :until (atom current)
+     :finally (return length)))
+
+;; :SOURCE PJB common-lisp/cesarum/list.lisp :WAS `circular-list-lengths' :LICENSE GPL
+(defun list-circular-lengths (circular-list)
+  (declare (list circular-list))
+  (let ((cells (make-hash-table)))
+    (declare (hash-table cells))
+    (loop
+       :for index :from 0
+       :for cell = circular-list :then (cdr cell)
+       :for previous = (gethash cell cells)
+       :do (if previous
+               (return-from list-circular-lengths (values previous (- index previous)))
+               (setf (gethash cell cells) index)))))
+
+;; :SOURCE PJB common-lisp/cesarum/list.lisp :WAS `list-lengths' :LICENSE GPL
+;; :NOTE Has test in mon-test/testing.lisp 
+(defun list-lengths (list)
+  (declare ((or atom list) list))
+  (labels ((proper (current slow)
+             ;; (print (list 'proper current slow))
+             (cond ((null current)       (values (list-length        list) 0))
+                   ((atom current)       (values (list-dotted-length list) nil))
+                   ((null (cdr current)) (values (list-length        list) 0))
+                   ((atom (cdr current)) (values (list-dotted-length list) nil))
+                   ((eq current slow)    (list-circular-lengths list))
+                   (t                    (proper (cddr current) (cdr slow))))))
+    (typecase list
+      (cons  (proper list (cons nil list)))
+      (null  (values 0 0))
+      ;; :WAS (t     (values 0 nil))
+      (t     (values nil (type-of list))))))
+
+
 
 ;;; ==============================
 ;;; :SEQ-DESTURCTIVE
@@ -544,7 +587,9 @@
 (defun freqs (seq &key (test #'eql) (key #'identity))
   (declare (sequence seq) 
 	   (type (function (t t) t) test)
-           (type (function (t) t) key))
+           (type (function (t) t) key)
+           (optimize (speed 3)))
+  #-sbcl (assert (sequencep seq))
   (unless (sequence-zerop seq)
     (sort
      (reduce (lambda (res el)
@@ -1124,6 +1169,85 @@ Signal an error if car of either A or B is not `cl:realp'
  \(car-less-than-car '\(3  a\)  '\(b  2\)\)~%
  \(car-less-than-car nil  '\(b  2\)\)~%~@
 :SEE-ALSO `mon:car-less-than-car'.~%►►►")
+
+
+;;; ==============================
+;;; :LIST-LENGTHS
+;;; ==============================
+
+(fundoc 'list-dotted-length
+"Return the number of cons cells in DOTTED-LIST.~%~@
+DOTTED-LIST must be a dotted list or a proper list.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `mon:list-lengths', `mon:list-dotted-length', `mon:list-circular-lengths',
+`mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
+`mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
+`mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+
+(fundoc 'list-circular-lengths
+"Return the length of a circular-list.~%~@
+CIRCULAR-LIST must be a circular list.~%~@
+Return value is the length of CIRCULAR-LIST's stem and the length of
+the cyclic circlular portion.
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `mon:list-lengths', `mon:list-dotted-length', `mon:list-circular-lengths',
+`mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
+`mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
+`mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+
+;; (values nil nil)
+;; (export (find-symbol "LIST-LENGTHS"))
+(fundoc 'list-lengths
+"Return the length of a LIST.~%~@
+LIST is any kind of list: proper-list, circular-list or dotted-list.~%~@
+Return as if by `cl:values' as follows:~%
+ - for a proper list, the length of the list and 0;~%
+ - for a circular list, the length of the stem, and the length of the circle;~%
+ - for a dotted list, the number of cons cells, and nil;~%
+ -  for an atom, nil, and (type-of <ATOM>).~%
+:EXAMPLE~%
+ ;; :ATOM
+ \(equal \(multiple-value-list \(list-lengths 'a\)\)               '\(nil symbol\)\)~%
+ ;; :PROPER-LISTS
+ \(equal \(multiple-value-list \(list-lengths \(\)\)\)           '\(0 0\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a\)\)\)         '\(1 0\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b\)\)\)       '\(2 0\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c\)\)\)     '\(3 0\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d\)\)\)   '\(4 0\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d e\)\)\) '\(5 0\)\)~%
+ ;; :DOTTED-LISTS
+ \(equal \(multiple-value-list \(list-lengths '\(a . b\)\)\)         '\(1 nil\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b . c\)\)\)       '\(2 nil\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c . d\)\)\)     '\(3 nil\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d . e\)\)\)   '\(4 nil\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d e . f\)\)\) '\(5 nil\)\)~%
+ ;; :CIRCULAR-LISTS
+ \(equal \(multiple-value-list \(list-lengths '#1=\(a . #1#\)\)\)               '\(0 1\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '#2=\(a b . #2#\)\)\)             '\(0 2\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '#3=\(a b c . #3#\)\)\)           '\(0 3\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '#4=\(a b c d . #4#\)\)\)         '\(0 4\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '#5=\(a b c d e . #5#\)\)\)       '\(0 5\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a . #6=\(b . #6#\)\)\)\)         '\(1 1\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a . #7=\(b c . #7#\)\)\)\)       '\(1 2\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a . #8=\(b c d . #8#\)\)\)\)     '\(1 3\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a . #9=\(b c d e . #9#\)\)\)\)   '\(1 4\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b . #10=\(c . #10#\)\)\)\)     '\(2 1\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b . #11=\(c d . #11#\)\)\)\)   '\(2 2\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b . #12=\(c d e . #12#\)\)\)\) '\(2 3\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c . #13=\(d . #13#\)\)\)\)   '\(3 1\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c . #14=\(d e . #14#\)\)\)\) '\(3 2\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d . #15=\(e . #15#\)\)\)\) '\(4 1\)\)~%
+ \(equal \(multiple-value-list \(list-lengths '\(a b c d e . #16=\(#16#\)\)\)\)   '\(6 0\)\)~%~@
+:SEE-ALSO `mon:list-lengths', `mon:list-dotted-length', `mon:list-circular-lengths',
+`mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
+`mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
+`mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+
 
 
 ;;; ==============================

@@ -183,30 +183,30 @@
        :finally (replace ret vec :start1 ret-pos :start2 vec-pos))
     ret))
 
+;; :NOTE sbcl/src/code/target-extensions.lisp
+(defun vector-binary-search (value vector &key (key #'identity))
+  ;; Binary search for simple vectors
+  (declare (simple-vector vector))
+  #+sbcl (sb-impl::binary-search value vector key)
+  #-sbcl (labels ((recurse (start end)
+                    (when (< start end)
+                      (let* ((i (+ start (truncate (- end start) 2)))
+                             (elt (svref vector i))
+                             (key-value (funcall key elt)))
+                        (cond ((< value key-value)
+                               (recurse start i))
+                              ((> value key-value)
+                               (recurse (1+ i) end))
+                              (t
+                               elt))))))
+           (recurse 0 (length vector))))
+
 ;;; :SOURCE garnet-20030525/kr/kr.lisp :WAS `copy-extend-array'
 (defun vector-copy-extend (oldarray oldlen newlen)
   (let ((result (make-array newlen)))
     (dotimes (i oldlen)
       (setf (svref result i) (svref oldarray i)))
     result))
-
-;; sbcl/src/code/target-extensions.lisp
-(defun vector-binary-search (value seq &key (key #'identity))
-  ;; Binary search for simple vectors
-  (declare (simple-vector seq))
-  #+sbcl (sb-impl::binary-search value seq key)
-  #-sbcl (labels ((recurse (start end)
-             (when (< start end)
-               (let* ((i (+ start (truncate (- end start) 2)))
-                      (elt (svref seq i))
-                      (key-value (funcall key elt)))
-                 (cond ((< value key-value)
-                        (recurse start i))
-                       ((> value key-value)
-                        (recurse (1+ i) end))
-                       (t
-                        elt))))))
-    (recurse 0 (length seq))))
 
 ;; :SOURCE PCL Chapter 23 p 305
 (defun nshuffle-vector (vector)
@@ -239,7 +239,7 @@
 (defun array-get-undisplaced (array)  
   (let ((length (length array))
         (start 0))
-    (declare (length (array-length)))
+    (declare (array-length length))
     (loop
        (multiple-value-bind (to offset) (array-displacement array)
          (if to
@@ -319,7 +319,7 @@
 ;;; ==============================
 ;;; Follwing functions are GPLv3 Copyright (c) 2008-2011 Keith James. All rights reserved.
 ;;; :SOURCE uk.co.deoxybyte-utilities/vector-utilities 
-;;; `vector-positions', `vector-split-indices', `vector-split', `vector-binary-search'
+;;; `vector-positions', `vector-split-indices', `vector-split'
 ;;; ==============================
 (defun vector-positions (elt vector &key (start 0) end (test #'eql))
   (declare (optimize (speed 3) (debug 0)))
@@ -402,23 +402,11 @@ compared with elements in VECTOR using TEST, which defaults to EQL."
                          :displaced-index-offset start))
             (t
              (list (subseq vector start end)))))))
-;;
-;; :WAS `binary-search'
-(defun vector-binary-search (vector item &key (test #'<) key
-                      (start 0) (end (length vector)))  
-  (labels ((bin-search (start end)
-             (when (< start end)
-               (let ((mid (+ start (floor (- end start) 2))))
-                 (let ((mid-item (if key
-                                     (funcall key (aref vector mid))
-                                   (aref vector mid))))
-                   (cond ((funcall test item mid-item)
-                          (bin-search start mid))
-                         ((funcall test mid-item item)
-                          (bin-search (1+ mid) end))
-                         (t
-                          (aref vector mid))))))))
-      (bin-search start end)))
+
+
+
+
+
 
 
 ;;; ==============================
@@ -548,19 +536,19 @@ a displaced array.~%
 
 (fundoc 'make-string-adjustable 
 "Convenience feature for `cl:make-array' specialized for strings.~%~@
-Optional arg STRING is when non-nil is a string to use as :initial-contents for returned array.
-Specs of returned array are as follows:
- :element-type     'character 
+Optional arg STRING is when non-nil is a string to use as :initial-contents for returned array.~%~@
+Specs of returned array are as follows:~%
+ :element-type     'character
  :initial-contents [<STRING> | \"\"]
- :fill-pointer     [0 | (length <STRING>)]
+ :fill-pointer     [0 | \(length <STRING>\)]
  :adjustable       t~%~@
-:EXAMPLE~%~@
- \(array-has-fill-pointer-p \(make-string-adjustable\)\)
- \(adjustable-array-p \(make-string-adjustable\)\) 
- \(fill-pointer \(make-string-adjustable \"bubba\"\)\)
- \(fill-pointer \(make-string-adjustable\)\)
- \(let \(\(v-p-e-string \(make-string-adjustable\)\)\)
-   \(vector-push-extend #\\a v-p-e-string\)
+:EXAMPLE~%
+ \(array-has-fill-pointer-p \(make-string-adjustable\)\)~%
+ \(adjustable-array-p \(make-string-adjustable\)\)~%
+ \(fill-pointer \(make-string-adjustable \"bubba\"\)\)~%
+ \(fill-pointer \(make-string-adjustable\)\)~%
+ \(let \(\(v-p-e-string \(make-string-adjustable\)\)\)~%
+   \(vector-push-extend #\\a v-p-e-string\)~%
    \(values v-p-e-string \(fill-pointer v-p-e-string\)\)\)~%~@
 :SEE-ALSO `cl:make-string', `cl:with-output-to-string', `cl:format'.~%►►►")
 
@@ -656,34 +644,30 @@ data structures/strings.~%~@
  "Return a list of vectors splitting VECTOR at ELT, between START and END.~%~@
 ELT is compared with elements in VECTOR using 
 Keyword START is and END are as with `cl:position'.~%~@
-Keyword TEST is a function Default is EQL. 
+Keyword TEST is a function, default is EQL.~%~@
 Keyword REMOVE-EMPTY-SUBSEQS when non-nil indicates empty subsequences should be
-omitted from returned list.
-Keyword DISPLACE-TO-VECTOR when non-nil indicates returned subsequences should be displaced to the
-actual subsequences within VECTOR. In such case subsequences will share structure with VECTOR.
+omitted from returned list.~%~@
+Keyword DISPLACE-TO-VECTOR when non-nil indicates returned subsequences should
+be displaced to the actual subsequences within VECTOR. In such case subsequences
+will share structure with VECTOR.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
 ;;
 (fundoc 'vector-positions
 "Return list indices into VECTOR from START to END where ELT satisfies TEST.~%~@
-VECTOR is an sequece object of type `cl:array'
+VECTOR is an sequece object of type `cl:array'.~%~@
 Keywords START and END ara as `cl:position'~%~@
 Keyword TEST defaults to `cl:eql'
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
-;;
+
 (fundoc 'vector-binary-search
-"Search for ITEM in VECTOR by binary search.
-VECTOR is a sorted vector to search.
-ITEM is an object to be find.~%~@
-Keyword TEST is a function which compares ITEM with VECTOR elements.~%~@
+ "Search for VALUE in VECTOR by binary search.~%~@
+VECTOR is a sorted vector to search.~%~@
+VALUE is an object to be find.~%~@
 Keyword KEY is a function function with which to transform VECTOR elements.~%~@
-Kewword START is a lower bounding index for a search in VECTOR.
-Keyword END is an upper bound index for a search in VECTOR. 
-Default is (length <VECTOR>)
-Both start and end should be integer values of type `array-index'.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")

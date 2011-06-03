@@ -162,7 +162,8 @@
        initform))
        
 (defun %verify-hash-table-for-documented-class (&optional doc-hash-table)
-  (or (and doc-hash-table (hash-or-symbol-p doc-hash-table))
+  ;; (or (and doc-hash-table (hash-or-symbol-p doc-hash-table))
+  (or (and doc-hash-table (hash-or-symbol-p doc-hash-table :w-no-error t))
       (or (and (hash-table-p *default-class-documentation-table*)
                *default-class-documentation-table*)
           (setq *default-class-documentation-table* (make-hash-table)))))

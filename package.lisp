@@ -93,6 +93,7 @@
    #:*hexadecimal-chars*
    #:*vowel-chars*
    #:*length-unit*
+   #:*keyword-hash-inverted*
    ;;
  ;; macros.lisp
    ;;
@@ -154,6 +155,7 @@
    #:vector-map
    ;;
    #:byte-octets-for-integer
+   #:bytes-round-to-words
    ;;
    #:multiple-value-nth-p
    #:multiple-value-nil-nil-p
@@ -186,7 +188,8 @@
    #:read-file-gunzip-to-string     
    #:write-string-to-file-gzip      
    #:read-file-gzip-to-gunzip-file
-   
+   #:gzip-files-and-delete-source
+   ;;
  ;; environ.lisp
    #:username-for-system-var-p      ;; sb-posix:getpwnam sb-posix:passwd-name
    #:username-for-system-var-bind   
@@ -198,6 +201,7 @@
    #:intern-soft
    #:make-keyword-sanely
    #:keyword-prune
+   #:keyword-property-to-function
    #:fset   
    #:where-is
    #:where-is-local          ;; sb-int:sane-package
@@ -256,12 +260,16 @@
    #:string-or-symbol-not-boolean
    #:string-or-symbol-not-empty-nor-boolean
    #:standard-test-function
+   #:logical-pathname-designator
    #:pathname-designator
    #:filename-designator
+   #:pathname-or-namestring
    #:stream-or-boolean
    #:stream-or-boolean-or-string-with-fill-pointer
    #:symbol-not-null
    #:string-or-symbol
+   #:hash-table-or-symbol
+   #:hash-table-or-symbol-with-hash
    #:string-with-fill-pointer
    #:symbol-not-a-constant
    #:symbol-not-null-or-string-not-empty
@@ -269,24 +277,34 @@
    #:string-or-null
    #:string-not-null
    #:string-empty
+   #:string-all-whitespace-safely
+   #:string-null-empty-or-all-whitespace
+   #:string-not-null-empty-or-all-whitespace
    #:string-not-empty
    #:string-null-or-empty
-   #:simple-string-not-null
+   #:string-all-whitespace
+   #:string-of-length-1
    #:string-not-null-or-empty
+   #:simple-string-not-null
    #:simple-string-empty
    #:simple-string-not-empty
    #:simple-string-null-or-empty
    #:simple-string-not-null-or-empty
+   #:simple-string-of-length-1   
    #:simple-string-or-null
    #:simple-ascii-string
    #:simple-latin-1-string
-   #:string-all-whitespace
    #:standard-char-or-null
    #:digit-char-0-or-1
    #:string-all-digit-char-0-or-1
+   #:each-a-string-or-null
    #:each-a-string
    #:each-a-simple-string
    #:each-a-string-of-length-1
+   #:each-a-simple-string-of-length-1
+   #:each-a-sequence
+   #:each-a-sequence-proper
+   #:each-a-sequence-proper-or-character
    #:type-every          ;; #:sb-int:every/type
    #:type-any            ;; #:sb-impl::any/type
    #:array-index
@@ -310,8 +328,13 @@
    #:nibble
    #:each-a-character
    #:whitespace-char
+   #:char-not-whitespace-char
    #:hexadecimal-char
    #:char-code-integer
+   #:char-or-char-code-integer
+   #:char-or-char-code-integer-or-string-1
+   #:char-or-char-code-integer-or-simple-string-1
+   ;; #:character-or-char-code-integer                   ; :ALIAS (don't export)
    #:string-or-char
    #:string-symbol-or-char
    #:string-or-char-or-code-point-integer
@@ -340,7 +363,14 @@
    #:symbol-not-null-or-string-not-empty-p
    #:each-a-string-p
    #:each-a-simple-string-p
+   #:string-of-length-1-p
+   #:simple-string-of-length-1-p
    #:each-a-string-of-length-1-p
+   #:each-a-simple-string-of-length-1-p
+   #:each-a-sequence-p
+   #:each-a-sequence-proper-p
+   #:each-a-sequence-proper-or-character-p
+   #:each-a-string-or-null-p
    #:string-all-whitespace-p
    #:string-all-hex-char-p
    #:string-contains-whitespace-p
@@ -351,6 +381,9 @@
    #:simple-string-or-null-p
    #:simple-string-null-or-empty-p
    #:string-null-or-empty-p
+   #:string-null-empty-or-all-whitespace-p
+   #:string-not-empty-or-all-whitespace-p
+   #:string-not-null-empty-or-all-whitespace-p
    #:string-empty-p
    #:string-not-empty-p
    #:simple-string-empty-p
@@ -372,6 +405,10 @@
    #:not-boolean-integer-p
    #:boolean-integer-p
    #:type-specifier-p
+   #:logical-pathname-p
+   #:filename-designator-p
+   #:pathname-designator-p
+   #:pathname-or-namestring-p
    #:standard-test-function-p
    #:declared-special-p             ;; sb-walker:var-globally-special-p
    #:featurep                       ;; sb-int:featurep      ;;#-sbcl alexandria:eswitch
@@ -484,6 +521,7 @@
    #:hash-print-key-value-pairs
    #:hash-pprint
    #:hash-or-symbol-p
+   #:hash-found-p
    ;; :NOTE `hash-resize' requires the following:
    ;; sb-thread::with-recursive-system-spinlock, sb-impl::hash-table-spinlock
    ;; sb-impl::hash-table-next-vector, sb-impl::rehash-size, sb-impl::hash-table-rehash-size
@@ -494,6 +532,9 @@
    #:car-less-than-car
    #:car-greater-than-car
    #:list-length-n-p
+   #:list-lengths
+   #:list-circular-lengths
+   #:list-dotted-length
    ;;
    #:car-safe
    #:cdr-safe
@@ -569,8 +610,10 @@
    ;;
  ;; chars.lisp
    ;;
+   #:char-ascii-table
    #:char-to-string
    #:whitespace-char-p
+   #:char-not-whitespace-char-p
    #:hexadecimal-char-p
    #:char-position
    #:chars-not-in-string-p
@@ -588,6 +631,7 @@
    #:char-list-to-string
    #:char-code-integer-to-string
    #:char-code-integer-to-char
+   #:char-or-char-code-integer-or-string-1-ensure-char
    #:char-invert-case-maybe
    #:char-for-readtable-case
    #+sbcl #:char-length         ;; sb-impl::char-len-as-utf8
@@ -633,6 +677,7 @@
    ;; #:string-simple-string
    #:flatten-list-to-string
    #:concat
+   #:string-seqs-convert-chars-if
    #:substring
    #:string-insert-char
    #:string-insert-char-3b
@@ -650,6 +695,8 @@
    #:string-symbol-or-char-if
    #:string-or-char-or-code-point-integer-if
    #:string-symbol-or-char-or-code-point-integer-if
+   #:char-or-char-code-integer-or-string-1-p
+   #:char-or-char-code-integer-or-simple-string-1-p
    #:string-lines-to-array
    #+sbcl #:string-remove-backslashes ;; sb-impl::remove-backslashes
    ;;
@@ -669,9 +716,11 @@
    #:pathname-directory-append
    #:unix-dot-directory-p
    #:pathname-components
+   #:pathname-components-funcallable-pairs
    #:pathname-directory-merged
    #:file-newer-than-file-p
    #:find-file-search-path
+   #+sbcl #:pathname-native-file-kind ;; sb-ext:native-namestring sb-impl::native-file-kind
    #+sbcl #:remove-directory  ;; sb-posix:rmdir
    #+sbcl #:probe-directory   ;; sb-impl::native-file-kind
    #+sbcl #:logical-hosts
@@ -679,6 +728,9 @@
    #:replace-file
    #:delete-file-if-exists
    #:ensure-file-exists
+   #:pathname-file-if
+   #:pathname-file-list-if
+   #:make-pathname-user-homedir          ;; sb-ext:native-namestring
    ;; These require cl-fad
    #:directory-files
    #:pathname-directory-pathname         ;; cl-fad:pathname-as-directory
@@ -762,6 +814,9 @@
    ;; 
    #:string-underscore-to-dash   ;; cl-ppcre:regex-replace-all
    #:string-find-matching        ;; cl-ppcre:create-scanner, cl-ppcre:scan 
+   #:string-whitespace-to-char       ;; cl-ppcre:create-scanner, regex-replace-all
+   #:string-whitespace-to-dash
+   #:string-whitespace-to-underscore
    ;;
    ;;
  ;; chronos.lisp

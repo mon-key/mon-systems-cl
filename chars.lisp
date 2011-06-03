@@ -89,44 +89,72 @@
 (in-package #:mon)
 ;; *package*
 
-
+(declaim (inline whitespace-char-p))
 (defun whitespace-char-p (maybe-wsp-char)
-  ;; :WAS 
-  ;; (or (member maybe-wsp-char *whitespace-chars* :test #'char=)
-  ;; :NOTE #\space is considered to be `graphic-char-p' and is in fact its lower bounds.
-  ;; (not (graphic-char-p maybe-wsp-char))))
-  (typep maybe-wsp-char 'whitespace-char))
+  (declare (optimize (speed 3)))
+  (when (characterp maybe-wsp-char)
+    (the boolean
+      (typep maybe-wsp-char 'whitespace-char))))
+    ;; :WAS 
+    ;; (or (member maybe-wsp-char *whitespace-chars* :test #'char=)
+    ;; :NOTE #\space is considered to be `graphic-char-p' and is in fact its lower bounds.
+    ;; (not (graphic-char-p maybe-wsp-char))))
 
+(declaim (inline char-not-whitespace-char-p))
+(defun char-not-whitespace-char-p (maybe-not-whitespace-char)
+  (declare (optimize (speed 3)))
+  (the boolean
+    (typep maybe-not-whitespace-char 'char-not-whitespace-char)))
+
+(declaim (inline hexadecimal-char-p))
 (defun hexadecimal-char-p (maybe-hex-char)
-  (typep maybe-hex-char 'hexadecimal-char))
+  (declare (optimize (speed 3)))
+  (the boolean           
+    (typep maybe-hex-char 'hexadecimal-char)))
 
-(defun char-code-integer-to-string (char-code-int &optional stream)
+(defun char-code-integer-to-string (char-code-int &key stream) ;;&optional stream)
   (declare (type char-code-integer char-code-int)
            (stream-or-boolean stream))
+  #-sbcl (assert (char-code-integer-p char-code-int))
   ;; :NOTE Using `mon:open-stream-output-stream-p' instead:  
   (and stream (open-stream-output-stream-p stream :allow-booleans t :w-error t))
-  (etypecase char-code-int 
-    (char-code-integer (or 
-			(and stream (write-string (string (code-char char-code-int)) stream))
-			(string (code-char char-code-int))))))
+  (or 
+   (and stream (write-string (string (the character (code-char char-code-int))) stream))
+   (string (the character (code-char char-code-int)))))
 
-(defun char-to-string (char &optional stream)
+;; string-split-on-chars, char-list-to-string
+(defun char-to-string (char &key stream (allow-integers t))
   (declare (type (or char-code-integer character) char)
+           (boolean allow-integers)
            (stream-or-boolean stream))
   ;; :WAS (and stream (or (and (streamp stream) (open-stream-p stream)) (error 'stream-error)))
   ;; :NOTE Use `mon:open-stream-output-stream-p' instead:
   (and stream (open-stream-output-stream-p stream :allow-booleans t :w-error t))
   (etypecase char
-    (char-code-integer (char-code-integer-to-string char stream))
+    (char-code-integer (if allow-integers
+                           (char-code-integer-to-string char :stream stream)
+                           (error 'type-error :datum char :expected-type 'character)))
+    ;; simple-type-error (where-is "simple-type-error")
     (character         (or (and stream (write-string (string char) stream))
 			   (string char)))))
 
+(declaim (inline %char-code-integer-to-char-if))
+(defun %char-code-integer-to-char-if  (char-or-char-code-integer)
+  (declare (char-code-integer char-or-char-code-integer)
+           (optimize (speed 3)))
+  (code-char char-or-char-code-integer))
+
 (defun char-code-integer-to-char  (char-or-char-code-integer &key w-no-error)
-  ;; (declare (type (or character char-code-integer) char-or-char-code-integer))
+  (declare (inline 
+             char-or-char-code-integer-p
+             %char-code-integer-to-char-if)
+           (boolean w-no-error)
+           (optimize (speed 3)))
   (typecase char-or-char-code-integer
     (character char-or-char-code-integer)
-    (char-code-integer (code-char char-or-char-code-integer))
-    (t (if (not w-no-error)
+    (char-code-integer (%char-code-integer-to-char-if char-or-char-code-integer))
+    (t (if w-no-error
+           char-or-char-code-integer
            (simple-error-mon 
             :w-sym  'char-code-integer-to-char
             :w-type 'function 
@@ -134,13 +162,52 @@
                   nor `mon:char-code-integer-p'"
             :w-got   char-or-char-code-integer
             :w-type-of t
-            :signal-or-only nil)
-           char-or-char-code-integer))))
+            :signal-or-only nil)))))
 
+(declaim (inline %char-coerce-string-of-length-1-if))
+(defun %char-coerce-string-of-length-1-if (string-of-length-1)
+  (declare (string-of-length-1 string-of-length-1)
+           (inline char-code-integer-p)
+           (optimize (speed 3)))
+  ;; :NOTE In neither case clause should schar/char 0 ever be a non
+  ;; char-code-integer happen and will likely never happen with objects of type
+  ;; simple-string-of-length-1 however, it is conceivable for it to occure with
+  ;; objects of type string-of-length-1.
+  (etypecase string-of-length-1
+    (simple-string-of-length-1
+     (let ((get-char (schar (the simple-string-of-length-1 string-of-length-1) 0)))
+       (or 
+        (and (char-code-integer-p (char-code get-char)) get-char)
+        (error "The CL:SCHAR at index 0 not of type `mon:char-code-integer'~% ~
+                      got: ~S~%" string-of-length-1))))
+    (string-of-length-1
+     (let ((get-char (char (the string-of-length-1 string-of-length-1) 0)))
+       (or 
+        (and (char-code-integer-p (char-code get-char)) get-char)
+        (error "The CL:CHAR at index 0 not of type `mon:char-code-integer'~% ~
+                      got: ~S~%" string-of-length-1))))))
+
+(defun char-or-char-code-integer-or-string-1-ensure-char (char-or-char-code-integer-or-string-1)
+  (declare (char-or-char-code-integer-or-string-1 char-or-char-code-integer-or-string-1)
+           (inline %char-code-integer-to-char-if
+                   %char-coerce-string-of-length-1-if)
+           (optimize (speed 3)))
+  ;; #-sbcl (assert (char-or-char-code-integer-or-string-1
+  (etypecase char-or-char-code-integer-or-string-1
+    (character char-or-char-code-integer-or-string-1)
+    (char-code-integer (%char-code-integer-to-char-if char-or-char-code-integer-or-string-1))
+    (simple-string-of-length-1
+     (%char-coerce-string-of-length-1-if 
+      (the simple-string-of-length-1 char-or-char-code-integer-or-string-1)))    
+    (string-of-length-1
+     (%char-coerce-string-of-length-1-if 
+      (the string-of-length-1 char-or-char-code-integer-or-string-1)))))
+    
 (defun char-numeric= (char-x char-y)
- (declare ((or character char-code-integer) char-x char-y)
-          (inline %char-numeric=)
-          (optimize (speed 3) (safety 1)))
+  (declare                     ;((or character char-code-integer) char-x char-y)
+   (char-or-char-code-integer char-x char-y)
+   ;; inlining %char-numeric= is bad don't do it!
+   (optimize (speed 3) (safety 1)))
   (values-list 
    (etypecase char-x 
      (character 
@@ -152,14 +219,14 @@
         (char-code-integer (or (and (zerop (%char-numeric= char-x (code-char char-y)))
                                     (list t char-x))
                                (list nil char-x (code-char char-y))))))
-    (char-code-integer
-     (etypecase char-y
-       (char-code-integer (or (and (zerop (logxor char-x char-y))
-                                   (list t (code-char char-x)))
-                              (list nil (code-char char-x) (code-char char-y))))
-       (character (or (and (zerop (logxor char-x (char-code char-y)))
-                           (list t char-y))
-                      (list nil (code-char char-x) char-y))))))))
+     (char-code-integer
+      (etypecase char-y
+        (char-code-integer (or (and (zerop (logxor char-x char-y))
+                                    (list t (code-char char-x)))
+                               (list nil (code-char char-x) (code-char char-y))))
+        (character (or (and (zerop (logxor char-x (char-code char-y)))
+                            (list t char-y))
+                       (list nil (code-char char-x) char-y))))))))
 
 (defun char-list-to-string (char-list &optional stream)
   (declare (type list char-list)
@@ -175,7 +242,7 @@
     (with-open-stream (msos (make-string-output-stream))
 	  (loop 
              :for chars :in char-list 
-             :do (char-to-string chars msos)
+             :do (char-to-string chars :allow-integers t :stream msos)
              :finally (return (if stream
                                   (values (write-string (get-output-stream-string msos) stream)
                                           (length char-list))
@@ -203,24 +270,42 @@
      :finally (return-from bail-if t)))
 
 ;; 
+(declaim (inline max-char))
 (defun max-char ()
+  (declare (optimize (speed 3)))
   char-code-limit)
 
+(declaim (inline ascii-char-p))
+(defun ascii-char-p (c) 
+  (declare (optimize (speed 3)))
+  (when (characterp c)
+    (the boolean
+      (<= (char-code (the character c)) 127))))
+
+(declaim (inline ascii-string-p))
 (defun ascii-string-p (string)
   ;; Allow STRING arg to be anything then filter out everything w/ string-not-null-p
   ;; (every #'ascii-char-p ())
+  ;; (every #'ascii-char-p "")
   ;; (every #'ascii-char-p "í")
-  (and (string-not-null-p string)
-       (every #'ascii-char-p (the string string))))
+  (declare (inline string-not-null-p ascii-char-p)
+           (optimize (speed 3)))
+  (when (string-not-null-p string)
+    (locally 
+        (declare (string-not-null string))
+      (etypecase string
+        (simple-string (the boolean (every #'ascii-char-p (the simple-string string))))
+        (string        (the boolean (every #'ascii-char-p (the string string))))))))
 
+(declaim (inline ascii-simple-string-p))
 (defun ascii-simple-string-p (string)
-  (typep string 'simple-ascii-string))
-
-(defun ascii-char-p (c) 
-  (and (characterp c)
-       (<= (char-code (the character c)) 127)))
+  (declare (inline ascii-string-p)
+           (optimize (speed 3)))
+  (the boolean
+    (typep string 'simple-ascii-string)))
 
 (defun ascii-downcase (char-w-code)
+  (declare (optimize (speed 3)))
   (let ((cwc
 	 (etypecase char-w-code
 	   ((unsigned-byte 7) char-w-code)
@@ -235,21 +320,30 @@
 	 (list cwc nil)))))
 
 (defun ascii-equal (char-a char-b)
-  (and (ascii-char-p char-a)
-       (ascii-char-p char-b)
-       (eql (ascii-downcase char-a)
-	    (ascii-downcase char-b))))
+  (declare (inline ascii-char-p)
+           (optimize (speed 3)))
+  (when (and (ascii-char-p char-a)
+             (ascii-char-p char-b))
+    (the boolean
+      (eql (ascii-downcase char-a)
+           (ascii-downcase char-b)))))
 
 ;;; :SOURCE chunga-1.1.1/read.lisp :WAS `controlp'
 ;;; What about an alias for `control-char-p'?
+(declaim (inline ascii-control-p))
 (defun ascii-control-p (char) 
-  (and (characterp char)
-       (or (<= 0 (char-code (the character char)) 31)
-	   (= (char-code (the character char)) 127))))
+  (declare (optimize (speed 3)))
+  (when (characterp char)
+    (the boolean
+      (or (<= 0 (char-code (the character char)) 31)
+          (= (char-code (the character char)) 127)))))
 
+(declaim (inline latin-1-char-p))
 (defun latin-1-char-p (char) 
-  (and (characterp char)
-       (<= (char-code (the character char)) 255)))
+  (declare (optimize (speed 3)))
+  (when (characterp char)
+    (the boolean
+      (<= (char-code (the character char)) 255))))
 
 
 ;; (and (notany #'characterp "") (every  #'characterp "")) ;=> t
@@ -262,13 +356,28 @@
 ;;; :NOTE :SEE :FILE mon-systems/arrays.lisp  `string-ascii-to-byte-array'
 ;;;       :SEE :FILE mon-systems/types.lisp `simple-iso-latin-1-string'
 (defun latin-1-string-p (string)
-  (and (stringp string)
-       (or (string-empty-p (the string string))
-	   (every #'latin-1-char-p (the string string)))))
+  (declare (inline string-empty-p 
+                   simple-string-empty-p
+                   latin-1-char-p)
+           (optimize (speed 3)))
+  (when (stringp string)
+    (locally 
+        (declare (string string))
+      (etypecase string
+        (simple-string 
+         (the boolean
+           (or (simple-string-empty-p (the simple-string string))
+               (every #'latin-1-char-p (the simple-string string)))))
+        (string 
+         (the boolean
+           (or (string-empty-p string)
+               (every #'latin-1-char-p string))))))))
 
 (defun latin-1-simple-string-p (string)
-  (and (latin-1-string-p string) 
-       (simple-string-p (the string string))))
+  (declare (optimize (speed 3)))
+  (when (stringp string)
+    (when (simple-string-p (the string string))
+      (latin-1-string-p (the simple-string string)))))
 
 ;; :SOURCE slime-20101207-cvs/swank.lisp :WAS `casify-char'
 (defun char-invert-case-maybe (char-to-invert &key (case :preserve))
@@ -301,11 +410,46 @@
                                                      :signal-or-only nil)))
                              (readtable-case (or readtable *readtable*)))))
 
+(defun char-ascii-table (&key case)  
+  ;; :NOTE Yes, we know there are more elegant ways to do this!
+  (ecase case
+    (:lower
+     (loop 
+        for x from 97 below 123
+        and y from 1 below 27
+        collect (cons y (char-code-integer-to-string x))))
+    (:upper 
+     (loop 
+        for x from 65 below 91
+        and y from 1 below 27
+        collect (cons y (char-code-integer-to-string x))))
+    (:lower-upper  
+     (loop 
+        for lx from 97 below 123
+        for ux from 65 below 91
+        and ly from  1 to 27
+        and uy from  27 to 52
+        collect (cons uy (char-code-integer-to-string ux)) into rtn
+        collect (cons ly (char-code-integer-to-string lx)) into gthr
+        finally (return (append gthr rtn ))))
+    (:upper-lower
+      (loop 
+         for ux from 65 below 91
+         for lx from 97 below 123
+         and uy from  1 to 27
+         and ly from 27 to 52
+         collect (cons uy (char-code-integer-to-string ux)) into rtn
+         collect (cons ly (char-code-integer-to-string lx)) into gthr
+         finally (return (append rtn gthr))))))
+
 #+sbcl 
 (defun char-length (mb-char)
-  (declare ((or character code-point) mb-char))
+  ;; :NOTE what about `char-or-char-code-integer'?
+  (declare 
+   ((or character code-point) mb-char)
+   (optimize (speed 3)))
   (sb-impl::char-len-as-utf8
-   (typecase mb-char 
+   (etypecase mb-char 
      (code-point mb-char)
      (character (char-code mb-char)))))
 
@@ -442,6 +586,16 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
 `cl:both-case-p', `cl:char=', `cl:char/=', `cl:char<', `cl:char>', `cl:char<=', `cl:char>=',
 `cl:char-equal', `char-not-equal'.~%►►►")
 
+(fundoc 'char-not-whitespace-char-p
+"Whether MAYBE-NOT-WHITESPACE-CHAR is of type `mon:char-not-whitespace-char'.~%~@
+:EXAMPLE~%
+ \(char-not-whitespace-char-p #\\a\)~%
+ \(char-not-whitespace-char-p #\\Tab\)
+ \(funcall \(complement #'char-not-whitespace-char-p\) #\\Tab\)
+ \(notany #'char-not-whitespace-char-p *whitespace-chars*\)
+:SEE-ALSO `mon:whitespace-char', `mon:whitespace-char-p',
+`mon:*whitespace-chars*'.~%►►►")
+
 (fundoc 'hexadecimal-char-p
 "Whether MAYBE-HEX-CHAR is of type `mon:hexadecimal-char'~%~@
 :EXAMPLE~%
@@ -478,16 +632,21 @@ character in CHAR-BAG is present in STRING. Default is `cl:char='.~%~@
 
 (fundoc 'char-to-string
   "Convert CHAR to a string containing that character.~%~@
-CHAR may be of type character or `mon:char-code-integer'.
-When optional arg stream is provided it should satisfy `streamp' and `open-stream-p'.
-Signal an error if not.~%~@
+CHAR may be of type `cl:character'. 
+When ALLOW-INTEGERS is non-nil CHAR may also be of type `mon:char-code-integer'.~%~@
+Keyword STREAM is provided return output to STREAM. 
+It should satisfy `streamp' and `open-stream-p' Signal an error if not.~%~@
+Keyword ALLOW-INTEGERS is a boolean it defaults to T.
+When ALLOW-INTEGERS is true, if CHAR satisfies mon:char-code-integer-p it will
+be converted to a string as if by `mon:char-code-integer-to-string', if not a
+`cl:type-error' condition is signaled.~%~@
 :EXAMPLE~%
  \(char-to-string  #\\a\)~%
- \(char-to-string  97\)~%
+ \(char-to-string  97 :allow-integers t\)~%
  \(with-open-stream \(s \(make-string-output-stream\)\) 
-   \(char-to-string 97 s\)
-   \(char-to-string #\\\\b s\)
-   \(char-to-string  99 s\)
+   \(char-to-string 97 :stream s :allow-integers t\)
+   \(char-to-string #\\\\b :stream s\)
+   \(char-to-string  99 :stream s :allow-integers t\)
    \(get-output-stream-string s\)\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `char-list-to-string', `string-to-char', `string-to-number',
@@ -506,9 +665,11 @@ When optional arg stream is provided it should satisfy `streamp' and `open-strea
 Signal an error if not.~%~@
 :EXAMPLE~%
  \(char-code-integer-to-string 9658\)~%
-;; Following signals an error:~@
- (char-code-integer-to-string -1)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+;; Following signals an error:~%
+ \(char-code-integer-to-string -1\)~%~@
+:SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
+`mon:char-to-string', `char-list-to-string', `mon:char-code-integer',
+`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%►►►")
 
 (fundoc 'char-code-integer-to-char
 "Convert CHAR-CODE-INTEGER-TO-CHAR to an object of type `cl:character'.~%~@
@@ -524,15 +685,51 @@ argument CHAR-CODE-INTEGER-TO-CHAR.
  \(char-code-integer-to-char \"string\"\)~%
  \(char-code-integer-to-char \"string\"  :w-no-error t\)~%~@
 :SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
+`mon:char-to-string', `char-list-to-string', `mon:char-code-integer',
+`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%►►►")
+
+(fundoc 'char-or-char-code-integer-or-string-1-ensure-char
+        "If CHAR-OR-CHAR-CODE-INTEGER-OR-STRING-1 may be coerced to a character do so.~%~@
+Signal an error if char-or-char-code-integer-or-string-1 is not of type:
+`cl:character', `mon:char-code-integer', `mon:simple-string-of-length-1', `mon:string-of-length-1'
+:EXAMPLE~%
+ \(char-or-char-code-integer-or-string-1-ensure-char #\\a\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char 0\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char \(format nil \"~~C\" #\\TAB\)\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char 
+  \(make-array 1 :element-type 'character :initial-element #\\nul :adjustable t :fill-pointer 0\)\)~%~@
+;; Following fail successfully:~%
+ \(char-or-char-code-integer-or-string-1-ensure-char \(1+ char-code-limit\)\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char \"ab\"\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char \"\"\)~%
+ \(char-or-char-code-integer-or-string-1-ensure-char 
+  \(make-array 2 :element-type 'character :initial-element #\\nul :adjustable t :fill-pointer 0\)\)~%~@
+:SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
 `mon:char-to-string', `char-list-to-string', `mon:char-code-integer'.~%►►►")
+
+(fundoc 'char-ascii-table
+"Return a list of conses mapping integers to an ASCII string equivalent.~%~@
+Keyword CASE is one of { :lower | :upper | :lower-upper | :upper-lower }.~%~@
+When CASE is :LOWER map [a,z] to integers [1,26].~%
+When CASE is :UPPER map integers map [A,Z] to integers [1,26]~%
+When CASE is :LOWER-UPPER map [a,z] to integers [1,26]
+                          map [A,Z] to integers [27,52]~%~@
+When CASE is :LOWER-UPPER map [A,Z] to integers [1,26]
+                          map [a,z] to integers [27,52]~%~@
+:EXAMPLE~%
+ \(char-ascii-table :case :lower\)~%
+ \(char-ascii-table :case :upper\)~%
+ \(char-ascii-table :case :upper-lower\)~%
+ \(char-ascii-table :case :lower-upper\)~%~@
+:SEE-ALSO `<XREF>'.~%►►►")
 
 (fundoc 'char-list-to-string
 "Convert charcters of CHAR-LIST to string.~%~@
 CHAR-LIST should satisfy `mon:each-a-character-p'. Signal an error if not.~%~@
 Optional arg STREAM is a destination stream default string to.~%~@
 :EXAMPLE~%
- \(char-list-to-string '\(#\\a #\\b 99\)
- \(char-list-to-string '\(#\\a #\\b #\\c\)\)
+ \(char-list-to-string '\(#\\a #\\b 99\)~%
+ \(char-list-to-string '\(#\\a #\\b #\\c\)\)~%
 ;; (char-list-to-string (list #\a 98 #\c 9658))
 ;; (char-list-to-string (list #\a #\b #\c))
 ;; (char-list-to-string (list 97 97 99 9658))

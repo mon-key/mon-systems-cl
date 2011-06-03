@@ -58,16 +58,6 @@
      do (setf (aref str put) (aref rnd-str put))
      finally (return str)))
 
-(defun string-insert-char-test-VALS ()
-  (let* ((len (loop
-                 for x = (random 16)
-                 until (plusp x)
-                 finally (return x)))
-         (rnd-idx (random len)) 
-         (rnd-str (make-random-string len))
-         (rnd-char (char rnd-str rnd-idx)))
-    (list rnd-str rnd-char rnd-idx)))
-
 (defun string-insert-char-test-VALS (&optional str-len)
   (when str-len
     (assert (and (integerp str-len) (> str-len 4))
@@ -164,7 +154,7 @@ Return value is shuffled as if by `mon:nshuffle-vector'.~%~@
 
 ;;; ==============================
 
-
+
 ;; Local Variables:
 ;; indent-tabs-mode: nil
 ;; show-trailing-whitespace: t

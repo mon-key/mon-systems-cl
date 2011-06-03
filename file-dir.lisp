@@ -1,6 +1,29 @@
 ;;; :FILE mon-systems/file-dir.lisp
 ;;; ==============================
 
+;;; ==============================
+;;
+;; Following is the Lord Voldemort of CL forms:
+;; It is dangerous code that one should _never_ be evaluated:
+;;  (m@pc@r (lambda (x) (ignore-errors (delete-file x)))
+;;         (directory "/**/*.*")) ;  <-- IOW don't evaluate that EVER!
+;;
+;; For more details google: <87zmgn327x.fsf@thalassa.informatimago.com>
+;;
+;; #lisp 2011-06-02
+;; <pjb> mon_key: notice that it doesn't delete everything on your system.
+;;      Actually, it doesn't delete anything of importance, only all the files
+;;      owned by the user. (But don't run it as root).  It's the same as rm -rf
+;;      /, which is rather benign again, unless you run it as root.
+;; <pjb> mon_key: to  the contrary of, eg. FORMAT C:, which did delete
+;;       everything, since there was no notion of user and file protection on
+;;       MS-DOS.
+;;
+;;; ==============================
+
+
+;;; ==============================
+;;
 ;; :TODO
 ;; :EMACS-LISP-COMPAT `symbol-file', `locate-library', `process-lines', `directory-files'
 ;;
@@ -34,6 +57,14 @@
 ;; sb-impl::user-homedir-namestring
 ;; sb-impl::physicalize-pathname
 ;; sb-unix:unix-rename
+;; sb-impl::pathname=
+;; sb-impl::*logical-hosts*
+;; sb-impl::*physical-host*
+;; sb-impl::*win32-host*
+;; sb-impl::*unix-host*
+;;
+;;; ==============================
+
 ;;; ==============================
 ;; SB-POSIX NOTES
 ;; 
@@ -204,6 +235,9 @@
 ;; `---- :SEE info node (info "(sbcl)Lisp objects and C structures")
 ;;
 ;;; ==============================
+
+
+;;; ==============================
 ;; 
 ;;  asdf::*defined-systems*
 ;;
@@ -255,13 +289,15 @@
 ;; 
 ;; (sb-posix:getenv "DEVHOME") ;; mon-local
 ;;
+
 ;;; ==============================
-
+;; (sb-impl::map-directory 
 ;;; ==============================
 ;; #lisp 2011-03-01 
 ;; re removing directories without following symbolinks:
 ;; <nikodemus> (cffi:foreign-funcall "system" :string (format nil "rm -rf ~A" dir) :int) ; the dirty option  [15:18]
 ;; <lichtblau> yay, from symlink problem to space-in-filename problem
+;;
 ;;
 ;;; ==============================
 
@@ -287,6 +323,92 @@
     (setf as-fname (pop new-dir))
     (setf new-dir (reverse new-dir))
     (make-pathname :name as-fname :directory new-dir)))
+
+(declaim (inline %probe-file-if-string-or-pathname))
+(defun %probe-file-if-string-or-pathname (putative-pathname) ;; &key (as-pathnames t)
+  ;; Is putative-pathname `cl:stringp' or `cl:pathnamep' if so return its `cl:pathname'.
+  (unless (or (stringp putative-pathname) 
+              (pathnamep putative-pathname))
+    (return-from %probe-file-if-string-or-pathname
+      (values nil (type-of putative-pathname))))
+  (locally 
+      (declare (pathname-or-namestring putative-pathname))
+    ;; (let ((nrmlz-to-pathname (pathname putative-pathname)))
+    ;; (declare (pathname nrmlz-to-pathname))
+    (etypecase putative-pathname
+      (string (if (string-not-empty-or-all-whitespace-p putative-pathname)
+                  (values (pathname putative-pathname) :string)
+                  (values nil :string-empty)))
+      (pathname (values putative-pathname :pathname)))))
+
+#+sbcl
+(defun pathname-native-file-kind (putative-pathname)  ;; &key (as-pathnames t)
+  (declare (inline %probe-file-if-string-or-pathname)
+           (optimize (speed 3)))
+  (let* ((pathname-chk 
+          (multiple-value-bind (pnfk-chk pnfk-typ) (%probe-file-if-string-or-pathname putative-pathname)
+            (if pnfk-chk 
+                (cons pnfk-chk pnfk-typ)
+                (return-from pathname-native-file-kind (values pnfk-chk pnfk-typ)))))
+         (pathname-namestring-if (sb-ext:native-namestring (the pathname (car pathname-chk)))))
+    (declare (cons pathname-chk)
+             (string pathname-namestring-if))
+    (values 
+     (sb-impl::native-file-kind pathname-namestring-if)
+     (ecase (cdr pathname-chk)
+       (:string pathname-namestring-if)
+       (:pathname (pathname pathname-namestring-if))))))
+
+#+sbcl
+(defun probe-directory (putative-pathname-dir)
+  (let ((pathname-chk (multiple-value-list 
+                       (pathname-native-file-kind putative-pathname-dir))))
+    (ecase (car pathname-chk)
+      ((nil) (values nil (cadr pathname-chk) putative-pathname-dir))
+      (:file (values nil :file (cadr pathname-chk)))
+      (:special (values nil :special (cadr pathname-chk)))
+      (:symlink (let ((probed (probe-file  (cadr pathname-chk))))
+                  (values nil :symlink (cons (pathname (cadr pathname-chk)) probed))))
+      (:directory (values (truename (cadr pathname-chk)) :directory 
+                          (cons (cadr pathname-chk) putative-pathname-dir))))))
+
+(defun pathname-file-if (putative-pathname &key allow-directory) ;; (as-pathnames t)
+  (declare (inline %probe-file-if-string-or-pathname)
+           (optimize (speed 3)))
+  (let* ((pathname-chk (multiple-value-bind (pfi-str-or-pth pfi-val)
+                           (%probe-file-if-string-or-pathname putative-pathname)
+                         (if pfi-str-or-pth 
+                             pfi-str-or-pth
+                             (return-from pathname-file-if (values pfi-str-or-pth pfi-val)))))
+         (pathname-if  pathname-chk))
+    (declare (pathname pathname-if))
+    ;; :NOTE The non-SBCL version has a different behaviour w/r/t symlinks!
+    #-sbcl
+    (when (setf pathname-chk (probe-file pathname-if))
+      (locally (declare (pathname pathname-chk))
+        (if allow-directory
+            pathname-chk
+            (when (not (equal pathname-chk
+                              (make-pathname :directory (pathname-directory pathname-chk))))
+              pathname-chk))))
+    #+sbcl 
+    (multiple-value-bind (path-type path-if) (pathname-native-file-kind pathname-if)
+      (ecase path-type
+        ((nil :symlink) nil)
+        (:file (truename path-if))
+        (:directory (when allow-directory 
+                      (truename path-if)))))))
+
+(defun pathname-file-list-if (namestring-list &key allow-directory (as-pathnames t))
+  (declare (boolean as-pathnames))
+  (flet ((filter-files (filename)
+           (pathname-file-if filename :allow-directory allow-directory)))
+    (let ((filtered (remove-if-not #'filter-files namestring-list)))
+      (declare (list filtered))
+      (if as-pathnames
+          (loop for path in filtered collect (pathname path))
+          (loop for path in filtered collect (namestring path)))
+      )))
 
 ;; :SOURCE slime/swank.lisp :WAS `merged-directory'
 (defun pathname-directory-merged (dirname pathname-defaults)
@@ -391,18 +513,19 @@
     ;; (cl-fad:directory-pathname-p #P"./bubba/") *default-pathname-defaults*)
     (let ((wrn (format nil 
                        "~%~T:FUNCTION `delete-file-if-exists' --~%~12T~
-                       declining to delete PATHNAME, arg was `~A',~%~12T~
-                       got: ~S" 
-                       ;; pathname))
-                       (or (and (streamp pathname) 
-                                (string 'cl:streamp) 
-                                (string 'cl:wild-pathname-p))
-                           *default-pathname-defaults*))))
+                       declining to delete PATHNAME, got: ~S" 
+                       pathname
+                       ;; (or (and (streamp pathname) 
+                       ;;          (string 'cl:streamp) 
+                       ;;          (string 'cl:wild-pathname-p))
+                       ;;     *default-pathname-defaults*)
+                       )))
       (warn wrn)
       (return-from delete-file-if-exists (values nil wrn))))
   (when (probe-file pathname)
     (delete-file pathname)))
 
+;; (open-stream-p  (ensure-file-exists #P"/tmp/pp-btree/"))
 ;; (probe-file (delete-file #P"/tmp/pp-btree/"))
 
 
@@ -459,7 +582,6 @@
     (loop
        for host being each hash-key of SB-IMPL::*LOGICAL-HOSTS*
        collect host)))
-	   
 
 
 ;;; ==============================
@@ -489,6 +611,33 @@
 (defun pathname-directory-pathname (pathname)
   (declare (type pathname-designator pathname))
   (cl-fad:pathname-as-directory pathname))
+
+
+(defun make-pathname-user-homedir (&key user path)
+  (declare (string-or-null user)
+           (proper-list path))
+  #-sbcl (check-type user string-or-null)
+  #-sbcl (check-type path proper-list)
+  (if user
+      (if (string-not-empty-or-all-whitespace-p user)
+          #-sbcl(pathname 
+                 (namestring
+                  (make-pathname :directory `(,@(pathname-directory (directory-file-name (user-homedir-pathname))) ,@path))))
+          #+sbcl (pathname 
+                  (sb-ext:native-namestring 
+                   (make-pathname :directory `(:absolute :home ,user ,@path))))
+          (simple-error-mon :w-sym "make-pathname-user-homedir"
+                            :w-type 'function
+                            :w-spec "Keyword USER did not satisfy `mon:string-not-empty-or-all-whitespace-p'"
+                            :w-got user
+                            :w-type-of t
+                            :signal-or-only nil))
+      #-sbcl (pathname 
+              (namestring 
+               (make-pathname :directory `(,@(pathname-directory (user-homedir-pathname)) ,@path))))
+      #+sbcl (pathname 
+              (sb-ext:native-namestring 
+               (make-pathname :directory `(,@(pathname-directory (user-homedir-pathname)) ,@path))))))
 
 (defun make-pathname-directory-wildcard (pathname)
   ;; Return pathname with pathname-name and pathname-type :wild
@@ -604,7 +753,8 @@
 				(loop for i fixnum from p below n
 				   for ch of-type character = (aref filename i)
 				   while (or ;;(alphanumericp ch)
-					  (alpha-char-p ch)(digit-char-p ch)
+					  (alpha-char-p ch)
+                                          (digit-char-p ch) ;; radix??
 					  (char= ch #\_))
 				   finally 
 				   ;;(setq jnext (min i (the fixnum (1- n))))
@@ -621,15 +771,79 @@
 	     (setq j jnext))))
 	finally (return (concatenate 'string result (subseq filename j)))))
 
-;;; :SOURCE freedius/freedius/lisp/system-tool/ev-pathnames.lisp
-(defun pathname-components (pathname)
-  (setq pathname (pathname pathname))
-  (values :physical-pathname
-	  (pathname-host pathname)
-	  (pathname-directory pathname)
-	  (pathname-name pathname)
-	  (pathname-type pathname)
-	  (pathname-version pathname)))
+(defun pathname-components (pathname-or-namestring &key (list-or-plist nil) (plist-for-backquote nil))
+  (declare (pathname-or-namestring pathname-or-namestring)
+           (boolean plist-for-backquote)
+           (inline logical-pathname-p)
+           (optimize (speed 3)))
+  (assert (member list-or-plist '(:plist :list :values nil t)))
+  (let* ((nrmlz-path      (pathname pathname-or-namestring))
+         (path-is-logical (logical-pathname-p nrmlz-path))
+         (backquotable  (and (eql list-or-plist :plist) plist-for-backquote))
+         (plist-style   (if backquotable
+                            (list :host :device :directory :name :type :version)
+                            (list :pathname-or-logical :pathname-host :pathname-device
+                                  :pathname-directory  :pathname-name :pathname-type
+                                  :pathname-version)))
+         (path-pieces '()))
+    (declare (pathname nrmlz-path))
+    (setf path-is-logical 
+          (cons path-is-logical 
+                (if path-is-logical :pathname-logical :pathname-physical)))
+    ;; :NOTE We cons for the host value b/c cl:pathname-host may return an
+    ;; unreadable-object for nrmlz-path when its not `mon:logical-pathname-p'
+    ;; i.e. on SBCL: 
+    ;;  (pathname-host #P"SYS:SRC;CODE;TARGET-PATHNAME.LISP")
+    ;;  => #<SB-KERNEL:LOGICAL-HOST "SYS">
+    (setf path-pieces
+          (list 
+           (cdr path-is-logical)                        ; nth-value 0
+           (cons (when (pop path-is-logical) (host-namestring nrmlz-path))
+                 (pathname-host nrmlz-path))             ; nth-value 1
+           (or (pathname-device nrmlz-path) :unspecific) ; nth-value 2
+           (pathname-directory  nrmlz-path)              ; nth-value 3
+           (pathname-name       nrmlz-path)              ; nth-value 4
+           (pathname-type       nrmlz-path)              ; nth-value 5
+           (pathname-version    nrmlz-path)))            ; nth-value 6
+    (when backquotable 
+      (pop path-pieces)
+      (setf path-pieces (rplaca path-pieces (caar path-pieces))))
+    (ecase list-or-plist
+      (:plist 
+       (setf path-pieces
+             (loop 
+                for props in plist-style
+                for vals in path-pieces
+                nconcing (list props vals) into path-pieces
+                finally (return path-pieces)))
+       (if backquotable 
+           (values path-pieces path-is-logical)
+           path-pieces))
+      (:list  path-pieces)
+      ((:values nil t) (values-list path-pieces)))))
+
+(defun pathname-components-funcallable-pairs (pathname-or-namestring)
+  (declare (pathname-or-namestring pathname-or-namestring))
+  (let* ((comp-plist (pathname-components pathname-or-namestring :list-or-plist :plist))
+         (comp-tail (nthcdr 2 comp-plist))
+         (comp-head (nbutlast comp-plist 12)))
+    ;; pop the tail off the value of the :pathname-host property 
+    ;;  ( { <STRING> | NIL } . <LOGICAL-HOST-OBJECT> ) => { <STRING> | NIL }
+    (setf (cadr comp-tail) (caadr comp-tail)
+          comp-head (cadr comp-head)
+          comp-plist nil)
+    ;; :NOTE On SBCL 1.0.47.1 return value of (make-pathname :type "bmp") is IMO bogus.
+    ;; A workaround would be to special case around :pathname-type with something like this: 
+    ;; #+sbcl for paths = (if (eql key :pathname-type) 
+    ;;                     (pathname (pathname-type (make-pathname :type "bmp")))
+    ;; Which is equally bogus...
+    (loop        
+       for (head . tail) on comp-tail by #'cddr
+       for funs = (keyword-property-to-function head)
+       for key =  (gethash head *keyword-hash-inverted*)
+       for paths = `(make-pathname ,(gethash head *keyword-hash-inverted*) ,(car tail))
+       ;; for paths =  (apply 'make-pathname `(,(gethash head *keyword-hash-inverted*) ,(car tail)))
+       collect (list funs paths))))
 
 ;;; :SOURCE clocc/src/cllib/fileio.lisp :WAS `file-newer'
 ;;; :TODO elide the ignore-errors and check w/ probe-file for FILE1 FILE2 check 
@@ -640,14 +854,8 @@
 
 #+sbcl 
 (defun remove-directory (pathname)
+  (declare (optimize (speed 3)))
   (sb-posix:rmdir pathname))
-
-#+sbcl 
-(defun probe-directory (path)
-  (let ((dir (namestring 
-	      (make-pathname :name nil :type nil :defaults path)))
-	(fn (find-symbol "NATIVE-FILE-KIND" :sb-impl)))
-    (eq (funcall fn dir) :directory)))
 
 ;;; ==============================
 ;;  As of asdf::*asdf-version* => 2.010
@@ -759,6 +967,41 @@ EXAMPLE~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
 
+(fundoc 'pathname-file-if
+        "Is PUTATIVE-PATHNAME `cl:stringp' or `cl:pathnamep' probe it as if by `cl:probe-file'.~%~@
+If PUTATIVE-PATHNAME is not of type `mon:pathname-or-namestring' return as if by `cl:values':~%
+ nil, \(type-of <PUTATIVE-PATHNAME>\)~%~@
+If PUTATIVE-PATHNAME is a file and not a directory return its `cl:truename'.
+If keyword ALLOW-DIRECTORY is non-nil and PUTATIVE-PATHNAME names a directory return its `cl:truename'.~%~@
+When ALLOW-DIRECTORY is non-nil and PUTATIVE-PATHNAME names a symbolic-link
+pointing to a directory the truename of the directory pointed to is returned
+_not_ the truename of the symbolic-link.~%~@
+:EXAMPLE~%
+ \(pathname-file-if 
+  \(namestring 
+   \(merge-pathnames \(make-pathname :name \".sbclrc\"\) 
+                    \(user-homedir-pathname\)\)\)\)~%
+ \(pathname-file-if \(namestring \(user-homedir-pathname\)\)\)~%
+ \(pathname-file-if \(namestring \(user-homedir-pathname\)\) :allow-directory t\)~%
+ \(pathname-file-if #P\"~~/\" :allow-directory t\)~%
+ \(pathname-file-if 42\)~%~@
+:SEE-ALSO `<XREF>'.~%►►►")
+
+(fundoc 'pathname-file-list-if 
+"Filter any string or pathname in NAMESTRING-LIST for which `pathname-file-if' retrurns null.
+Keyword ALLOW-DIRECTORY is as with `pathname-file-if'.~%
+Keyword AS-PATHNAMES when non-nil returns each valid string or pathname as if by
+`cl:pathname', when nil returns each valid string or pathname as if by
+`cl:namestring'. Default is T.~%~@
+:EXAMPLE~%
+ \(pathname-file-list-if
+  \(directory \(merge-pathnames \(make-pathname :name :wild :type :wild\)
+                              \(user-homedir-pathname\)\)\)\)~%
+ \(pathname-file-list-if
+  \(directory \(merge-pathnames \(make-pathname :name :wild :type :wild\)
+                              \(user-homedir-pathname\)\)\) :allow-directory t\)~%
+:SEE-ALSO `<XREF>'.~%►►►")
+
 (fundoc  'file-truename
 "Return the truename of FILENAME.~%~@
 :EXAMPLE~%~@
@@ -793,12 +1036,26 @@ In Unix-syntax, this function just removes the final slash.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%►►►")
 
+#+sbcl
 (fundoc 'probe-directory
-"Unlike `cl:probe-file', return false when PATH is a non-directory file.~%~@
+        "Unlike `cl:probe-file', return false when PATH is a non-directory file.~%~@
 Should return non-nil when PATH is a symbolic link to a directory.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `file-directory-p'.~%►►►")
+Return as if by `cl:values' one of the following forms:~%
+ #P<PUTATIVE-PATHNAME-DIR>, :DIRECTORY, 
+ \( {\"<PUTATIVE-PATHNAME-DIR>\" | #P<PUTATIVE-PATHNAME-DIR> } . <PUTATIVE-PATHNAME-DIR>\)~%
+ NIL, :SYMLINK, \(#P<PUTATIVE-PATHNAME-DIR> . \(probe-file <PUTATIVE-PATHNAME-DIR>\)\)~%
+ NIL, :FILE, #P<PUTATIVE-PATHNAME-DIR>~%
+ NIL, \(type-of <PUTATIVE-PATHNAME-DIR>\), <PUTATIVE-PATHNAME-DIR>~%
+:EXAMPLE~%
+ \(probe-directory \(cl:user-homedir-pathname\)\)~%
+ \(probe-directory #P\"~~/\"\)~%
+ \(probe-directory \(namestring \(cl:user-homedir-pathname\)\)\)~%
+ \(probe-directory \"~~/.sbclrc\"\)~%
+ \(probe-directory \"\"\)~%
+ \(probe-directory \"   \"\)~%
+ \(probe-directory 42\)~%
+:SEE-ALSO `mon:pathname-native-file-kind', `file-directory-p', `cl:probe-file',
+`cl:ensure-directories-exist'.~%►►►")
 
 (fundoc 'ensure-file-exists
         "Return PATHNAME as if by `cl:open' :direction :probe.~%~@
@@ -902,16 +1159,112 @@ If `//' appears, everything up to and including the first of those `/' is discar
 :SEE \(man \"getenv\"\)~%~@
 :SEE-ALSO `sb-ext:posix-environ' `sb-ext:posix-getenv'.~%►►►")
 
+
+
 (fundoc 'pathname-components
-"Return the components of PATHNAME as if by `values'.~%~@
-Return value has the format:~%
- ;=> physical-pathname
- ;   pathname-host
- ;   pathname-directory
- ;   pathname-name
- ;   pathname-type
- ;   pathname-version~% 
-:EXAMPLE~%~%  \(pathname-components *default-pathname-defaults*\) ~%~@
+"Return the components of PATHNAME.~%~@
+Keyword LIST-OR-PLIST is one of the following:~%
+ { :LIST  | :PLIST | :VALUES | NIL | T }~%~@
+When keyword LIST-OR-PLIST is  :VALUES, T, NIL \(the default\), return 7
+objects as if by `cl:values'. Return values have the format:~%
+ ;=> { :PATHNAME-LOGICAL | :PATHNAME-PHYSICAL }      ; nth-value 0
+ ;   \( { <STRING> | NIL } . <LOGICAL-HOST-OBJECT> \)  ; nth-value 1
+ ;   { <DEVICE> | :UNSPECIFIC }                      ; nth-value 2
+ ;   <PATHNAME-DIRECTORY>                            ; nth-value 3
+ ;   <PATHNAME-NAME>                                 ; nth-value 4
+ ;   <PATHNAME-TYPE>                                 ; nth-value 5
+ ;   <PATHNAME-VERSION>                              ; nth-value 6~%~@
+When keyword LIST-OR-PLIST is :LIST return as above but as a list of seven elements.~%~@
+When keyword LIST-OR-PLIST is :PLIST and keyword PLIST-FOR-BACKQUOTE is nil
+return a property list of key/value pairs with the format:~%
+ \( :PATHNAME-OR-LOGICAL { :PATHNAME-LOGICAL | :PATHNAME-PHYSICAL }
+   :PATHNAME-HOST       \( { <STRING> | NIL } . <LOGICAL-HOST-OBJECT> \)
+   :PATHNAME-DEVICE     { <DEVICE> | :UNSPECIFIC }
+   :PATHNAME-DIRECTORY  <DIRECTORY>
+   :PATHNAME-NAME       <NAME>
+   :PATHNAME-TYPE       <TYPE> 
+   :PATHNAME-VERSION    <VERSION> \)~%~@
+In each of the cases, the nth-value 0, nth 0, or value of first property
+evaluates to a symbol indicating whether PATHNAME is a physical-pathname or
+`logical-pathname-p'.~%~@
+The nth-value 1, nth 1, or value of the second property evaluates to a cons.
+If PATHNAME is `mon:logical-pathname-p' the car is a `cl:hostname-string', else NIL. 
+Its cdr is an object as returned from `cl:pathname-host'.~%~@
+As a special case, when keyword LIST-OR-PLIST is :PLIST and keyword
+PLIST-FOR-BACKQUOTE is T return 2 objects as if by `cl:values'. 
+Return values have the format:~%
+ ;=> \( :HOST      { <STRING> | NIL }
+ ;     :DEVICE    { <DEVICE> | :UNSPECIFIC }
+ ;     :DIRECTORY <DIRECTORY>
+ ;     :NAME      <NAME>
+ ;     :TYPE      <TYPE>
+ ;     :VERSION   <VERSION> \)                      ; nth-value 0
+ ;     { :PATHNAME-LOGICAL | :PATHNAME-PHYSICAL }  ; nth-value 1~%~@
+nth-value 0 is a property list of key/value pairs where each key is a valid
+argument to `cl:make-pathname'.
+nth-value 1 is { :PATHNAME-LOGICAL | :PATHNAME-PHYSICAL }~%~@
+:EXAMPLE~%
+ \(pathname-components *default-pathname-defaults*\)~%
+ \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)~%
+ \(pathname-components \(translate-logical-pathname #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)\)~%
+ \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\" :list-or-plist :list\)~%
+ \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\" :list-or-plist :plist\)~%
+ \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\" 
+                      :list-or-plist :plist 
+                      :plist-for-backquote t\)~%
+\(pathname-components (translate-logical-pathname #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\" 
+                      :list-or-plist :plist 
+                      :plist-for-backquote t\)~%
+ \(let* \(\(log-path #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)
+        \(trans-log \(translate-logical-pathname log-path\)\)\)
+   \(setf log-path
+         \(apply #'make-pathname
+                \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"
+                                     :list-or-plist :plist 
+                                     :plist-for-backquote t\)\)\)
+   \(equal trans-log \(setf trans-log \(translate-logical-pathname trans-log\)\)\)\)~%
+ \(multiple-value-bind \(components type\)
+      \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\" 
+                           :list-or-plist :plist 
+                           :plist-for-backquote t\)
+    \(values \(apply #'make-pathname components\)
+            type\)\)~%
+ \(multiple-value-bind \(phys host dev dir nm typ ver\) 
+    \(pathname-components *default-pathname-defaults*\)
+  \(list phys host dev dir nm typ ver\)\)~%
+ \(equal 
+   \(pathname-components *default-pathname-defaults* :list-or-plist :list\)
+   \(multiple-value-list \(pathname-components *default-pathname-defaults*\)\)\)~%
+ \(getf \(pathname-components *default-pathname-defaults* :list-or-plist :plist\)
+      :pathname-or-logical\)~%
+ \(eql \(pathname-components #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\) :pathname-logical\)~%
+ \(let \(\(logical #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)
+       \(trans-logical '\(\)\)\)
+   \(when \(eql \(nth-value 0 \(pathname-components logical\)\) :pathname-logical\)
+     \(setf trans-logical \(translate-logical-pathname logical\)\)
+     \(list \(pathname-components trans-logical :list-or-plist :list\)
+           \(multiple-value-list \(pathname-components logical\)\)\)\)\)~%~@
+:NOTE ANSI Section 19.2.2.4.1 \"Restrictions on Examining a Pathname Host Component\":~%
+ ,----
+ | It is implementation-dependent what object is used to represent the host.
+ `---- :SEE \(info \"\(ansicl\)Interpreting Pathname Component Values\"\)~%~@
+As such, it can be difficult to distinguish how the following may return:~%
+ \(host-namestring #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)~%
+ \(pathname-host #P\"SYS:SRC;CODE;TARGET-PATHNAME.LISP\"\)~%~@
+:NOTE Per the spec, logical pathnames require characters to be
+`cl:upper-case-p'. This does not pose a problem when the output from
+`pathname-components' is fed directly back into `cl:make-pathname' b/c the as
+the spec indicates w/r/t :case keywords:~%
+ ,---- Section 19.2.2.1.2.2 Common Case in Pathname Components:
+ | Note that these conventions have been chosen in such a way that
+ | translation from :local to :common and back to :local is
+ | information-preserving.
+ `---- :SEE \(info \"\(ansicl\)Interpreting Pathname Component Values\"\)~%~@
+However, as it is not always desirable to roundtrip a logical-pathname in such a
+direct manner in situations where PATHNAME is `logical-pathname-p' when
+providing the return value of this function as the argument to a pathname
+function which accepts the CASE keyword take care to ensure that the case of the
+argument is appropriate for the intended caller!~%~@
 :SEE-ALSO `pathname-host', `pathname-directory', `pathname-name', `pathname-type',
 `pathname-version', `fad:copy-file', `fad:copy-stream', `fad:delete-directory-and-files',
 `fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
@@ -946,6 +1299,28 @@ Return nil if an existing file is not found.~%~@
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
 `fad:walk-directory', `cl:probe-file'.~%►►►")
 
+#+sbcl
+(fundoc 'pathname-native-file-kind
+"Return the file type of PUTATIVE-PATHNAME.~%~@
+Return as if by `cl:values'.~%~@
+When PUTATIVE-PATHNAME is `cl:stringp' or `cl:pathnamep', nth-value 0 is as if
+by `sb-impl::native-file-kind', nth-value 1 is as per `sb-ext:native-namestring'
+its type is is dependent on whether putative-pathname was a string or pathname. 
+Returned values have the form:~%
+ [ :file | :directory | :symlink | :special ], [ <STRING> | <PATHNAME> ]~%~@
+When PUTATIVE-PATHNAME is the empty-string return values have the form:~%
+ nil, :string-empty~%~@
+When PUTATIVE-PATHNAME is some other type return values have the form:~%
+ nil, \(type-of <PUTUTIVE-PATHNAME>\)~%~@
+:EXAMPLE~%~@
+ \(pathname-native-file-kind \(user-homedir-pathname\)\)
+ \(pathname-native-file-kind sb-ext:*CORE-PATHNAME*\)
+ \(pathname-native-file-kind \"\"\)
+ \(pathname-native-file-kind \"   \"\)
+ \(pathname-native-file-kind 42\)~%~@
+:SEE-ALSO `sb-ext:native-namestring', `sb-unix:unix-lstat', `sb-unix:unix-stat',
+`sb-posix:lstat', `sb-posix:stat'.~%►►►")
+
 #+sbcl 
 (fundoc 'remove-directory
 "Remove directory specified by PATHNAME.~%~@
@@ -968,6 +1343,20 @@ Return nil if an existing file is not found.~%~@
 `fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
 `fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%►►►")
+
+(fundoc 'make-pathname-user-homedir
+        "Return a directory pathname for USER with directory components of PATH.~%~@
+USER is a string naming a user.~%~@
+PATH is a proper-list of strings identifiying directores beneath USER's
+`cl:user-homedir-pathname'.~%~@
+:EXAMPLE~%
+ \(make-pathname-user-homedir :user \"bubba\"\)~%
+ \(make-pathname-user-homedir :path '\(\"a\" \"b\"\)\)~%
+ \(make-pathname-user-homedir :user \"bubba\" :path '\(\"a\" \"b\"\)\)~%~@
+Following each fail successfully:~%
+ \(make-pathname-user-homedir :user \"\"\)~%
+ \(make-pathname-user-homedir :path '\(\"a\" . \"b\"\)\)~%~@
+:SEE-ALSO `cl:make-pathname', `sb-ext:native-namestring', `sb-ext:native-pathname'.~%►►►")
 
 #+asdf
 (fundoc 'pathname-directory-system

@@ -141,7 +141,7 @@
           () 
           ":FUNCTION `plist-delete' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
-  ;; FIXME: should not cons
+  ;; :FIXME should not cons
   (apply 'plist-remove plist keys))
 ;;
 (define-modify-macro plist-removef (&rest keys) 
@@ -305,7 +305,7 @@ is not one of the properties on the list.~%~@
 ;; 
 (fundoc 'plist-values
 "Collect values in PLIST.~%~@
-Keyword TEST is a function predicate applied to each value of PLIST.
+Keyword TEST is a function predicate applied to each value of PLIST.~%~@
 :EXAMPLE~%
  \(plist-values '\(1 a 2 b 3 c\)\)~%
  \(plist-values '\(1 a 2 \"b\" 3 c\) :test #'stringp\)~%~@

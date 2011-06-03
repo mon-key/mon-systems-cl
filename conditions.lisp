@@ -2,6 +2,22 @@
 ;;; :FILE mon-systems/conditions.lisp
 ;;; ==============================
 
+;;; ==============================
+;; :MON-CONDITION-HEIRARCHY
+;; error-mon                                  (ERROR)
+;; simple-error-mon                           (error-mon)
+;; case-error                                 (error-mon)
+;; proper-list-error                          (error-mon) 
+;; circular-list-error                        (TYPE-ERROR error-mon)
+;; slot-non-existent-error                    (CELL-ERROR error-mon)
+;; package-error-not                          (TYPE-ERROR simple-error-mon)
+;; symbol-not-null-or-string-not-empty-error  (TYPE-ERROR simple-error-mon)
+;; plist-error                                (TYPE-ERROR simple-error-mon)
+;; plist-not-null-error                       (plist-error)
+;; open-stream-output-stream-error            (TYPE-ERROR simple-error-mon)
+;;
+
+;;; ==============================
 
 
 (in-package #:mon)
@@ -64,21 +80,21 @@ Direct slot initarg/readers are as follows:
     :initarg :w-type-of
     :initform nil
     :reader error-type-of))
-  (:report (lambda (c s) 
-             (declare (stream s))
-             (simple-error-mon-report c s)))
+  (:report (lambda (sem-condition sem-stream) 
+             (declare (condition sem-condition) (stream sem-stream))
+             (simple-error-mon-report sem-condition sem-stream)))
   (:documentation 
    #.(format nil
              "Like condition `mon:error-mon' but with :report formatting capabilities.~%~@
 Invokes `mon:simple-error-mon-report' when formatting for :report.~%~@
 Accessible via convenience function `mon:simple-error-mon'.~%~@
-Direct slot initargs/readers are as follows:
+Direct slot initargs/readers are as follows:~%
  - :W-GOT ERROR-GOT
    If T and W-TYPE-OF is not a boolean value use its else use provided value.~%
  - :W-TYPE-OF ERROR-TYPE-OF 
-    If T get the tyep-of W-GOT, else if provided get type-of for object provided.~%~@
+    If T get the `cl:tyep-of' W-GOT, else if provided get `cl:type-of' for object.~%~@
 Inherited slot initargs/readers may be formatted by `mon:simple-error-mon-report' when provided.
-Formats slot initaargs/readers of direct superclass `mon:error-mon' as follows:~%
+Formats slot initargs/readers of direct superclass `mon:error-mon' as follows:~%
  - :W-SYM  ERROR-SYM
  - :W-TYPE ERROR-TYPE
  - :W-SPEC ERROR-SPEC
@@ -97,15 +113,16 @@ Formats slot initaargs/readers of direct superclass `mon:error-mon' as follows:~
     :type proper-list
     :initarg :w-args
     :reader case-args))
-  (:report (lambda (cc out)
-             (declare (stream out))
-             (format out "~A~@[~?~]"
-                     (format-error-symbol-type (error-sym cc) (error-sym-type cc))
-                     (case-spec cc)                     
-                     `(,(first  (case-args cc))
-                        ,(second (case-args cc))
-                        ,(type-of (second (case-args cc)))
-                        ,(nthcdr 2 (case-args cc))))))
+  (:report (lambda (ce-condtion ce-stream)
+             (declare (condition ce-condtion)
+                      (stream ce-stream))
+             (format ce-stream "~A~@[~?~]"
+                     (format-error-symbol-type (error-sym ce-condtion) (error-sym-type ce-condtion))
+                     (case-spec ce-condtion)                     
+                     `(,(first  (case-args ce-condtion))
+                        ,(second (case-args ce-condtion))
+                        ,(type-of (second (case-args ce-condtion)))
+                        ,(nthcdr 2 (case-args ce-condtion))))))
   (:documentation
    #.(format nil 
               "An error for use in `cl:typecase' and `cl:case' forms.~%~@
@@ -138,10 +155,10 @@ Formats slot initaargs/readers of direct superclass `mon:error-mon' as follows:~
     :type proper-list
     :initarg :proper-list-error-args
     :reader proper-args))
-  (:report (lambda (cc out)
-             (declare (type stream out)
-                      (type condition cc))
-             (proper-list-error-report cc out)))
+  (:report (lambda (ple-condition ple-stream)
+             (declare (type stream ple-stream)
+                      (type condition ple-condition))
+             (proper-list-error-report ple-condition ple-stream)))
   (:documentation
    #.(format nil 
 "Error condition for objects which do not satisfy `mon:list-proper-p'.~%
@@ -158,11 +175,12 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
 
 (define-condition circular-list-error (type-error error-mon)
   ()
-  (:report (lambda (condition stream)
-             (declare (type stream stream))
-             (let ((es       (error-sym        condition))
-                   (et       (error-sym-type   condition))
-                   (ted      (type-error-datum condition))
+  (:report (lambda (cle-condition cle-stream)
+             (declare (condition cle-condition)
+                      (stream cle-stream))
+             (let ((es       (error-sym        cle-condition))
+                   (et       (error-sym-type   cle-condition))
+                   (ted      (type-error-datum cle-condition))
                    (expect   '(and list (not circular-list))))
                (when ted 
                  (setf ted (write-to-string ted 
@@ -177,7 +195,7 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
                                          (and ted (format nil "The value: ~A~%" ted))
                                          (format nil "Is circular-list-p and not of type:~% ~A" expect))
                                    (make-string 0)))
-               (format stream et))))
+               (format cle-stream et))))
   ;; The standard says one can rely on the accessors and initargs of a condition
   ;; to exist if specified, but _not_ on these being a _slots_ which might be
   ;; accessed or initialized. 
@@ -207,17 +225,18 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
    (w-not-slot-value
     :initarg :w-not-slot-value
     :reader value-for-not-slot))
-  (:report (lambda (cc strm)
-             (declare (stream strm))
-             (let* ((c-e-n (cell-error-name cc))
-                    (w-o-l (w-object-locus cc))
+  (:report (lambda (snee-condition snee-stream)
+             (declare (condition snee-condition)
+                      (stream snee-stream))
+             (let* ((c-e-n (cell-error-name snee-condition))
+                    (w-o-l (w-object-locus snee-condition))
                     (w-o-c (and w-o-l (class-name-of w-o-l)))
-                    (w-not (value-for-not-slot cc))
+                    (w-not (value-for-not-slot snee-condition))
                     (fmt  `(,(and w-o-c (cons ":SLOT-NOT-OF-CLASS~24T~S" w-o-c))
-                            ,(and w-o-l (cons ":SLOT-NOT-OF-OBJECT~24T~S" w-o-l))
-                            ,(and c-e-n (cons ":SLOT-THATS-NOT~24T~S" c-e-n))
-                            ,(and w-not (cons ":SLOT-DONT-GOT~24T~S" w-not)))))
-               (apply #'format strm
+                             ,(and w-o-l (cons ":SLOT-NOT-OF-OBJECT~24T~S" w-o-l))
+                             ,(and c-e-n (cons ":SLOT-THATS-NOT~24T~S" c-e-n))
+                             ,(and w-not (cons ":SLOT-DONT-GOT~24T~S" w-not)))))
+               (apply #'format snee-stream
                       (mapconcat #'car fmt "~%")
                       (mapcar #'cdr fmt)))))
   (:documentation
@@ -240,10 +259,10 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
 
 (define-condition package-error-not (type-error simple-error-mon)
   ()
-  (:report (lambda (c s) 
-             (declare (type stream s)
-                      (type condition c))
-             (package-error-not-report c s)))
+  (:report (lambda (pen-condition pen-stream) 
+             (declare (condition pen-condition)
+                      (stream pen-stream))
+             (package-error-not-report pen-condition pen-stream)))
   ;; Can't initalize these:
   ;; :w-type-of t :w-got (type-error-datum condition)
   (:default-initargs :expected-type 'package)
@@ -261,8 +280,10 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
     :initarg :symbol-nor-string-locus
     :initform nil
     :reader symbol-nor-string-error-locus))
-  (:report (lambda (condition stream)
-             (symbol-not-null-or-string-not-empty-error-report condition stream)))
+  (:report (lambda (snn-condition snn-stream)
+             (declare (condition snn-condition)
+                      (stream snn-stream))
+             (symbol-not-null-or-string-not-empty-error-report snn-condition snn-stream)))
   (:default-initargs :expected-type 'symbol-not-null-or-string-not-empty)
    (:documentation 
    #.(format nil
@@ -298,10 +319,10 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
   ((plist-obj-locus
     :initarg :plist-obj-locus
     :reader plist-error-locus))
-  (:report (lambda (condition stream)
-             (declare (type stream stream)
-                      (type condition condition))
-             (plist-error-report condition stream)))
+  (:report (lambda (pnne-condition pnne-stream)
+             (declare (type stream pnne-stream)
+                      (type condition pnne-condition))
+             (plist-error-report pnne-condition pnne-stream)))
   (:default-initargs :datum 'nil :expected-type 'proper-plist-not-null)
   (:documentation 
    #.(format nil
@@ -319,10 +340,10 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
 
 (define-condition open-stream-output-stream-error (type-error simple-error-mon)
   ()
-  (:report (lambda (condition stream)
-             (declare (type stream stream)
-                      (type condition condition))
-             (open-stream-output-stream-error-report condition stream)))
+  (:report (lambda (osose-condition osose-stream)
+             (declare (type condition osose-condition)
+                      (type stream osose-stream))
+             (open-stream-output-stream-error-report osose-condition osose-stream)))
   (:default-initargs :expected-type 'stream)
   (:documentation
    #.(format nil "A type-error condition with all slots of `mon:simple-error-mon' and `mon:error'~%~@
@@ -406,7 +427,7 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                              ;;                    :proper-list-error-args `(error-spec ,espec)
                              ;;                    :signal-or-only nil)
                              ))
-                    (make-string 0)))
+                    (make-string 0 :initial-element #\nul)))
     (apply #'format stream espec earg)))
 
 (defun format-error-symbol-type (&optional error-symbol symbol-type)
@@ -445,7 +466,7 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                                                                      :w-type 'function 
                                                                      :error-args `(w-spec ,w-spec)
                                                                      :signal-or-only 'signal)))
-                                         (and (or w-got w-type-of) (make-string 0))
+                                         (and (or w-got w-type-of) (make-string 0 :initial-element #\nul))
                                          (list "simple-error-mon w/out format-control argument"))
                              :w-args (and w-spec 
                                           (and w-args
@@ -536,7 +557,7 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                                                               :w-got w-locus
                                                               :w-type-of t
                                                               :signal-or-only 'signal))))
-                                       (make-string 0))))))
+                                       (make-string 0 :initial-element #\nul))))))
         (declare (type condition stree))
         (signal-error-or-condition signal-or-only stree))
     (simple-error-mon (cnd) (error cnd))))

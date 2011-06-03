@@ -284,7 +284,7 @@
                  (write value)
                  (pprint-newline :fill))
                hash-table))))
-
+;; (export '(hash-table-or-symbol))
 ;; (open-stream-output-stream-p nil)
 ;; (open-stream-output-stream-p nil :allow-booleans t :w-error t)
 (defun hash-print-key-value-pairs (hash-table &optional stream)
@@ -299,27 +299,32 @@
              (format chkd "key: ~S value: ~S~%" key val)))
       (maphash #'maphash-hpkvp hash-table))))
 
-(defun hash-or-symbol-p (maybe-hash-table)
-  (or (and (hash-table-p maybe-hash-table) maybe-hash-table)
+(defun hash-or-symbol-p (maybe-hash-table &key w-no-error)
+  (when (null maybe-hash-table)
+    (return-from hash-or-symbol-p (values nil 'NULL nil)))
+  (or (and (hash-table-p maybe-hash-table)
+           (return-from hash-or-symbol-p (values maybe-hash-table 'HASH-TABLE)))
       (and (symbolp maybe-hash-table)
            (boundp  maybe-hash-table)
            (ref-bind mht (symbol-value maybe-hash-table)
-             (and (hash-table-p mht) mht)))
-      (error 'type-error :datum maybe-hash-table :expected-type '(or symbol hash-table))))
+             (and (hash-table-p mht)
+                  (return-from hash-or-symbol-p (values mht 'SYMBOL maybe-hash-table)))))
+      (or (and w-no-error
+               (return-from hash-or-symbol-p (values nil (type-of maybe-hash-table) maybe-hash-table)))
+          (error 'type-error :datum maybe-hash-table :expected-type '(or hash-table symbol null)))))
+
+(defun %hash-or-symbol-p-no-error (maybe-hash-table)
+  (hash-or-symbol-p maybe-hash-table :w-no-error t))
 
 (defun hash-or-symbol-ensured (maybe-hash-table &rest hash-args &key &allow-other-keys)
-  (declare ((or symbol null hash-table) maybe-hash-table))
-  (or (and (hash-table-p maybe-hash-table) maybe-hash-table)
-      (or  (and (not (boundp maybe-hash-table))
-                (apply #'make-hash-table :allow-other-keys t hash-args)))
-      (and (null maybe-hash-table)
+  (declare (hash-table-or-symbol maybe-hash-table))
+  (or (and (booleanp maybe-hash-table)
            (apply #'make-hash-table :allow-other-keys t hash-args))
-      (and (symbolp maybe-hash-table)
-           (or (and (boundp maybe-hash-table)
-                    (ref-bind mht (symbol-value maybe-hash-table)
-                      (or (and (hash-table-p mht) mht))))
-               (setf (symbol-value maybe-hash-table)
-                     (apply #'make-hash-table :allow-other-keys t hash-args))))))
+      (and (hash-or-symbol-p maybe-hash-table :w-no-error t))
+      (or (and (not (boundp maybe-hash-table))
+               (apply #'make-hash-table :allow-other-keys t hash-args))
+          (setf (symbol-value maybe-hash-table)
+                (apply #'make-hash-table :allow-other-keys t hash-args)))))
 
 (defun hash-invert-key-val (src-hash &optional (dest-hash (make-hash-table 
                                                            :size (hash-table-size src-hash))))
@@ -328,6 +333,16 @@
                (setf (gethash src-key dest-hash) dest-key))
            src-hash)
   dest-hash)
+
+;; :COURTESY hexstream #lisp 2011-05-25
+(defun hash-found-p (key hash-table &optional default)
+  (declare (hash-table hash-table))
+  (multiple-value-bind (value foundp) (gethash key hash-table default)
+    (values 
+     (if foundp (lambda () value) 
+         default)
+     foundp)))
+
 
 
 ;;; ==============================
@@ -486,22 +501,39 @@ Mapped key/values are returned one pair per line with the format:~%
 ;; :EXAMPLE~%~%~@
 ;; :SEE-ALSO `<XREF>'.~%►►►"))
 
+
 (fundoc 'hash-or-symbol-p
 "Whether MAYBE-HASH-TABLE is `hash-table-p' or a symbol with `symbol-value' evaluating to one.~%~@
-Signal a `cl:type-error' if not. Return value is a hash-table.~%~@
+Return as if by `cl:values'.
+When MAYBE-HASH-TABLE is a hash-table return:~%
+ (the hash-table MAYBE-HASH-TABLE),HASH-TABLE~%~@
+When MAYBE-HASH-TABLE is a symbol evaluating to a hash-table return:~%
+ (the hash-table (symbol-value MAYBE-HASH-TABLE)),SYMBOL,MAYBE-HASH-TABLE~%~@
+When MAYBE-HASH-TABLE is null return:~%
+ nil,NULL
+When MAYBE-HASH-TABLE is none of the above and keyword W-NO-ERROR is non-nil return:~%
+ MAYBE-HASH-TABLE, (type-of MAYBE-HASH-TABLE)~%~@
+When keyword W-NO-ERROR is ommited and MAYBE-HASH-TABLE is none of the above
+signal a `cl:type-error'.~%~@
 :EXAMPLE~%
  \(hash-or-symbol-p *default-class-documentation-table*\)~%
  \(hash-or-symbol-p '*default-class-documentation-table*\)~%
  \(hash-or-symbol-p \(make-hash-table\)\)~%
+ \(hash-or-symbol-p nil\)~%
+ \(hash-or-symbol-p t :w-no-error t\)~%
+ \(hash-or-symbol-p \(list 8\) :w-no-error t\)~%
+;; Following both signal `cl:type-error's:~%
+ \(hash-or-symbol-p t\)~%
  \(hash-or-symbol-p \(list 8\)\)~%~@
-:SEE-ALSO `hash-or-symbol-ensured'.~%►►►")
+:SEE-ALSO `hash-or-symbol-ensured', `mon:hash-table-or-symbol',
+`mon:hash-table-or-symbol-with-hash'.~%►►►")
 
 (fundoc 'hash-or-symbol-ensured
-"If MAYBE-HASH-TABLE is hash-table-p return it.~%~@
+"If MAYBE-HASH-TABLE is `cl:hash-table-p' return it.~%~@
 If MAYBE-HASH-TABLE is a symbol evaluating to hash-table return it.~%~@
-If MAYBE-HASH-TABLE is a symbol but not a hash-table set its symbol-value to a
+If MAYBE-HASH-TABLE is a symbol but not a hash-table set its `cl:symbol-value' to a
 new hash-table and return it.~%~@
-If MAYBE-HASH-TABLE is null return a new hash-table.~%~@
+If MAYBE-HASH-TABLE is NULL or T return a new hash-table.~%~@
 :EXAMPLE~%
  \(hash-or-symbol-ensured nil\)~%
  \(hash-or-symbol-ensured \(gensym\)\)~%
@@ -524,7 +556,8 @@ If MAYBE-HASH-TABLE is null return a new hash-table.~%~@
                                :test 'equal\)
        *tt--hash*\)
    \(unintern '*tt--hash*\)\)~%~@
-:SEE-ALSO `hash-or-symbol-p'.~%►►►")
+:SEE-ALSO `hash-or-symbol-p', `mon:hash-table-or-symbol',
+`mon:hash-table-or-symbol-with-hash'.~%►►►")
 
 #+sbcl 
 (setf (documentation 'hash-resize 'function)
@@ -536,6 +569,15 @@ be larger than the supplied value.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `hash-map-sorted', `hash-merge', `hash-pop', `hash-get-keys',
 `hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%►►►"))
+
+(fundoc 'hash-found-p
+"Like `cl:gethash' but nth-value 0 is a closure if key was found.~%~@
+:EXAMPLE~%
+ \(let \(\(tt-ht \(make-hash-table :test 'equal\)\)\)
+   \(setf \(gethash \"bubba\" tt-ht\) \"bubba\"\)
+   \(values \(hash-found-p \"bubba\" tt-ht\)
+           \(hash-found-p \"no-bubba\" tt-ht \"can't find bubba\"\)\)\)~%
+:SEE-ALSO `<XREF>'.~%►►►")
 
 ;;; ==============================
 
