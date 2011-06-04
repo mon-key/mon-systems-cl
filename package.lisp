@@ -251,6 +251,7 @@
    #:proper-plist-not-null
    #:circular-list
    #:dotted-list
+   #:proper-sequence
    #:not-null
    #:not-t
    #:not-boolean
@@ -353,6 +354,7 @@
    #:list-circular-p
    #:list-dotted-p
    #:list-proper-p
+   #:sequence-proper-p
    #:plist-proper-p
    #:plist-proper-not-null-p
    #:list-proper-not-null-p
@@ -361,6 +363,8 @@
    #:sequencep
    #:symbol-not-a-constant
    #:symbol-not-null-or-string-not-empty-p
+   #:each-a-string-or-vector-in-vector
+   #:each-a-string-or-vector-in-list
    #:each-a-string-p
    #:each-a-simple-string-p
    #:string-of-length-1-p

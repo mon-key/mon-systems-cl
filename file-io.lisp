@@ -193,7 +193,6 @@
 ;; :NOTE :SEE Nathan Froyd's archive for working with cpio/tar data
 ;; (URL `https://github.com/froydnj/archive.git')
 ;; (archive::create-tar-file  <PATHNAME> '(<FILELIST>))
-;; (salza2:gzip-file Russian_Olympics-0.bmp
 ;;; ==============================
 ;; :NOTE Rudiments of a $> tar cvzf file.tgz file
 ;; (defun gzip-file-tgz (tar-pathname file &key (if-tar-does-not-exist :create)

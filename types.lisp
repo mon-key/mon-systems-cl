@@ -262,6 +262,50 @@
 (deftype string-all-digit-char-0-or-1 ()
   `(satisfies string-all-digit-char-0-or-1-p))
 
+
+;; :NOTE Keep sequencep before `list-proper-p'
+(declaim (inline sequencep))
+(defun sequencep (object)
+  (declare (optimize (speed 3)))
+  (the boolean 
+    (typep object 'sequence)))
+
+;;; ==============================
+;;; :PASTED-BY PJB 2011-04-11
+;;; :SOURCE (URL `http://paste.lisp.org/+2LMR/8')
+;;; (defun proper-list-p (object)
+;;;   "Whether OBJECT is a proper list
+;;; :NOTE Terminates with any kind of list, dotted, circular, etc."
+;;;   (labels ((proper (current slow)
+;;;              (cond ((null current)       t)
+;;;                    ((atom current)       nil)
+;;;                    ((null (cdr current)) t)
+;;;                    ((atom (cdr current)) nil)
+;;;                    ((eq current slow)    nil)
+;;;                    (t                    (proper (cddr current) (cdr slow))))))
+;;;     (and (listp object) (proper object (cons nil object)))))
+;;; ==============================
+;;;
+;;; :SOURCE alexandria/lists.lisp :WAS `proper-list-p'
+(declaim (inline list-proper-p))
+(defun list-proper-p (object)
+  (declare (inline sequencep)
+           (optimize (speed 3)))
+  (unless (sequencep object) (return-from list-proper-p (the boolean nil)))
+  (locally 
+      (declare (sequence object))
+    (the boolean
+      (cond ((not object) t)
+            ((consp object)
+             (do ((fast object (cddr fast))
+                  (slow (cons (car object) (cdr object)) (cdr slow)))
+                 (nil)
+               (unless (and (listp fast) (consp (cdr fast)))
+                 (return (the boolean (and (listp fast) (not (cdr fast))))))
+               (when (eq fast slow)
+                 (return (the boolean nil)))))
+            (t nil)))))
+
 ;;; :SOURCE alexandria/lists.lisp
 (deftype proper-list ()
   `(and list (satisfies list-proper-p)))
@@ -282,6 +326,22 @@
 (deftype proper-list-not-null ()
   `(and not-null proper-list))
 
+(deftype proper-sequence ()
+  '(or vector
+    (and list proper-list)))
+
+(declaim (inline sequence-proper-p))
+(defun sequence-proper-p (sequence-putatively-proper)
+  (declare (inline list-proper-p 
+                   sequencep)
+           (optimize (speed 3)))
+  (unless (sequencep sequence-putatively-proper)
+    (return-from sequence-proper-p (the boolean nil)))
+  (locally 
+      (declare (sequence sequence-putatively-proper))
+    (the boolean
+      (typep sequence-putatively-proper 'proper-sequence))))
+
 (deftype each-a-sequence () 
   '(and sequence (satisfies each-a-sequence-p)))
 
@@ -290,7 +350,6 @@
 
 (deftype each-a-sequence-proper-or-character ()
   '(and sequence (satisfies each-a-sequence-proper-or-character-p)))
-
 
 ;;; BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD BAD! 
 ;;; Left as a reminder that `list-of-len' is not reasonably possible.
@@ -592,7 +651,6 @@
             (and not-boolean
                  (satisfies %hash-or-symbol-p-no-error)))))
 
-
 ;; :SOURCE sbcl/src/code/kernel.lisp 
 #+sbcl 
 (deftype closure-obj ()
@@ -721,13 +779,6 @@
 ;;; :SEQ-TYPE-PREDICATES
 ;;; ==============================
 
-;; :NOTE Keep sequencep before `list-proper-p'
-(declaim (inline sequencep))
-(defun sequencep (object)
-  (declare (optimize (speed 3)))
-  (the boolean 
-    (typep object 'sequence)))
-
 ;;; :NOTE what about `proper-list-of-length-p'
 ;;; :FILE sbcl/src/code/primordial-extensions.lisp
 ;;; "Helper function for macros which expect clauses of a given length, etc.
@@ -779,47 +830,13 @@
                    (values t 'dotted-list)
                    (values nil 'proper-list)))))))
 
-;;; ==============================
-;;; :PASTED-BY PJB 2011-04-11
-;;; :SOURCE (URL `http://paste.lisp.org/+2LMR/8')
-;;; (defun proper-list-p (object)
-;;;   "Whether OBJECT is a proper list
-;;; :NOTE Terminates with any kind of list, dotted, circular, etc."
-;;;   (labels ((proper (current slow)
-;;;              (cond ((null current)       t)
-;;;                    ((atom current)       nil)
-;;;                    ((null (cdr current)) t)
-;;;                    ((atom (cdr current)) nil)
-;;;                    ((eq current slow)    nil)
-;;;                    (t                    (proper (cddr current) (cdr slow))))))
-;;;     (and (listp object) (proper object (cons nil object)))))
-;;; ==============================
-;;; :SOURCE alexandria/lists.lisp :WAS `proper-list-p'
-;; if 
-(declaim (inline list-proper-p))
-(defun list-proper-p (object)
-  (declare (inline sequencep)
-           (optimize (speed 3)))
-  (when (typep object 'sequence)
-    (locally (declare (sequence object))
-      (the boolean
-        (cond ((not object) t)
-              ((consp object)
-               (do ((fast object (cddr fast))
-                    (slow (cons (car object) (cdr object)) (cdr slow)))
-                   (nil)
-                 (unless (and (listp fast) (consp (cdr fast)))
-                   (return (and (listp fast) (not (cdr fast)))))
-                 (when (eq fast slow)
-                   (return nil))))
-              (t nil))))))
-
 (declaim (inline plist-proper-p))
 (defun plist-proper-p (object)
   (declare (inline list-proper-p)
            (optimize (speed 3)))
   (when (list-proper-p object) 
     (the boolean
+      ;; (evenp (length (the list-length object))))))
       (evenp (length (the list object))))))
 
 (declaim (inline plist-proper-not-null-p))
@@ -861,7 +878,7 @@
            (optimize (speed 3)))
   (when no-error 
     (when (not (sequencep seq)) 
-      (return-from sequence-type)))
+      (return-from sequence-type (the boolean nil))))
   (typecase seq    
     (null        (values nil 'null))
     (proper-list 'list)
@@ -994,6 +1011,59 @@
            (optimize (speed 3)))
   (typep maybe-char-char-code-or-simple-string-1 'char-or-char-code-integer-or-simple-string-1))
 
+(defun each-a-string-or-vector-in-vector (vector)
+  (declare (inline sequencep)
+           (optimize (speed 3)))
+  (unless (sequencep vector)
+    (return-from each-a-string-or-vector-in-vector (the boolean nil)))
+  (unless (vectorp (the sequence vector))
+    (return-from each-a-string-or-vector-in-vector (the boolean nil)))
+  (when (stringp (the vector vector))
+    (return-from each-a-string-or-vector-in-vector (the boolean nil)))
+  (flet ((chk-string-like (string-like)
+           (if (sequencep string-like)
+               (if (or (stringp string-like) 
+                       (typep string-like '(vector character *)))
+                   t
+                   (if (simple-vector-p string-like)
+                       (loop 
+                          for chk-char across (the simple-vector string-like)
+                          always (characterp  chk-char)))))))
+    (locally 
+        (declare (vector vector))
+      (the boolean
+        (loop
+           :for chk-str across vector
+           :always (chk-string-like chk-str))))))
+
+(defun each-a-string-or-vector-in-list (list)
+  (declare (inline sequencep)
+           (optimize (speed 3)))
+  (unless (sequencep list)
+    (return-from each-a-string-or-vector-in-list (the boolean nil)))
+  (when (null list)
+    (return-from each-a-string-or-vector-in-list (the boolean nil)))
+  (when (vectorp (the sequence list))
+    (return-from each-a-string-or-vector-in-list (the boolean nil)))
+  (unless (list-proper-p (the sequence list))
+    (return-from each-a-string-or-vector-in-list (the boolean nil)))
+  (flet ((chk-string-like (string-like)
+           (if (sequencep string-like)
+               (if (or (stringp string-like) 
+                       (typep string-like '(vector character *)))
+                   t
+                   (if (simple-vector-p string-like)
+                       (loop 
+                          for chk-char across (the simple-vector string-like)
+                          always (characterp  chk-char)))))))
+    (locally 
+        (declare ((and not-null list) list))
+      (the boolean
+        (loop
+           :for chk-str in list
+           :always (chk-string-like chk-str))))))
+
+(declaim (inline each-a-string-p))
 (defun each-a-string-p (string-list)
   (declare (inline list-proper-not-null-p  list-proper-p)
            (optimize (speed 3)))
@@ -1001,7 +1071,7 @@
     (return-from each-a-string-p nil))
   (locally 
       (declare (list string-list))
-    (the boolean     ;; (the boolean (every #'stringp string-list))
+    (the boolean ;; (the boolean (every #'stringp string-list))
       (loop
          :for chk-str :in string-list
          :always (stringp chk-str)))))
@@ -1071,28 +1141,82 @@
   (declare  (inline sequencep)
             (optimize (speed 3)))
   (when (null seq) 
-    (return-from each-a-sequence-p t))
+    (return-from each-a-sequence-p (the (values boolean symbol) (values t (quote null)))))
   (unless (sequencep seq)
-    (return-from each-a-sequence-p nil))
-  (locally 
-      (declare (sequence seq))
-    (the boolean
-      (every #'sequencep seq))))
-
-(defun each-a-sequence-proper-p (seq)
-  (declare  (inline sequencep list-proper-p)
-            (optimize (speed 3)))
-  (when (null seq) 
-    (return-from each-a-sequence-proper-p t))
-  (unless (sequencep seq)
-    (return-from each-a-sequence-proper-p nil))
+    (return-from each-a-sequence-p (the boolean nil)))
   (locally
       (declare (sequence seq))
-    (the boolean
-      (every #'(lambda (x) 
-                 (and (sequencep x)
-                      (or (and (listp x) (list-proper-p x)) t)))
-             seq))))
+    (let ((string-or-bv (typecase seq
+                          (string     (quote string))
+                          (bit-vector (quote bit-vector)))))
+      (declare (symbol string-or-bv))
+      (when string-or-bv
+        (return-from each-a-sequence-p (the (values boolean symbol) (values  nil string-or-bv))))
+      (locally
+          (declare ((and sequence (not string) (not bit-vector)) seq))
+        (the (values boolean symbol)
+          (etypecase seq
+            (list 
+             (setf string-or-bv (quote list))
+             (values (loop 
+                        for elt in seq
+                        always (sequencep elt))
+                     string-or-bv))
+            (simple-array 
+             (setf string-or-bv (quote simple-array))
+             (values (loop 
+                        for elt across (the simple-array seq)
+                        always (sequencep elt))
+                     string-or-bv))
+            (array 
+             (setf string-or-bv (quote array))
+             (values (loop 
+                        for elt across (the array seq)
+                        always (sequencep elt))
+                     string-or-bv))))))))
+
+(defun each-a-sequence-proper-p (seq)
+  (declare  (inline sequencep 
+                    list-proper-p
+                    sequence-proper-p)
+            (optimize (speed 3)))
+  (when (null seq) 
+    (return-from each-a-sequence-proper-p (the (values boolean symbol) (values t (quote null)))))
+  (unless (sequencep seq)
+    (return-from each-a-sequence-proper-p (the boolean nil)))
+  (locally
+      (declare (sequence seq))
+    (let ((string-or-bv (typecase seq
+                          (string     (quote string))
+                          (bit-vector (quote bit-vector)))))
+      (declare (symbol string-or-bv))
+      (when string-or-bv
+        (return-from each-a-sequence-proper-p (the (values boolean symbol) (values nil string-or-bv))))
+      ;; (locally 
+      ;;     (declare ((and sequence (not string) (not bit-vector)) seq))
+      ;;   (the boolean (every #'sequence-proper-p seq))))))
+      (locally
+          (declare ((and sequence (not string) (not bit-vector)) seq))
+        (the (values boolean symbol)
+          (etypecase seq
+            (list 
+             (setf string-or-bv (quote list))
+             (values (loop 
+                        for elt in seq
+                        always (sequencep elt))
+                     string-or-bv))
+            (simple-array 
+             (setf string-or-bv (quote simple-array))
+             (values (loop 
+                        for elt across (the simple-array seq)
+                        always (sequencep elt))
+                     string-or-bv))
+            (array 
+             (setf string-or-bv (quote array))
+             (values (loop 
+                        for elt across (the array seq)
+                        always (sequencep elt))
+                     string-or-bv))))))))
 
 (defun each-a-sequence-proper-or-character-p (seq)
   (declare (inline sequencep list-proper-p)
@@ -1835,15 +1959,80 @@ bubba
 Implemented as a SATISFIES type constraint w/ `mon:list-proper-p' and not
 recommended for performance intensive use.~%~@
 Main usefulness as a type designator of the expected type in a TYPE-ERROR.~%~@
+:NOTE ANSI Glossary defines the following terms with regards to \"proper list\":~%
+ ,----
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ |
+ | circular list
+ | n. A chain of conses that has no termination because some cons in the
+ | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
+ `----~%~@
 :SEE-ALSO `mon:dotted-list', `mon:circular-list', `mon:proper-list-not-null-p',
 `mon:proper-list-p'.~%►►►")
 
 (typedoc 'proper-plist
  "Whether object is of type `mon:proper-list' with length `evenp'.~%~@
+A \"proper plist\" includes the emtpy list.
+A \"proper plist\" may sharpsign back references e.g. #N# so long as these do
+not create circularity.~%~@
 :EXAMPLE~%
  \(typep '\(:key \"val\") 'proper-plist\)~%
  \(typep nil 'proper-plist\)~%
+ \(typep '\(\) 'proper-plist\)~%
+ \(typep (list) 'proper-plist\)~%
+ \(typep  \(list #1='a #1#\) 'proper-plist\)~%
+;; Following fail succesfully:~%
  \(typep '\(a . b\) 'proper-plist\)~%
+ \(typep \(cons 'a  'b\) 'proper-plist\)~%
+ \(typep \(list* 'a 'b\) 'proper-plist\)~%
+ \(typep \(list* 'a 'b 'c\) 'proper-plist\)~%
+ \(typep  \(list* #1='a #1#\) 'proper-plist\)~%~@
+:NOTE ANSI Glossary defines the following terms with regards to whether an object is \"proper\":~%
+ ,----
+ | proper sequence
+ | n. A sequence which is not an improper list; that is, a vector or a proper list.
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ |
+ | circular list
+ | n. A chain of conses that has no termination because some cons in the
+ | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
+ `----~%~@
 :SEE-ALSO `mon:dotted-list', `mon:circular-list', `mon:proper-list-not-null-p',
 `mon:proper-list-p', `mon:plist-error'.~%►►►")
 
@@ -1863,6 +2052,23 @@ Main usefulness as a type designator of the expected type in a TYPE-ERROR.~%~@
  \(typep '\(a b . c\) 'dotted-list\)~%
  \(typep \(list 'a 'b 'c\) 'dotted-list\)~%
  \(typep nil 'dotted-list\)~%~@
+:NOTE A dotted list is an \"improper list\".
+ANSI Glossary defines the following terms with regards to dotted lists:~%
+ ,----
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ `----~%~@
 :SEE-ALSO `mon:proper-list', `mon:circular-list'.~%►►►")
 
 (typedoc 'circular-list
@@ -1875,6 +2081,11 @@ The glossary of the ANSI spec defines a circular list as:~%
  | circular list  n. 
  | A chain of conses that has no termination because some cons in the
  | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
  `----~%
 :SEE-ALSO `mon:circular-list-error', `mon:dotted-list', `mon:list-dotted-p',
 `mon:proper-list', `mon:list-proper-p', `mon:circular-list-error',
@@ -2395,6 +2606,34 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep 42 'each-a-sequence-proper\)~%
  \(typep '\(\"a\"  #\(b\) '\(\) \(b\) nil\) 'each-a-sequence-proper\)~%
  \(typep '\(\"a\" #\(b\) \(b\) \(a . b\)  \(a b . c\)\) 'each-a-sequence-proper\)~%~@
+:NOTE ANSI Glossary defines the following terms with regards to whether an object is \"proper\":~%
+ ,----
+ | proper sequence
+ | n. A sequence which is not an improper list; that is, a vector or a proper list.
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ |
+ | circular list
+ | n. A chain of conses that has no termination because some cons in the
+ | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
+ `----~%~@
 :SEE-ALSO `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-sequence-p',
 `mon:each-a-sequence-proper-or-character-p',
@@ -2548,11 +2787,20 @@ Else, return value has the format:~%
  \(let \(\(*print-circle* t\)\)
    \(labels \(\(make-circular  \(list\) \(setf \(cdr \(last list\)\) list\) list\)\)
      \(list-circular-p \(make-circular '\(a b c\) \)\)\)\)~%
+:NOTE A circular list is an improper list.
+ANSI Glossary defines \"proper list\" and \"improper list\" as follows:~%
+ ,----
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ `----~%~@
 :SEE-ALSO `mon:circular-list', `mon:circular-list-error', `mon:list-proper-p',
 `mon:list-dotted-p'.~%►►►")
 
 (fundoc 'list-dotted-p
- "Whether LIST is a dotted pair.~%~@
+ "Whether LIST is a dotted pair, i.e. an improper list.~%~@
 When LIST is `cl:listp' return value is as if by `cl:values'.~@
 When LIST a dotted pair first value is T, second is 'dotted-list.~%~@
 When LIST is null first value is NIL, second is 'null.~%~@
@@ -2570,6 +2818,14 @@ When list is none of the above return one value NIL.~%~@
  \(labels \(\(make-circular \(list\) 
             \(setf \(cdr \(last list\)\) list\) list\)\)
    \(list-dotted-p \(make-circular '\(a b c\)\)\)\)~%~@
+:NOTE ANSI Glossary defines \"proper list\" and \"improper list\" as follows:~%
+ ,----
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ `----~%~@
 :SEE-ALSO `list-proper-not-null-p', `mon:list-proper-p', `mon:list-circular-p',
 `mon:circular-list', `mon:circular-list-error'.~%►►►")
 
@@ -2580,6 +2836,34 @@ When list is none of the above return one value NIL.~%~@
  \(list-proper-p '\(a b c\)\)~%
  \(list-proper-p '\(\)\)~%
  \(list-proper-p nil\)~%~@
+:NOTE ANSI Glossary defines the following terms with regards to whether an object is \"proper\":~%
+ ,----
+ | proper sequence
+ | n. A sequence which is not an improper list; that is, a vector or a proper list.
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ |
+ | circular list
+ | n. A chain of conses that has no termination because some cons in the
+ | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
+ `----~%~@
 :SEE-ALSO `mon:proper-list', `mon:list-proper-not-null-p', `mon:sequencep',
 `mon:list-dotted-p', `mon:list-circular-p', `mon:circular-list',
 `mon:circular-list-error', `mon:sequence-zerop', `mon:sequence-type',
@@ -2611,10 +2895,9 @@ is `cl:evenp'.~%~@
  \(typep '\(:key \"val\") 'proper-plist\)~%
  \(typep nil 'proper-plist\)~%
  \(typep '\(a . b\) 'proper-plist\)~%~@
+:NOTE ANSI defines the following terms with regards to property lists:
 ,----
-|
 | Property list
-|
 |  The property list of a symbol provides a mechanism for associating
 |  named attributes with that symbol.
 | 
@@ -2628,21 +2911,46 @@ is `cl:evenp'.~%~@
 | 
 |  The property list associated with a fresh symbol is initially null.
 |
-| property list (noun)
-|
+| property list n.
 |  1. A list containing an even number of elements that are alternating
-|  names (sometimes called indicators or keys) and values (sometimes
-|  called properties).
+|  names \(sometimes called indicators or keys\) and values \(sometimes
+|  called properties\).
 |
 |  When there is more than one name and value pair with the identical
 |  name in a property list, the first such pair determines the property.
 |
-|  2. (of a symbol) The component of the symbol containing a property
+|  2. \(of a symbol\) The component of the symbol containing a property
 |  list.
-|
-`---- :SOURCE ANSI spec~%~@
+`----~%~@
+:NOTE ANSI Glossary defines the following terms with regards to whether an object is \"proper\":~%
+ ,----
+ | proper sequence
+ | n. A sequence which is not an improper list; that is, a vector or a proper list.
+ |
+ | proper list
+ | n. A list terminated by the empty list. \(The empty list is a proper list.\)
+ | 
+ | improper list
+ | n. A list which is not a proper list: a circular list or a dotted list.
+ |
+ | dotted list  n.
+ | n. A list which has a terminating atom that is not NIL.
+ |    \(An atom by itself is not a dotted list, however.\)
+ |
+ | dotted pair  n.
+ |  1. a cons whose cdr is a non-list.
+ |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
+ |
+ | circular list
+ | n. A chain of conses that has no termination because some cons in the
+ | chain is the cdr of a later cons.
+ |
+ | circular  adj.
+ |  1. \(of a list\) a circular list.  
+ |  2. \(of an arbitrary object\) having a component, element, constituent, or
+ |      subexpression \(as appropriate to the context\) that is the object itself.
+ `----~%~@
 :SEE \(info \"\(ansicl\)symbol\"\)~%
-:SEE \(info \"\(ansicl\)P\"\)~%~@
 :SEE-ALSO `mon:proper-plist', `mon:plist-proper-not-null-p',
 `mon:proper-plist-not-null', `mon:plist-error', `cl:get-properties'.~%►►►")
 
@@ -2696,11 +3004,43 @@ Return value is one of \(string, vector, or list\).~%~@
 :SEE-ALSO `mon:sequencep'.~%►►►")
 
 (fundoc 'sequencep
-  "Return t if OBJECT is a sequence \(list or array\).~%~@
+  "Return t if OBJECT is a sequence \(list or vector\).~%~@
 :EXAMPLE~%
  \(sequencep '\(l i s t\)\)~%
  \(sequencep #\(v e c t o r\)\)~%
  \(sequencep \"string\"\)~%~@
+:NOTE ANSI Glossary defines the following terms with regards to sequences:~%
+,----
+| sequence  n. 
+| 1. An ordered collection of elements.
+| 2. a vector or a list.
+|
+| proper sequence
+| n. A sequence which is not an improper list; that is, a vector or a proper list.
+|
+| sequence function
+| n. One of the following standardized sequence functions:
+|
+|  `cl:concatenate'         `cl:length'               `cl:remove'
+|  `cl:copy-seq'            `cl:map'                  `cl:remove-duplicates'
+|  `cl:count'               `cl:map-into'             `cl:remove-if'
+|  `cl:count-if'            `cl:merge'                `cl:remove-if-not'
+|  `cl:count-if-not'        `cl:mismatch'             `cl:replace'
+|  `cl:delete'              `cl:notany'               `cl:reverse'
+|  `cl:delete-duplicates'   `cl:notevery'             `cl:search'
+|  `cl:delete-if'           `cl:nreverse'             `cl:some'
+|  `cl:delete-if-not'       `cl:nsubstitute'          `cl:sort'
+|  `cl:elt'                 `cl:nsubstitute-if'       `cl:stable-sort'
+|  `cl:every'               `cl:nsubstitute-if-not'   `cl:subseq'
+|  `cl:fill'                `cl:position'             `cl:substitute'
+|  `cl:find'                `cl:position-if'          `cl:substitute-if'
+|  `cl:find-if'             `cl:position-if-not'      `cl:substitute-if-not'
+|  `cl:find-if-not'         `cl:reduce'
+| 
+| Or, an implementation-defined function that operates on one or more
+| sequences.  and that is defined by the implementation to be a
+| sequence function.
+`----~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `mon:sequence-type'.~%►►►")
 
@@ -2742,10 +3082,14 @@ Values returned will have one of the following forms:~%
 :SEE-ALSO `mon:type-specifier-p', `cl:null', `cl:multiple-value-list'.~%►►►")
 
 (fundoc 'each-a-string-p
-"Whether each element of string-list is `stringp'.~%~@
-:EXAMPLE~%~@
- (each-a-string-p 
-:SEE-ALSO `mon:each-a-simple-string', `each-a-string-of-length-1-p'.~%►►►")
+"Whether each element of STRING-LIST is `stringp'.~%~@
+STRING-LIST is a proper list.
+:EXAMPLE~%
+ \(each-a-string-p '\(\"a\" \"b\" \"c\"\)\)~%
+ \(each-a-string-p '\(\"a\" \"b\" #\(#\\c\)\)\)~%
+ \(each-a-string-p '\(\"a\" . \"b\"\)\)~%
+:SEE-ALSO `mon:each-a-simple-string', `each-a-string-of-length-1-p',
+`mon:each-a-string-or-vector-in-vector'.~%►►►")
 
 (fundoc 'each-a-simple-string-p
 "Return non-nil when each elt in STRING-LIST is `simple-string-p'.~%~@
@@ -2758,7 +3102,7 @@ STRING-LIST is a proper-list of type `proper-list-not-null'.~%~@
  \(each-a-simple-string-p nil\)~%
  \(each-a-simple-string-p \"a string\"\)~%~@
 :SEE-ALSO `mon:each-a-simple-string', `each-a-string-p',
-`each-a-string-of-length-1-p'.~%►►►")
+`each-a-string-of-length-1-p', `mon:each-a-string-or-vector-in-vector'.~%►►►")
 
 (fundoc 'each-a-string-of-length-1-p
 	"Whether each element of STRING-LIST is a non-empty string of length 1.~%~@
@@ -2770,7 +3114,8 @@ Return non-nil when STRING-LIST is a proper list and each element satisfies `mon
  \(each-a-string-of-length-1-p '\(\"a\" \"b\" \"c\" nil \"d\"\)\)~%
  \(each-a-string-of-length-1-p nil\)~%~@
 :SEE-ALSO `mon:each-a-simple-string-of-length-1-p',
-`mon:each-a-simple-string-p', `mon:each-a-simple-string-p'.~%►►►")
+`mon:each-a-simple-string-p', `mon:each-a-simple-string-p',
+`mon:each-a-string-or-vector-in-vector'.~%►►►")
 
 (fundoc 'each-a-simple-string-of-length-1-p
 	"Whether each element of STRING-LIST is a non-empty simple-string of length 1.~%~@
@@ -2782,7 +3127,18 @@ Return non-nil when STRING-LIST is a proper list and each element satisfies `mon
  \(each-a-simple-string-of-length-1-p '\(\"a\" \"b\" \"c\" nil \"d\"\)\)~%
  \(each-a-simple-string-of-length-1-p nil\)~%~@
 :SEE-ALSO `mon:each-a-string-of-length-1-p', `mon:each-a-simple-string-p',
-`mon:each-a-simple-string-p'.~%►►►")
+`mon:each-a-simple-string-p', `mon:each-a-string-or-vector-in-vector'.~%►►►")
+
+(fundoc 'each-a-string-or-vector-in-vector
+        "Whether VECTOR is `cl:vectorp' with every element either `stringp' or a vector
+with each element of type `cl:chararacter'~%~@
+An object that is `cl:stringp' does not satisfy the test.~%~@
+:EXAMPLE~%~@
+ \(each-a-string-or-vector-in-vector #\(\"abc\" \"abc\" \"abc\"\)\)~%
+ \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\"\)\)~%
+ \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\" :adjustable t\)\)~%
+ \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\" :fill-pointer 0\)\)~%~@
+:SEE-ALSO `mon:each-a-string-p'.~%►►►")
 
 (fundoc '%byte-vector-each-an-unsigned-byte-8
 "Whether each element of the simple-vector BYTE-ARRAY is of type 'unsigned-byte-8.~%~@
@@ -3136,22 +3492,46 @@ CHAR-OR-CHAR-CODE-LIST should satisfy `mon:list-proper-not-null-p'.'
 
 (fundoc 'each-a-sequence-p
         "Whether each elt of SEQ is `cl:sequencep'.~%~@
+Return a boolean.~%~@
+When SEQ is `cl:null', `cl:stringp', `cl:bit-vector-p', `arrayp', `listp,  return multiple values:~%~@
+ NIL, { string | bit-vector }~%
+ T,  { null | simple-array | array | list }~%~@
 :EXAMPLE~%
  \(each-a-sequence-p nil\)~%
  \(each-a-sequence-p 42\)~%
  \(each-a-sequence-p '\(\"a\"  #\(b\) '\(\) \(b\) nil\)\)~%
  \(each-a-sequence-p '\(\"a\" #\(b\) \(b\) \(a . b\)  \(a b . c\)\)\)~%~@
+ \(each-a-sequence #*00000\)~%
+ \(each-a-sequence \"string\"\)~%
+ \(each-a-sequence #\(\(a\) \(b\) \(c\)\)\)~%
+ \(each-a-sequence \(make-array 3 
+                              :fill-pointer 3 
+                              :adjustable t 
+                              :initial-contents '\(\(a\) \(b\) \(c\)\)\)\)~%~@
 :SEE-ALSO `mon:each-a-sequence-proper-p',
 `mon:each-a-sequence-proper-or-character-p', `mon:each-a-sequence',
 `mon:each-a-sequence-proper', `mon:each-a-sequence-proper-or-character'.~%►►►")
 
+ 
+
 (fundoc 'each-a-sequence-proper-p
         "Whether each elt of SEQ is a proper sequence.~%~@
+Return a boolean.~%
+When SEQ is `cl:null', `cl:stringp', `cl:bit-vector-p', `arrayp', `listp,  return multiple values:~%~@
+ NIL, { string | bit-vector }~%
+ T,  { null | simple-array | array | list }~%~@
 :EXAMPLE~%
  \(each-a-sequence-proper-p nil\)~%
  \(each-a-sequence-proper-p 42\)~%
  \(each-a-sequence-proper-p '\(\"a\"  #\(b\) '\(\) \(b\) nil\)\)~%
  \(each-a-sequence-proper-p '\(\"a\" #\(b\) \(b\) \(a . b\)  \(a b . c\)\)\)~%~@
+ \(each-a-sequence-proper-p #*00000\)~%
+ \(each-a-sequence-proper-p \"string\"\)~%~@
+ \(each-a-sequence-proper-p #\(\(a\) \(b\) \(c\)\)\)
+ \(each-a-sequence-proper-p \(make-array 3 
+                                       :fill-pointer 3 
+                                       :adjustable t 
+                                       :initial-contents '\(\(a\) \(b\) \(c\)\)\)\)~%~@
 :SEE-ALSO `mon:each-a-sequence-p', `mon:each-a-sequence-proper-or-character-p',
 `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character'.~%►►►")
