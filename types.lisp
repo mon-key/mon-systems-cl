@@ -1587,7 +1587,7 @@
 :SEE-ALSO `mon:open-stream-output-stream-p',
 `mon:open-stream-output-stream-error', `open-stream-output-stream-error-report',
 `open-stream-output-stream-error', `cl:streamp', `cl:open-stream-p',
-`cl:output-stream-p'.~%►►►")
+`cl:output-stream-p'.~%▶▶▶")
 
 (typedoc 'stream-or-boolean-or-string-with-fill-pointer
          "An object which is of type `mon:stream-or-boolean', or `mon:string-with-fill-pointer'.~%~@
@@ -1597,7 +1597,7 @@
  \(with-output-to-string \(s\)
    \(format s \"is stream-or-boolean-or-string-with-fill-pointer ~~S\"
            \(typep s 'stream-or-boolean-or-string-with-fill-pointer\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'logical-pathname-designator
 "An object which is both `cl:pathnamep' and of type `cl:logical-pathname'.~%~@
@@ -1617,7 +1617,7 @@
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
-`mon:filename-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (typedoc 'pathname-designator
          "An object of this type is a legal arg to a pathname function including `cl:file-stream's.~%~@
@@ -1637,7 +1637,7 @@
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
-`mon:filename-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (typedoc 'filename-designator
 "An object of this type names a \"file\".~%~@
@@ -1647,7 +1647,7 @@ Like `mon:pathname-designator' but does not specifiy `cl:file-stream'.
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
-`mon:filename-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (typedoc 'pathname-or-namestring 
 "An object which is either `cl:stringp' and `cl:pathnamep'.~%~@
@@ -1656,7 +1656,7 @@ Like `mon:pathname-designator' but does not specifiy `cl:file-stream'.
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
-`mon:filename-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (typedoc 'string-or-symbol
 "An object that is of either type `cl:string' or `cl:symbol'.~%~@
@@ -1668,7 +1668,7 @@ Like `mon:pathname-designator' but does not specifiy `cl:file-stream'.
  \(typep nil 'string-or-symbol\)~%
  \(typep 8 'string-or-symbol\)~%~@
 :SEE-ALSO `mon:string-or-symbol-not-empty-nor-boolean',
-`mon:string-or-symbol-not-boolean'.~%►►►")
+`mon:string-or-symbol-not-boolean'.~%▶▶▶")
 
 (typedoc 'not-boolean
 "An object that is neither T nor NIL.~%~@
@@ -1679,7 +1679,7 @@ Like `mon:pathname-designator' but does not specifiy `cl:file-stream'.
  \(typep \(\) 'not-boolean\)~%
  \(typep \(not \(\)\) 'not-boolean\)~%
  \(typep 8 'not-boolean\)~%~@
-:SEE-ALSO `mon:not-t', `mon:not-null', `cl:boolean'.~%►►►")
+:SEE-ALSO `mon:not-t', `mon:not-null', `cl:boolean'.~%▶▶▶")
 
 (typedoc 'boolean-integer
          "An integer value  either 1 or 0.
@@ -1689,7 +1689,7 @@ Where 1 is equivavlent to CL:T and 0 to CL:NIL
  \(typep 1 'boolean-integer\)~%
  \(typep t 'boolean-integer\)~%
  \(typep nil 'boolean-integer\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'string-or-symbol-not-boolean
 "An object of type: \(and not-boolean \(or symbol string\)\)~%~@
@@ -1702,7 +1702,7 @@ Where 1 is equivavlent to CL:T and 0 to CL:NIL
  \(typep 8 'string-or-symbol-not-boolean\)~%~@
 :SEE-ALSO `mon:string-or-symbol-not-empty-nor-boolean',
 `mon:string-or-symbol-not-boolean', `mon:string-or-symbol',
-`mon:not-boolean'.~%►►►")
+`mon:not-boolean'.~%▶▶▶")
 
 (typedoc 'hash-table-or-symbol
 "Whether object is either of the types:~%~@
@@ -1723,7 +1723,7 @@ Where 1 is equivavlent to CL:T and 0 to CL:NIL
 :NOTE When declaring an object type and object alway evaluate to a hash-table or
 a symbol evaluating to one it may be useful to declare it
 `mon:hash-table-or-symbol-with-hash'.~%~@
-:SEE-ALSO `mon:hash-or-symbol-ensured', `mon:hash-or-symbol-p'.~%►►►")
+:SEE-ALSO `mon:hash-or-symbol-ensured', `mon:hash-or-symbol-p'.~%▶▶▶")
 
 (typedoc 'hash-table-or-symbol-with-hash
          "Whether object is a hash-table or symbol evalauating to one.~%~@
@@ -1737,7 +1737,7 @@ a symbol evaluating to one it may be useful to declare it
      \(unintern '*tt--hash-table-symbol*\)\)\)~%~@
 :NOTE When used as a declaration and object may be NULL it is better to declare 
 `mon:hash-table-or-symbol'.~%~@
-:SEE-ALSO `mon:hash-or-symbol-ensured', `mon:hash-or-symbol-p'.~%►►►")
+:SEE-ALSO `mon:hash-or-symbol-ensured', `mon:hash-or-symbol-p'.~%▶▶▶")
 
 (typedoc 'string-or-symbol-not-empty-nor-boolean
 "An object of type: \(and not-boolean \(or symbol string-not-empty\)\)~%~@
@@ -1750,7 +1750,7 @@ a symbol evaluating to one it may be useful to declare it
  \(typep nil 'string-or-symbol-not-boolean\)~%
  \(typep 8 'string-or-symbol-not-boolean\)~%~@
 :SEE-ALSO `mon:string-or-symbol-not-boolean', `mon:string-or-symbol',
-`mon:not-boolean'.~%►►►")
+`mon:not-boolean'.~%▶▶▶")
 
 (typedoc 'symbol-not-a-constant
 "Whether object satisfies `mon:symbol-not-a-constantp'.~%~@
@@ -1758,7 +1758,7 @@ a symbol evaluating to one it may be useful to declare it
  \(typep nil 'symbol-not-a-constant\)~%
  \(typep pi 'symbol-not-a-constant\)~%
  \(typep 'bubba 'symbol-not-a-constant\)~%~@
-:SEE-ALSO `cl:defconstant', `cl:constantp'.~%►►►")
+:SEE-ALSO `cl:defconstant', `cl:constantp'.~%▶▶▶")
 
 (typedoc 'symbol-not-null-or-string-not-empty
 "Whether object is of type `mon:symbol-not-null' or `mon:string-not-empty'.~%~@
@@ -1769,12 +1769,12 @@ a symbol evaluating to one it may be useful to declare it
  \(typep \"\"  'symbol-not-null-or-string-not-empty\)~%
  \(typep nil 'symbol-not-null-or-string-not-empty\)~%~@
 :SEE-ALSO `mon:symbol-not-null-or-string-not-empty-p',
-`mon:string-not-empty-p'.~%►►►")
+`mon:string-not-empty-p'.~%▶▶▶")
 
 (typedoc 'string-or-null
  "Type is either `cl:stringp' or null.~%~@
 :SEE-ALSO `mon:simple-string-or-null', `mon:string-or-null-p',
-`mon:string-null-or-empty-p'.~%►►►")
+`mon:string-null-or-empty-p'.~%▶▶▶")
 
 (typedoc 'string-null-empty-or-all-whitespace
          "Whether object is either of the types:~%
@@ -1784,7 +1784,7 @@ a symbol evaluating to one it may be useful to declare it
  \(typep \"\"     'string-null-empty-or-all-whitespace\)~%
  \(typep \"    \" 'string-null-empty-or-all-whitespace\)\)~%
  \(type-expand-all 'string-null-empty-or-all-whitespace\)~%~@
-:SEE-ALSO `string-null-empty-or-all-whitespace-p'.~%►►►")
+:SEE-ALSO `string-null-empty-or-all-whitespace-p'.~%▶▶▶")
 
 
 ;; (setf (documentation 'string-null-empty-or-all-whitespace 'type)
@@ -1797,7 +1797,7 @@ a symbol evaluating to one it may be useful to declare it
  \(typep \"\"     'string-null-empty-or-all-whitespace\)~%
  \(typep \"    \" 'string-null-empty-or-all-whitespace\)~%
  \(type-expand-all 'string-null-empty-or-all-whitespace\)~%~@
-:SEE-ALSO `string-null-empty-or-all-whitespace-p'.~%►►►")
+:SEE-ALSO `string-null-empty-or-all-whitespace-p'.~%▶▶▶")
 
 
 (typedoc 'string-not-null
@@ -1808,7 +1808,7 @@ a symbol evaluating to one it may be useful to declare it
  \(string-not-null nil\)~%~@
 :SEE-ALSO `mon:string-or-null', `mon:string-null-or-empty',
 `mon:simple-string-not-null', `mon:simple-string-or-null',
-`mon:simple-string-null-or-empty'.~%►►►")
+`mon:simple-string-null-or-empty'.~%▶▶▶")
 
 (typedoc 'each-a-string-or-null
          "Whether object is of type `mon:each-a-string-or-null-p'.~%~@
@@ -1824,14 +1824,14 @@ a symbol evaluating to one it may be useful to declare it
 `mon:each-a-simple-string', `mon:each-a-string-of-length-1',
 `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-simple-string-p',
-`mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 (typedoc 'simple-string-or-null
 "An object of type `mon:string-or-null' satisfying `cl:simple-string-p'~%~@
 :EXAMPLE~%
  \(let \(\(bubba \"bubba\"\)\)
   \(declare \(type simple-string-or-null bubba\)\) bubba\)~%~@
-:SEE-ALSO `mon:string-or-null-p', `mon:string-null-or-empty-p'.~%►►►")
+:SEE-ALSO `mon:string-or-null-p', `mon:string-null-or-empty-p'.~%▶▶▶")
 
 (typedoc 'string-empty
 "Whether object is a string of length 0.~%~@
@@ -1842,7 +1842,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty', `mon:string-not-null-or-empty',
 `mon:simple-string-empty', `mon:simpele-string-not-empty',
 `mon:simple-string-not-null-or-empty', `mon:string-or-null',
-`mon:simple-string-or-null'.~%►►►")
+`mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'string-not-empty
 "Whether object is a string not of length 0.~%~@
@@ -1851,7 +1851,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'string-not-null-or-empty
 "Whether object is a string not of length 0 and not null.~%~@
@@ -1860,7 +1860,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'simple-string-empty
 "Whether object is a `cl:simple-string' type of length 0.~%~@
@@ -1869,7 +1869,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'simple-string-not-empty
 "Whether object is a `cl:simple-string' not type of length 0.~%~@
@@ -1878,7 +1878,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'simple-string-not-null-or-empty
 "Whether object is a `cl:simple-string' not type of length 0 nor null.~%~@
@@ -1887,7 +1887,7 @@ a symbol evaluating to one it may be useful to declare it
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'string-of-length-1
 "An object with the type signature: \(array character \(1\)\).~%~@
@@ -1902,7 +1902,7 @@ includes adjustable arrays and those with fill-pointers.~%~@
  \(typep  \"ab\" 'string-of-length-1\)~%
  \(typep 42 'string-of-length-1\)~%
 :SEE-ALSO `mon:simple-string-of-length-1' `mon:simple-string-of-length-1-p',
-`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 (typedoc 'simple-string-of-length-1
 "An object with the type signature: \(simple-array character \(1\)\).~%~@
@@ -1915,7 +1915,7 @@ includes adjustable arrays and those with fill-pointers.~%~@
  \(typep  \"ab\" 'simple-string-of-length-1\)~%
  \(typep 42 'simple-string-of-length-1\)~%~@
 :SEE-ALSO `mon:string-of-length-1' `mon:string-of-length-1-p',
-`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 (typedoc 'string-all-whitespace-safely
 "Like type `mon:string-all-whitespace', but doesn't signal a type-error
@@ -1932,7 +1932,7 @@ error when object is not `cl:stringp'.~%~@
 :NOTE There are good use-cases for both `mon:string-all-whitespace-p' and its
 associated type `mon:string-all-whitespace' when we have already distinguished
 that object is of type `mon:string-not-null'.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; #.(format nil
 (typedoc 'string-not-null-empty-or-all-whitespace
@@ -1948,11 +1948,11 @@ bubba
 :SEE-ALSO `mon:string-empty', `mon:string-not-empty',
 `mon:string-not-null-or-empty', `mon:simple-string-empty',
 `mon:simpele-string-not-empty', `mon:simple-string-not-null-or-empty',
-`mon:string-or-null', `mon:simple-string-or-null'.~%►►►")
+`mon:string-or-null', `mon:simple-string-or-null'.~%▶▶▶")
 
 (typedoc 'integer-or-null
  "Type is either `cl:integerp' or null.~%~@
-:SEE-ALSO `mon:string-or-null-p', `mon:string-null-or-empty-p'.~%►►►")
+:SEE-ALSO `mon:string-or-null-p', `mon:string-null-or-empty-p'.~%▶▶▶")
 
 (typedoc 'proper-list
  "Type designator for proper lists.~%~@
@@ -1986,7 +1986,7 @@ Main usefulness as a type designator of the expected type in a TYPE-ERROR.~%~@
  |      subexpression \(as appropriate to the context\) that is the object itself.
  `----~%~@
 :SEE-ALSO `mon:dotted-list', `mon:circular-list', `mon:proper-list-not-null-p',
-`mon:proper-list-p'.~%►►►")
+`mon:proper-list-p'.~%▶▶▶")
 
 (typedoc 'proper-plist
  "Whether object is of type `mon:proper-list' with length `evenp'.~%~@
@@ -2034,7 +2034,7 @@ not create circularity.~%~@
  |      subexpression \(as appropriate to the context\) that is the object itself.
  `----~%~@
 :SEE-ALSO `mon:dotted-list', `mon:circular-list', `mon:proper-list-not-null-p',
-`mon:proper-list-p', `mon:plist-error'.~%►►►")
+`mon:proper-list-p', `mon:plist-error'.~%▶▶▶")
 
 (typedoc 'proper-plist-not-null
          "Like type spec for `mon:proper-list' but does allow the empty list.~%~@
@@ -2043,7 +2043,7 @@ not create circularity.~%~@
  \(typep nil 'proper-plist\)~%
  \(typep '\(a . b\) 'proper-plist\)~%
 :SEE-ALSO `mon:dotted-list', `mon:circular-list', `mon:proper-list-not-null-p',
-`mon:proper-list-p', `mon:plist-error'.~%►►►")
+`mon:proper-list-p', `mon:plist-error'.~%▶▶▶")
 
 (typedoc 'dotted-list
 "Whether object is of type cons and satisfies `mon:list-dotted-p'.~%~@
@@ -2069,7 +2069,7 @@ ANSI Glossary defines the following terms with regards to dotted lists:~%
  |  1. a cons whose cdr is a non-list.
  |  2. any cons, used to emphasize the use of the cons as a symmetric data pair.
  `----~%~@
-:SEE-ALSO `mon:proper-list', `mon:circular-list'.~%►►►")
+:SEE-ALSO `mon:proper-list', `mon:circular-list'.~%▶▶▶")
 
 (typedoc 'circular-list
 "Type designator for circular lists.~%~@
@@ -2089,7 +2089,7 @@ The glossary of the ANSI spec defines a circular list as:~%
  `----~%
 :SEE-ALSO `mon:circular-list-error', `mon:dotted-list', `mon:list-dotted-p',
 `mon:proper-list', `mon:list-proper-p', `mon:circular-list-error',
-`cl:*print-circle*'.~%►►►")
+`cl:*print-circle*'.~%▶▶▶")
 
 (typedoc 'bool-vector
 "A bool-vector is of type `cl:simple-bit-vector' with element-type bit.~%~@
@@ -2098,7 +2098,7 @@ The glossary of the ANSI spec defines a circular list as:~%
  \(typep \(make-array 8 :element-type 'bit :initial-element 1\) 'bool-vector\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE info node \(info \"\(ansicl\)simple-bit-vector\"\)~%~@
-:SEE-ALSO `mon:bit-vector-octet', `mon:byte-array'.~%►►►")
+:SEE-ALSO `mon:bit-vector-octet', `mon:byte-array'.~%▶▶▶")
 
 (typedoc 'bit-vector-octet 
          "An object of type: \(simple-bit-vector 8\).~%~@
@@ -2113,7 +2113,7 @@ An object of this type is a bit-vector with the following properties:~%
  \(typep \(make-array 8 :element-type '\(unsigned-byte 8\)\) 'bit-vector-octet\)~%
  \(mon:type-expand-all 'bit-vector-octet\)~%~@
 :SEE info node \(info \"\(ansicl\)simple-bit-vector\"\)~%~@
-:SEE-ALSO `mon:bool-vector', `mon:byte-array'.~%►►►")
+:SEE-ALSO `mon:bool-vector', `mon:byte-array'.~%▶▶▶")
 
 (typedoc 'byte-array
 "An object of type (simple-array 'unsigned-byte-8 ([* | LENGTH])).~%~@
@@ -2128,7 +2128,7 @@ Length is the upper bounds of the array dimension.~%~@
    \(typep \(sb-ext:string-to-octets \"bubba\"\) `\(byte-array ,\(1+ len\)\)\)\)~%
  \(typep #\(255 255 255 255\) '\(byte-array 4\)\)~%
  \(typep #\(255 255 255 255\) 'byte-array\)~%~@
-:SEE-ALSO `mon:unsigned-byte-8', `mon:bool-vector'.~%►►►")
+:SEE-ALSO `mon:unsigned-byte-8', `mon:bool-vector'.~%▶▶▶")
 
 (typedoc '%byte-vector
 "An object of this type is a SIMPLE-VECTOR of the specified LENGTH.~%~@
@@ -2137,7 +2137,7 @@ LENGTH is either '* or a positive integer value.~%~@
 Helper composite type for `mon:byte-array'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'fixnum-0-or-over
 "The range of fixnums from 0 to `cl:most-positive-fixnum'.~%~@
@@ -2147,7 +2147,7 @@ On a 32bit machine this is equivalent to \(unsigned-byte 29\).~%~@
  \(typep most-positive-fixnum 'fixnum-0-or-over\)~%
  \(typep \(1+ most-positive-fixnum\) 'fixnum-0-or-over\)~%
  \(typep -1 'fixnum-0-or-over\)~%~@
-:SEE-ALSO `mon:fixnum-exclusive', `mon:octet', `mon:index-or-minus-1'.~%►►►")
+:SEE-ALSO `mon:fixnum-exclusive', `mon:octet', `mon:index-or-minus-1'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-128
 "An object of type: \(unsigned-byte 128\)~%~@
@@ -2159,7 +2159,7 @@ Octal value:   #o3777777777777777777777777777777777777777777
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-96
          "An object of type: \(unsigned-byte 96\)~%~@
@@ -2170,7 +2170,7 @@ Decimal value: 79228162514264337593543950335
 Octal value:   #o77777777777777777777777777777777
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-64
 "An object of type: \(unsigned-byte 64\)~%~@
@@ -2183,7 +2183,7 @@ Binary value:  #b111111111111111111111111111111111111111111111111111111111111111
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-56
  "An object of type: \(unsigned-byte 56\)~%~@
@@ -2194,7 +2194,7 @@ Decimal value: 72057594037927935
 Octal value:   #o3777777777777777777
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-48
 "An object of type: \(unsigned-byte 48\)~%~@
@@ -2207,7 +2207,7 @@ Binary value: #b111111111111111111111111111111111111111111111111~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-32
 "An object of type: \(unsigned-byte 32\)~%~@
@@ -2220,7 +2220,7 @@ Binary value:  #b11111111111111111111111111111111~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-29
 "An object of type: \(unsigned-byte 29\).~%~@
@@ -2234,7 +2234,7 @@ Binary value:  #b00011111111111111111111111111111
  \(typep most-positive-fixnum 'unsigned-byte-29\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-24', `unsigned-byte-16', `unsigned-byte-8',
-`mon:fixnum-0-or-over'.~%►►►")
+`mon:fixnum-0-or-over'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-24
 "An object of type: \(unsigned-byte 24\)~%~@
@@ -2246,7 +2246,7 @@ Binary value:   #b111111111111111111111111~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-16
 "An object of type: \(unsigned-byte 16\)~%~@
@@ -2259,7 +2259,7 @@ Binary value:   #b1111111111111111~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-8
 "An object of type: \(unsigned-byte 8\)~%~@
@@ -2272,7 +2272,7 @@ Binary value:   #b11111111~%~@
 :EXAMPLE~%~@
  \(typep 88 'unsigned-byte-8\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
-`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%►►►")
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'octet
 "An object of type: \(unsigned-byte 8\)~%~@
@@ -2286,7 +2286,7 @@ Binary value:   #b11111111~%~@
  \(typep 88 'octet\)~%~@
 :SEE-ALSO `nibble', `unsigned-byte-128', `unsigned-byte-64', `unsigned-byte-48',
 `unsigned-byte-32', `unsigned-byte-29', `unsigned-byte-16',
-`unsigned-byte-8'.~%►►►")
+`unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'nibble
          "An object of type \(unsigned-byte 4\).~%~@
@@ -2302,7 +2302,7 @@ Binary value #b1111~%~@
 Equivalent to \(mod 16\)~%
 :SEE-ALSO `octet', `unsigned-byte-128', `unsigned-byte-64', `unsigned-byte-48',
 `unsigned-byte-32', `unsigned-byte-29', `unsigned-byte-16',
-`unsigned-byte-8'.~%►►►")
+`unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'code-point
  "The subtype of integers just big enough to hold all Unicode codepoints.~%~@
@@ -2315,7 +2315,7 @@ On SBCL with UTF enabled character set this \(1- `cl:char-code-limit'\)~%~@
 :NOTE The type `mon:char-code-integer' and `mon:code-point' are not the same b/c
 `cl:char-code-limit' is not necessarily tied to Unicode character set.
 :SEE (URL `http://unicode.org/glossary/#C').~%~@
-:SEE-ALSO `mon:octet', `cl:char-int'.~%►►►")
+:SEE-ALSO `mon:octet', `cl:char-int'.~%▶▶▶")
 
 (typedoc 'char-code-integer
 "Subtype of integers bounded by the range 0 - `cl:char-code-limit'.~%~@
@@ -2325,7 +2325,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
  \(not \(typep char-code-limit 'char-code-integer\)\)~%~@
 :NOTE The type `mon:char-code-integer' and `mon:code-point' are not the same b/c
 `cl:char-code-limit' is not necessarily tied to Unicode character set.
-:SEE-ALSO `mon:whitespace-char', `mon:base-char-p', `cl:graphic-char-p'.~%►►►")
+:SEE-ALSO `mon:whitespace-char', `mon:base-char-p', `cl:graphic-char-p'.~%▶▶▶")
 
 (typedoc 'char-or-char-code-integer
 "An object of type `cl:character' or `mon:char-code-integer'.~%~@
@@ -2336,7 +2336,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
  \(typep char-code-limit 'char-or-char-code-integer\)~%
  \(typep -1 'char-or-char-code-integer\)~%~@
 :SEE-ALSO `mon:code-point', `cl:char-code-limit', `mon:each-a-char-code-integer',
-`mon:each-a-character-or-char-code-integer'.~%►►►")
+`mon:each-a-character-or-char-code-integer'.~%▶▶▶")
 
 (typedoc 'whitespace-char
   "A character is of this type if `eql' a member of `mon:*whitespace-chars*'~%~@
@@ -2350,7 +2350,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
 `cl:graphic-char-p', `cl:alpha-char-p',`cl:digit-char-p', `cl:alphanumericp',
 `cl:upper-case-p', `cl:lower-case-p', `cl:both-case-p', `cl:char=', `cl:char/=',
 `cl:char<', `cl:char>', `cl:char<=', `cl:char>=', `cl:char-equal',
-`cl:char-not-equal'.~%►►►")
+`cl:char-not-equal'.~%▶▶▶")
 
 (typedoc 'char-not-whitespace-char
 "Whether object is of type cl:character and not a member `mon:*whitespace-chars*'.~%~@
@@ -2359,7 +2359,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
  \(char-not-whitespace-char #\\Tab\)~%
  \(notany #'\(lambda \(x\) \(typep x 'char-not-whitespace-char\)\) *whitespace-chars*\)~%~@
 :SEE-ALSO `mon:whitespace-char', `mon:whitespace-char-p',
-`mon:*whitespace-chars*'.~%►►►")
+`mon:*whitespace-chars*'.~%▶▶▶")
 
 (typedoc 'hexadecimal-char
 "An object that is of type `cl:standard-char' and member of `mon:*hexadecimal-chars*'.~%~@
@@ -2375,7 +2375,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
 `cl:graphic-char-p', `cl:alpha-char-p',`cl:digit-char-p', `cl:alphanumericp',
 `cl:upper-case-p', `cl:lower-case-p', `cl:both-case-p', `cl:char=', `cl:char/=',
 `cl:char<', `cl:char>', `cl:char<=', `cl:char>=', `cl:char-equal',
-`cl:char-not-equal'.~%►►►")
+`cl:char-not-equal'.~%▶▶▶")
 
 (typedoc 'string-or-char
 "An object that is either of type `cl:string' or a `cl:character'.~%~@
@@ -2384,7 +2384,7 @@ The is 1- upper exclusive bound on values produced by `cl:char-code'.~%~@
  \(typep #\\► 'string-or-char\)~%
  \(typep 9658 'string-or-char\)~%~@
 :SEE-ALSO `mon:string-or-char-or-code-point-integer',
-`mon:string-or-char-or-code-point-integer-if'.~%►►►")
+`mon:string-or-char-or-code-point-integer-if'.~%▶▶▶")
 
 (typedoc 'string-or-char-or-code-point-integer
 "An object of type `mon:string-or-char' or `mon:code-point'.~%~@
@@ -2394,7 +2394,7 @@ Or, when not sb-unicode an object of type `char-code-integer'.~%~@
  \(typep #\\► 'string-or-char-or-code-point-integer\)~%
  \(typep 9658 'string-or-char-or-code-point-integer\)~%~@
 :SEE-ALSO `mon:string-or-char', `mon:string-or-char-or-code-point-integer',
-`mon:string-or-char-or-code-point-integer-if'.~%►►►")
+`mon:string-or-char-or-code-point-integer-if'.~%▶▶▶")
 
 #+sbcl 
 (typedoc 'closure-obj
@@ -2406,7 +2406,7 @@ Or, when not sb-unicode an object of type `char-code-integer'.~%~@
 	    \(setf *my-clsr* \(mk-clsr 10\)\)\)
      \(typep *my-clsr* 'closure-obj\)
    \(unintern '*my-clsr*\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'array-length
 "Type designator for a dimension of an array of LENGTH.~%~@
@@ -2416,7 +2416,7 @@ LENGTH defaults to ARRAY-DIMENSION-LIMIT.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:index', `index-or-minus-1', `mon:array-index',
 `mon:array-length', `cl:array-dimension-limit',
-`cl:most-positive-fixnum'.~%►►►")
+`cl:most-positive-fixnum'.~%▶▶▶")
 
 (typedoc 'array-index
   "Type designator for an index into array.~%~@
@@ -2447,7 +2447,7 @@ This type def is courtesy SBCL, which says:~%
  \(typep \(-  most-positive-fixnum 3\) 'array-index\)~%~@
 :SEE-ALSO `mon:index', `index-or-minus-1', `mon:array-index',
 `mon:array-length', `cl:array-dimension-limit',
-`cl:most-positive-fixnum'.~%►►►")
+`cl:most-positive-fixnum'.~%▶▶▶")
 
 (typedoc 'index
 "Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
@@ -2461,7 +2461,7 @@ On non-SBCL systems this is the integer range:~%~@
  \(typep #x1FFFFFFD 'index\)~%
  \(typep \(1+ #x1FFFFFFD\) 'index\)~%~@
 :SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:fixnump',
-`mon:bignump', `cl:array-dimension-limit' `cl:most-positive-fixnum'.~%►►►")
+`mon:bignump', `cl:array-dimension-limit' `cl:most-positive-fixnum'.~%▶▶▶")
 
 (typedoc 'index-plus-1 
 "Type for indexing into arrays in cl:loop forms where the stepped quantity may
@@ -2478,7 +2478,7 @@ On non-SBCL systems this is the range:~%
  \(typep #x1FFFFFFF 'index\)~%~@
 :SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:index',
 `mon:array-length', `mon:fixnump', `mon:bignump', `cl:array-dimension-limit'
-`cl:most-positive-fixnum'.~%►►►")
+`cl:most-positive-fixnum'.~%▶▶▶")
 
 (typedoc 'index-or-minus-1
 "Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
@@ -2490,7 +2490,7 @@ leaving the loop range.~%~@
 :NOTE `cl:most-positive-fixnum' is specified as being:~%~
   \(and \(<= \(1- \(expt 2 15\)\) <M-P-F>\)
        \(<= array-dimension-limit <M-P-F>\)\)~%~@
-:SEE-ALSO `mon:index-plus-1', `mon:array-index', `mon:index', `mon:fixnump', `mon:bignump'.~%►►►")
+:SEE-ALSO `mon:index-plus-1', `mon:array-index', `mon:index', `mon:fixnump', `mon:bignump'.~%▶▶▶")
 
 (typedoc 'fixnum-exclusive
 "A bounded range of integer values one less than unary stepping iterators can access.~%~@
@@ -2504,7 +2504,7 @@ On a 32bit machine this is likely from -536870910 to 536870909.~%~@
  \(typep most-negative-fixnum 'fixnum-exclusive\)~%
  \(typep most-positive-fixnum 'fixnum-exclusive\)~%~@
 :SEE-ALSO `mon:fixnump', `mon:bignump', `mon:index', `mon:array-index',
-`mon:index-or-minus-1'.~%►►►")
+`mon:index-or-minus-1'.~%▶▶▶")
 
 (typedoc 'standard-char-or-null
 "An object of type `cl:standard-char' or null.~%~@
@@ -2512,7 +2512,7 @@ On a 32bit machine this is likely from -536870910 to 536870909.~%~@
  \(typep #\\a 'standard-char-or-null\)~%
  \(typep nil 'standard-char-or-null\)~%
  \(typep #\\é 'standard-char-or-null\)~%~@
-:SEE-ALSO `mon:proper-list-not-null', `mon:not-null', `mon:base-char-p'.~%►►►")
+:SEE-ALSO `mon:proper-list-not-null', `mon:not-null', `mon:base-char-p'.~%▶▶▶")
 
 (typedoc 'digit-char-0-or-1
 "An object which is null or satisfies `mon:digit-char-0-or-1-p'.~%~@
@@ -2521,7 +2521,7 @@ On a 32bit machine this is likely from -536870910 to 536870909.~%~@
  \(typep #\\0 'digit-char-0-or-1-p\)~%
  \(typep nil  'digit-char-0-or-1-p\)~%
  \(typep #\\2 'digit-char-0-or-1-p\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'string-all-digit-char-0-or-1
 "An object which is is null or a simple-string of which every character
@@ -2534,7 +2534,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
    \(let \(\(not-ok chars-no\)\)
      \(declare \(string-all-digit-char-0-or-1 not-ok\)\)
      not-ok\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (typedoc 'not-null
 "An object witch is not null.~%~@
@@ -2543,7 +2543,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep nil 'not-null\)~%
  \(typep t   'not-null\)~%
 :SEE-ALSO `mon:proper-list-not-null', `mon:standard-char-or-null',
-`mon:booleanp', `cl:null'.~%►►►")
+`mon:booleanp', `cl:null'.~%▶▶▶")
 
 (typedoc 'symbol-not-null
 "Whether OBJECT is symbolp and not null.~%~@
@@ -2554,7 +2554,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep 'bubba 'symbol-not-null\)~%
  \(typep 't     'symbol-not-null\)~%
  \(typep '8     'symbol-not-null\)~%~@
-:SEE-ALSO `mon:not-null', `mon:symbol-not-a-constant'.~%►►►")
+:SEE-ALSO `mon:not-null', `mon:symbol-not-a-constant'.~%▶▶▶")
 
 (typedoc  'proper-list-not-null
 "A list of type `cl:not-null' satisfying `mon:list-proper-p'.~%~@
@@ -2565,14 +2565,14 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep  '\(\) 'proper-list-not-null\)~%
  \(typep  '\(a b . c\) 'proper-list-not-null\)~%
  \(typep  '\(a . c\) 'proper-list-not-null\)~%~@
-:SEE-ALSO `mon:proper-list-not-null', `mon:booleanp', `cl:null'.~%►►►")
+:SEE-ALSO `mon:proper-list-not-null', `mon:booleanp', `cl:null'.~%▶▶▶")
 
 (typedoc 'each-a-simple-string
 "A proper list of type `mon:proper-list-not-null' satisfying  `mon:each-a-simple-string-p'.~%~@
 :EXAMPLE~%
  \(typep '\(\"a\" \"b\" \"c\" \"d\"\) 'each-a-simple-string\)~%~@
 :SEE-ALSO `mon:proper-list', `mon:proper-list-p', `mon:not-null',
-`cl:simple-string-p', `cl:simple-string', `cl:null'.~%►►►")
+`cl:simple-string-p', `cl:simple-string', `cl:null'.~%▶▶▶")
 
 (typedoc 'string-with-fill-pointer 
 "Whether object is of type `cl:vector' with element of type either
@@ -2585,7 +2585,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
                     :fill-pointer 6\)
         'string-with-fill-pointer\)~%~@
 :SEE-ALSO `mon:string-with-fill-pointer-p', `mon:vector-with-fill-pointer-p',
-`cl:vectorp', `cl:array-has-fill-pointer-p'.~%►►►")
+`cl:vectorp', `cl:array-has-fill-pointer-p'.~%▶▶▶")
 
 (typedoc 'each-a-sequence
  "Whether each elt in object satisfies `mon:each-a-sequence-p'.~%~@
@@ -2597,7 +2597,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
 :SEE-ALSO `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-sequence-p',
 `mon:each-a-sequence-proper-or-character-p',
-`mon:each-a-sequence-proper-p'.~%►►►")
+`mon:each-a-sequence-proper-p'.~%▶▶▶")
 
 (typedoc 'each-a-sequence-proper
  "Whether object is `sequencep' and satisfies `mon:each-a-sequence-proper-p'~%~@
@@ -2637,7 +2637,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
 :SEE-ALSO `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-sequence-p',
 `mon:each-a-sequence-proper-or-character-p',
-`mon:each-a-sequence-proper-p'.~%►►►")
+`mon:each-a-sequence-proper-p'.~%▶▶▶")
 
 (typedoc 'each-a-string-of-length-1-p
          "An object which is a proper list with each element satisfying `mon:string-of-length-1-p'.
@@ -2656,7 +2656,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep  '\(\"a\" \"b\" \"c\" nil \"d\"\) 'each-a-string-of-length-1\)~%
  \(typep nil 'each-a-string-of-length-1\)~%~@
 :SEE-ALSO `mon:each-a-simple-string-of-length-1-p',
-`mon:each-a-simple-string-p', `mon:each-a-simple-string-p'.~%►►►")
+`mon:each-a-simple-string-p', `mon:each-a-simple-string-p'.~%▶▶▶")
 
 (typedoc 'each-a-simple-string-of-length-1
 	"An object which is a proper list with each element satisfying `mon:simple-string-of-length-1-p'.
@@ -2675,7 +2675,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep  '\(\"a\" \"b\" \"c\" nil \"d\"\) 'each-a-simple-string-of-length-1\)~%
  \(typep nil 'each-a-simple-string-of-length-1\)~%~@
 :SEE-ALSO `mon:each-a-string-of-length-1-p', `mon:each-a-simple-string-p',
-`mon:each-a-simple-string-p'.~%►►►")
+`mon:each-a-simple-string-p'.~%▶▶▶")
 
 (typedoc 'mon:each-a-sequence-proper-or-character
  "Whether object is `sequencep' and satisfies `mon:each-a-sequence-proper-or-character-p'.~%~@
@@ -2685,7 +2685,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
 :SEE-ALSO `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-sequence-p',
 `mon:each-a-sequence-proper-or-character-p',
-`mon:each-a-sequence-proper-p'.~%►►►")
+`mon:each-a-sequence-proper-p'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -2699,7 +2699,7 @@ When true return SYMBOL else nil.
  (symbol-not-a-constantp nil)
  (symbol-not-a-constantp 'bubba)
  \(symbol-not-a-constantp \"bubba\"\)~%
-:SEE-ALSO `mon:symbol-not-null-or-string-not-empty-p'.~%►►►")
+:SEE-ALSO `mon:symbol-not-null-or-string-not-empty-p'.~%▶▶▶")
 
 (fundoc 'symbol-not-null-or-string-not-empty-p
 "Whether OBJECT is of type `mon:symbol-not-null-or-string-not-empty'.~%~@
@@ -2709,7 +2709,7 @@ When true return SYMBOL else nil.
  \(symbol-not-null-or-string-not-empty-p \"b\"\)~%
  \(symbol-not-null-or-string-not-empty-p \"\"\)~%
  \(symbol-not-null-or-string-not-empty-p nil\)~%~@
-:SEE-ALSO `mon:symbol-not-a-constantp'.~%►►►")
+:SEE-ALSO `mon:symbol-not-a-constantp'.~%▶▶▶")
 
 (fundoc 'define-list-of-predicate
 "Return a function object which checks if elements of its OBJECT arg are of TYPE.
@@ -2733,7 +2733,7 @@ Suitable for use with `cl:deftype' in a satisfies form.~%~@
  \(typep '\(1 2 . 3\) 'each-an-integer\)~%~@
 ;; :NOTE Following signals an error whereas above `typep' form does not:~%
  \(each-an-integer-p '\(1 2 . 3\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-list-of-predicate-name
 "Make an internable string from symbol-name of TYPE.~%~@
@@ -2746,7 +2746,7 @@ Else, return value has the format:~%
 :EXAMPLE~%
  \(make-list-of-predicate-name 'integer\)
  \(make-list-of-predicate-name 'function\)
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'type-any
 "Like `cl:notany' except for type predicates and:~%
@@ -2759,7 +2759,7 @@ Else, return value has the format:~%
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:type-not', `mon:type-any', `mon:type-every', `cl:typep',
-`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%►►►")
+`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%▶▶▶")
 
 (fundoc 'type-every
 "Like `cl:every', except for type predicates and:
@@ -2772,14 +2772,14 @@ Else, return value has the format:~%
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:type-not', `mon:type-any', `mon:type-every', `cl:typep',
-`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%►►►")
+`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%▶▶▶")
 
 (fundoc 'type-equal
 "Whether TYPE1 and TYPE2 denote the same type.~%~@
 :EXAMPLE~%
  \(type-equal 'string 'string\)~%~@
 :SEE-ALSO `mon:type-every', `mon:type-any' `mon:type-not', `cl:typep',
-`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%►►►")
+`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%▶▶▶")
 
 (fundoc 'list-circular-p
  "Returns true if OBJECT is a circular list, NIL otherwise.~%~@
@@ -2797,7 +2797,7 @@ ANSI Glossary defines \"proper list\" and \"improper list\" as follows:~%
  | n. A list which is not a proper list: a circular list or a dotted list.
  `----~%~@
 :SEE-ALSO `mon:circular-list', `mon:circular-list-error', `mon:list-proper-p',
-`mon:list-dotted-p'.~%►►►")
+`mon:list-dotted-p'.~%▶▶▶")
 
 (fundoc 'list-dotted-p
  "Whether LIST is a dotted pair, i.e. an improper list.~%~@
@@ -2827,7 +2827,7 @@ When list is none of the above return one value NIL.~%~@
  | n. A list terminated by the empty list. \(The empty list is a proper list.\)
  `----~%~@
 :SEE-ALSO `list-proper-not-null-p', `mon:list-proper-p', `mon:list-circular-p',
-`mon:circular-list', `mon:circular-list-error'.~%►►►")
+`mon:circular-list', `mon:circular-list-error'.~%▶▶▶")
 
 (fundoc 'list-proper-p
   "Returns true if OBJECT is a proper list.~%~@
@@ -2867,7 +2867,7 @@ When list is none of the above return one value NIL.~%~@
 :SEE-ALSO `mon:proper-list', `mon:list-proper-not-null-p', `mon:sequencep',
 `mon:list-dotted-p', `mon:list-circular-p', `mon:circular-list',
 `mon:circular-list-error', `mon:sequence-zerop', `mon:sequence-type',
-`cl:list-length', `cl:list*', `cl:cons', `cl:consp', `cl:atom'.~%►►►")
+`cl:list-length', `cl:list*', `cl:cons', `cl:consp', `cl:atom'.~%▶▶▶")
 
 (fundoc 'list-proper-not-null-p
 "Whether OBJECT is of type `mon:proper-list-not-null'.~%~@
@@ -2885,7 +2885,7 @@ An object is of this type if it is of type `mon:not-null' and satisfies
  \(list-proper-not-null-p \(list\)\)~%
  \(list-proper-not-null-p #\(\)\)~%~@
 :SEE-ALSO `mon:sequencep', `sequence-zerop', `sequence-type', `cl:list-length',
-`cl:list*', `cl:cons', `cl:consp', `cl:atom'.~%►►►")
+`cl:list*', `cl:cons', `cl:consp', `cl:atom'.~%▶▶▶")
 
 (fundoc 'plist-proper-p
 "Whether object is a plist.~%~@
@@ -2952,7 +2952,7 @@ is `cl:evenp'.~%~@
  `----~%~@
 :SEE \(info \"\(ansicl\)symbol\"\)~%
 :SEE-ALSO `mon:proper-plist', `mon:plist-proper-not-null-p',
-`mon:proper-plist-not-null', `mon:plist-error', `cl:get-properties'.~%►►►")
+`mon:proper-plist-not-null', `mon:plist-error', `cl:get-properties'.~%▶▶▶")
 
 (fundoc 'plist-proper-not-null-p 
 "Like `mon:plist-proper-p' but do not consider empty list as of type `mon:proper-list'~%~@
@@ -2961,7 +2961,7 @@ is `cl:evenp'.~%~@
  \(plist-proper-not-null-p '\(:key \"val\"\)\)
  \(plist-proper-p '\(\)\)
  \(plist-proper-not-null-p '\(\)\)
-:SEE-ALSO `mon:plist-proper-not-null', `mon:plist-error'.~%►►►")
+:SEE-ALSO `mon:plist-proper-not-null', `mon:plist-error'.~%▶▶▶")
 
 (fundoc 'sequence-zerop
 "Returns non-nil iff the sequence SEQ has zero length.~%~@
@@ -2975,7 +2975,7 @@ Works in constant time even with lists.~%~@
  \(sequence-zerop \(make-array 0\)\)~%
  \(sequence-zerop '\(nil . nil\)\)~%
  \(sequence-zerop #*00000\)~%~@
-:SEE-ALSO `mon:proper-list-not-null', `mon:not-null', `mon:list-length-n-p'.~%►►►")
+:SEE-ALSO `mon:proper-list-not-null', `mon:not-null', `mon:list-length-n-p'.~%▶▶▶")
 
 (fundoc 'sequence-type
  "Return the symbol representing the type of the sequence SEQ.~%~@
@@ -3001,7 +3001,7 @@ Return value is one of \(string, vector, or list\).~%~@
  \(sequence-type #\(v e c t o r\)\)~%
  \(sequence-type 'symbol-not-in-error t\)~%
  \(sequence-type 'symbol-in-error\)~@
-:SEE-ALSO `mon:sequencep'.~%►►►")
+:SEE-ALSO `mon:sequencep'.~%▶▶▶")
 
 (fundoc 'sequencep
   "Return t if OBJECT is a sequence \(list or vector\).~%~@
@@ -3042,7 +3042,7 @@ Return value is one of \(string, vector, or list\).~%~@
 | sequence function.
 `----~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mon:sequence-type'.~%►►►")
+:SEE-ALSO `mon:sequence-type'.~%▶▶▶")
 
 (fundoc 'booleanp
 "Whether OBJ is of type `cl:boolean'.~%~@
@@ -3079,7 +3079,7 @@ Values returned will have one of the following forms:~%
  \(booleanp 8\)
  \(booleanp 8 t\)
  \(multiple-value-list \(booleanp 8 t\)\)~%~@
-:SEE-ALSO `mon:type-specifier-p', `cl:null', `cl:multiple-value-list'.~%►►►")
+:SEE-ALSO `mon:type-specifier-p', `cl:null', `cl:multiple-value-list'.~%▶▶▶")
 
 (fundoc 'each-a-string-p
 "Whether each element of STRING-LIST is `stringp'.~%~@
@@ -3089,7 +3089,7 @@ STRING-LIST is a proper list.
  \(each-a-string-p '\(\"a\" \"b\" #\(#\\c\)\)\)~%
  \(each-a-string-p '\(\"a\" . \"b\"\)\)~%
 :SEE-ALSO `mon:each-a-simple-string', `each-a-string-of-length-1-p',
-`mon:each-a-string-or-vector-in-vector'.~%►►►")
+`mon:each-a-string-or-vector-in-vector'.~%▶▶▶")
 
 (fundoc 'each-a-simple-string-p
 "Return non-nil when each elt in STRING-LIST is `simple-string-p'.~%~@
@@ -3102,7 +3102,7 @@ STRING-LIST is a proper-list of type `proper-list-not-null'.~%~@
  \(each-a-simple-string-p nil\)~%
  \(each-a-simple-string-p \"a string\"\)~%~@
 :SEE-ALSO `mon:each-a-simple-string', `each-a-string-p',
-`each-a-string-of-length-1-p', `mon:each-a-string-or-vector-in-vector'.~%►►►")
+`each-a-string-of-length-1-p', `mon:each-a-string-or-vector-in-vector'.~%▶▶▶")
 
 (fundoc 'each-a-string-of-length-1-p
 	"Whether each element of STRING-LIST is a non-empty string of length 1.~%~@
@@ -3115,7 +3115,7 @@ Return non-nil when STRING-LIST is a proper list and each element satisfies `mon
  \(each-a-string-of-length-1-p nil\)~%~@
 :SEE-ALSO `mon:each-a-simple-string-of-length-1-p',
 `mon:each-a-simple-string-p', `mon:each-a-simple-string-p',
-`mon:each-a-string-or-vector-in-vector'.~%►►►")
+`mon:each-a-string-or-vector-in-vector'.~%▶▶▶")
 
 (fundoc 'each-a-simple-string-of-length-1-p
 	"Whether each element of STRING-LIST is a non-empty simple-string of length 1.~%~@
@@ -3127,7 +3127,7 @@ Return non-nil when STRING-LIST is a proper list and each element satisfies `mon
  \(each-a-simple-string-of-length-1-p '\(\"a\" \"b\" \"c\" nil \"d\"\)\)~%
  \(each-a-simple-string-of-length-1-p nil\)~%~@
 :SEE-ALSO `mon:each-a-string-of-length-1-p', `mon:each-a-simple-string-p',
-`mon:each-a-simple-string-p', `mon:each-a-string-or-vector-in-vector'.~%►►►")
+`mon:each-a-simple-string-p', `mon:each-a-string-or-vector-in-vector'.~%▶▶▶")
 
 (fundoc 'each-a-string-or-vector-in-vector
         "Whether VECTOR is `cl:vectorp' with every element either `stringp' or a vector
@@ -3138,7 +3138,7 @@ An object that is `cl:stringp' does not satisfy the test.~%~@
  \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\"\)\)~%
  \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\" :adjustable t\)\)~%
  \(each-a-string-or-vector-in-vector \(make-array 3 :initial-element \"abc\" :fill-pointer 0\)\)~%~@
-:SEE-ALSO `mon:each-a-string-p'.~%►►►")
+:SEE-ALSO `mon:each-a-string-p'.~%▶▶▶")
 
 (fundoc '%byte-vector-each-an-unsigned-byte-8
 "Whether each element of the simple-vector BYTE-ARRAY is of type 'unsigned-byte-8.~%~@
@@ -3147,7 +3147,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(%byte-vector-each-an-unsigned-byte-8 #\(255 255 255 255\)\)~%~@
 ;; Following fails successfully:~%~@
  \(%byte-vector-each-an-unsigned-byte-8 #\(255 255 255 256\)\)~%~@
-:SEE-ALSO `mon:byte-array'.~%►►►")
+:SEE-ALSO `mon:byte-array'.~%▶▶▶")
 
 (fundoc  'string-or-null-p 
   "Return non-nil if object is `cl:stringp' or null.~%~@
@@ -3156,7 +3156,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(string-or-null-p \"bubba\"\)~%
  \(string-or-null-p 'bubba\)~%~@
 :SEE-ALSO `mon:string-or-null', `mon:simple-string-or-null',
-`mon:simple-string-or-null-p', `mon:string-null-or-empty-p'.~%►►►")
+`mon:simple-string-or-null-p', `mon:string-null-or-empty-p'.~%▶▶▶")
 
 (fundoc  'simple-string-or-null-p 
   "Return non-nil if object is null or `cl:simple-string-p'.~%~@
@@ -3165,19 +3165,19 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(simple-string-or-null-p \"bubba\"\)~%
  \(simple-string-or-null-p 'bubba\)~%~@
 :SEE-ALSO `mon:string-or-null', `mon:simple-string-or-null',
-`mon:simple-string-or-null-p', `mon:string-null-or-empty-p'.~%►►►")
+`mon:simple-string-or-null-p', `mon:string-null-or-empty-p'.~%▶▶▶")
 
 (fundoc 'string-not-null-p
 "Whether STR is of type `mon:string-not-null'~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'simple-string-not-null-p
 "Whether STR is of type `mon:simple-string-not-null'~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-empty-p
 "Whether  STR is `cl:stringp' with length `cl:zerop'~%~@
@@ -3185,7 +3185,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(string-empty-p \"\"\)~%
  \(string-empty-p \"m\"\)~%
  \(string-empty-p 'bubba\)~%~@
-:SEE-ALSO `mon:simple-string-empty-p'.~%►►►")
+:SEE-ALSO `mon:simple-string-empty-p'.~%▶▶▶")
 
 (fundoc 'string-not-empty-p
 "Whether string is stringp and greater than length 0.
@@ -3196,7 +3196,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(string-not-empty-p nil\)~%~@
 :NOTE This is effectively:~%
  \(funcall \(complement #'mon:string-empty-p\) <STRING>\)~%~@
-:SEE-ALSO `mon:string-empty-p'.~%►►►")
+:SEE-ALSO `mon:string-empty-p'.~%▶▶▶")
 
 (fundoc 'simple-string-empty-p
 "Whether STR is `mon:simple-string-null-p' with length `cl:zerop'~%~@
@@ -3204,7 +3204,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(string-empty-p \"\"\)~%
  \(string-empty-p \"m\"\)~%
  \(string-empty-p 'bubba\)~%~@
-:SEE-ALSO `mon:string-empty-p'.~%►►►")
+:SEE-ALSO `mon:string-empty-p'.~%▶▶▶")
 
 (fundoc 'string-null-or-empty-p
   "Whether STR is `mon:string-or-null-p' with length `cl:zerop'.~%~@
@@ -3216,7 +3216,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(string-null-or-empty-p 'bubba\)~%~@
 :SEE-ALSO `mon:simple-string-null-or-empty-p', `mon:string-or-null-p',
 `mon:simple-string-or-null-p', `mon:string-or-null',
-`mon:simple-string-or-null'.~%►►►")
+`mon:simple-string-or-null'.~%▶▶▶")
 
 (fundoc 'simple-string-null-or-empty-p
 "Whether STR is `simple-string-or-null-p' with length not `cl:zerop'~%~@
@@ -3230,7 +3230,7 @@ Helper function for the type-definition of `mon::%byte-vector'
 `mon:simple-string-or-null-p', `mon:string-or-null',
 `mon:simple-string-or-null', `mon:string-null-or-empty-p',
 `mon:simple-string-not-null-or-empty-p', `mon:string-not-null-or-empty-p',
-`mon:simple-string-not-null-or-empty-p'.~%►►►")
+`mon:simple-string-not-null-or-empty-p'.~%▶▶▶")
 
 (fundoc 'simple-string-not-null-or-empty-p
 "Whether STR is of type `mon:simple-string-not-null-or-empty'.~%~@
@@ -3243,7 +3243,7 @@ Helper function for the type-definition of `mon::%byte-vector'
 `mon:simple-string-or-null-p', `mon:string-or-null',
 `mon:simple-string-or-null', `mon:string-null-or-empty-p',
 `mon:simple-string-not-null-or-empty-p', `mon:string-not-null-or-empty-p',
-`mon:simple-string-not-null-or-empty-p'.~%►►►")
+`mon:simple-string-not-null-or-empty-p'.~%▶▶▶")
 
 (fundoc 'string-not-null-or-empty-p
 "Whether STR is of type `mon:string-not-null-or-empty'.~%~@
@@ -3256,7 +3256,7 @@ Helper function for the type-definition of `mon::%byte-vector'
 `mon:simple-string-or-null-p', `mon:string-or-null',
 `mon:simple-string-or-null', `mon:string-null-or-empty-p',
 `mon:simple-string-not-null-or-empty-p', `mon:string-not-null-or-empty-p',
-`mon:simple-string-not-null-or-empty-p'.~%►►►")
+`mon:simple-string-not-null-or-empty-p'.~%▶▶▶")
 
 (fundoc 'simple-string-of-length-1-p
 "Whether STRING is of type `mon:simple-string-of-length-1'.~%~@
@@ -3269,7 +3269,7 @@ Helper function for the type-definition of `mon::%byte-vector'
  \(simple-string-of-length-1-p  \"ab\"\)~%
  \(simple-string-of-length-1-p 42\)~%~@
 :SEE-ALSO `mon:string-of-length-1' `mon:string-of-length-1-p',
-`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 (fundoc 'string-of-length-1-p
 "Whether STRING is of type `mon:string-of-length-1'.~%~@
@@ -3284,7 +3284,7 @@ includes adjustable arrays and those with fill-pointers.~%~@
  \(string-of-length-1-p  \"ab\"\)~%
  \string-of-length-1-p( 42\)~%
 :SEE-ALSO `mon:simple-string-of-length-1' `mon:simple-string-of-length-1-p',
-`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1', `mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 (fundoc 'vector-with-fill-pointer-p
 "Whether OBJECT is satisfies both `cl:vectorp' and `cl:array-has-fill-pointer-p'.~%~@
@@ -3294,7 +3294,7 @@ includes adjustable arrays and those with fill-pointers.~%~@
                                         :element-type 'base-char
                                         :initial-contents \"string\" 
                                         :fill-pointer 6\)\)~%~@
-:SEE-ALSO `mon:string-with-fill-pointer', `mon:string-with-fill-pointer-p'.~%►►►")
+:SEE-ALSO `mon:string-with-fill-pointer', `mon:string-with-fill-pointer-p'.~%▶▶▶")
 
 (fundoc 'string-with-fill-pointer-p
 "Whether PUTATIVE-STRING-WITH-FILL-POINTER is of type `mon:string-with-fill-pointer'.~%~@
@@ -3335,7 +3335,7 @@ includes adjustable arrays and those with fill-pointers.~%~@
 :SEE \(info \"\(ansicl\)format\"\)~%~@
 :SEE-ALSO `mon:vector-with-fill-pointer-p', `mon:stream-or-boolean',
 `mon:open-stream-output-stream-p', `cl:array-has-fill-pointer-p',
-`cl:vectorp'.~%►►►")
+`cl:vectorp'.~%▶▶▶")
 
 (fundoc 'string-all-whitespace-p
 "Whether each character in STRING is `mon:whitespace-char-p'.~%~@
@@ -3350,7 +3350,7 @@ type `mon:whitespace-char' third value is the length of string.~%~@
  \(string-all-whitespace-p \"\"\)~%
  \(string-all-whitespace-p \"     a\"\)~%~@
 :SEE-ALSO `mon:string-contains-whitespace-p', `mon:string-no-whitespace-p',
-`mon:string-trim-whitespace', `mon:*whitespace-chars*'.~%►►►")
+`mon:string-trim-whitespace', `mon:*whitespace-chars*'.~%▶▶▶")
 
 (fundoc 'string-null-empty-or-all-whitespace-p
         "Whether MAYBE-EMPTY-STRING is null, `mon:string-empty-p',
@@ -3363,7 +3363,7 @@ MAYBE-EMPTY-STRING is any type of object.~%~@
  \(string-null-empty-or-all-whitespace-p  42\)~%
  \(string-null-empty-or-all-whitespace-p  '\(a\)\)~%~@
 :SEE-ALSO `string-not-null-empty-or-all-whitespace-p',
-`string-contains-whitespace-p', `string-no-whitespace-p'.~%►►►")
+`string-contains-whitespace-p', `string-no-whitespace-p'.~%▶▶▶")
 
 (fundoc 'string-not-null-empty-or-all-whitespace-p
 "Whether MAYBE-GOOD-STRING is of type `string-not-null-empty-or-all-whitespace'.~%~@
@@ -3375,7 +3375,7 @@ MAYBE-EMPTY-STRING is any type of object.~%~@
  \(string-not-null-empty-or-all-whitespace-p 42\)~%
  \(string-not-null-empty-or-all-whitespace-p '\(a\)\)~%~@
 :SEE-ALSO `string-null-empty-or-all-whitespace-p',
-`string-contains-whitespace-p', `string-no-whitespace-p'.~%►►►")
+`string-contains-whitespace-p', `string-no-whitespace-p'.~%▶▶▶")
 
 (fundoc 'string-not-empty-or-all-whitespace-p
         "Whether MAYBE-GOOD-STRING is a non-empty string without whitespace characters.~%~@
@@ -3390,7 +3390,7 @@ Return non-nil when the first two predicates are true and third is false:~%
  \(string-not-empty-or-all-whitespace-p nil\)~%
  \(string-not-empty-or-all-whitespace-p 42\)~%~@
 :SEE-ALSO `mon:string-contains-whitespace-p', `mon:string-no-whitespace-p',
-`mon:*whitespace-chars*'.~%►►►")
+`mon:*whitespace-chars*'.~%▶▶▶")
 
 (fundoc 'string-contains-whitespace-p 
 "Whether there is a char in STRING which is `mon:whitespace-char-p'.
@@ -3407,7 +3407,7 @@ When first value is NIL, second value is the length of string.~%
  \(string-contains-whitespace-p \"abc\"\)~%~@
 :SEE-ALSO `mon:string-all-whitespace-p', `mon:string-no-whitespace-p',
 `mon:string-all-whitespace-p', `mon:string-trim-whitespace',
-`mon:*whitespace-chars*'.~%►►►")
+`mon:*whitespace-chars*'.~%▶▶▶")
 
 (fundoc 'string-no-whitespace-p
 "Whether no chars in STRING are `mon:whitespace-char-p'.~%~@
@@ -3425,7 +3425,7 @@ type `mon:whitespace-char' third value is the length of string.~%~@
  \(string-no-whitespace-p \" \"\)~%
 :SEE-ALSO `mon:string-no-whitespace-p', `mon:string-all-whitespace-p',
 `mon:string-contains-whitespace-p', `mon:string-trim-whitespace',
-`mon:*whitespace-chars*'.~%►►►")
+`mon:*whitespace-chars*'.~%▶▶▶")
 
 (fundoc 'string-all-hex-char-p
 "Whether every character in MAYBE-HEX-STRING satsifies `mon:hexadecimal-char-p'.~%~@
@@ -3433,21 +3433,21 @@ type `mon:whitespace-char' third value is the length of string.~%~@
  \(string-all-hex-char-p \"6ba7b8109dad11d180b400c04fd430c8\"\)~%
  \(string-all-hex-char-p \"6BA7B8109DAD11D180B400C04FD430C8\"~%
  \(string-all-hex-char-p \"-6ba7b8109dad11d180b400c04fd430c8\"\)~%~@
-:SEE-ALSO `mon:*hexadecimal-chars*'.~%►►►")
+:SEE-ALSO `mon:*hexadecimal-chars*'.~%▶▶▶")
 
 (fundoc 'base-char-p
  "Return non-nil if character CHR is of type `cl:base-char'.~%~@
 :EXAMPLE~%
  \(base-char-p \(char \"abcd\" 0\)\)~%~@
 :SEE-ALSO `cl:char', `cl:standard-char-p', `cl:characterp', `cl:character',
-`cl:standard-char', `cl:char-int'.~%►►►")
+`cl:standard-char', `cl:char-int'.~%▶▶▶")
 
 (fundoc 'char-code-integer-p
 "Whether CHAR-CODE-INT is of type `mon:char-code-integer'.~%~@
 :EXAMPLE~%
  \(char-code-integer-p 1114111\)~%
  \(char-code-integer-p 1114112\)~%~@
-:SEE-ALSO `mon:each-a-char-code-integer-p', `cl:char-int'.~%►►►")
+:SEE-ALSO `mon:each-a-char-code-integer-p', `cl:char-int'.~%▶▶▶")
 
 (fundoc 'digit-char-0-or-1-p
 "Whether CHAR-1OR0 is `cl:digit-char-p' and either #\\0 or #\\1.~%~@
@@ -3459,7 +3459,7 @@ CHAR-1OR0 should be of type `mon:standard-char-or-null', signal an error if not.
  \(digit-char-0-or-1-p #\\2\)~%
  \(let \(\(not-1or0 \"00001b\"\)\)
    \(position-if-not #'digit-char-0-or-1-p not-1or0\)\)~%~@
-:SEE-ALSO `mon:string-all-digit-char-0-or-1-p'.~%►►►")
+:SEE-ALSO `mon:string-all-digit-char-0-or-1-p'.~%▶▶▶")
 
 (fundoc 'each-a-character-p
  "Whether each element in CHAR-LIST is `cl:characterp'.~%~@
@@ -3470,14 +3470,14 @@ CHAR-LIST should satisfy `mon:list-proper-not-null-p'.~%
  \(each-a-character-p #\\a\)~%
  \(each-a-character-p nil\)~%
 :SEE-ALSO `mon:digit-char-0-or-1-p', `mon:base-char-p',
-`mon:string-all-digit-char-0-or-1-p'.~%►►►")
+`mon:string-all-digit-char-0-or-1-p'.~%▶▶▶")
 
 (fundoc 'each-a-char-code-integer-p
 "Whether each element of CHAR-CODE-INTEGER-LIST is `mon:char-code-integer-p'.~%~@
 :EXAMPLE~%~@
  \(each-a-char-code-integer-p \(loop for ccil from 9658 to 9700 collect ccil\)\)
  \(each-a-char-code-integer-p 111411\)~%~@
-:SEE-ALSO `mon:each-a-character-or-char-code-integer-p', `cl:char-int'.~%►►►")
+:SEE-ALSO `mon:each-a-character-or-char-code-integer-p', `cl:char-int'.~%▶▶▶")
 
 (fundoc 'each-a-character-or-char-code-integer-p
 "Whether each element of CHAR-OR-CHAR-CODE-LIST is `characterp'
@@ -3488,7 +3488,7 @@ CHAR-OR-CHAR-CODE-LIST should satisfy `mon:list-proper-not-null-p'.'
  \(each-a-character-or-char-code-integer-p nil\)~%
  \(each-a-character-or-char-code-integer-p #\\a\)~%
  \(each-a-character-or-char-code-integer-p \"abc\"\)~%~@
-:SEE-ALSO `mon:each-a-char-code-integer-p', `cl:char-int'.~%►►►")
+:SEE-ALSO `mon:each-a-char-code-integer-p', `cl:char-int'.~%▶▶▶")
 
 (fundoc 'each-a-sequence-p
         "Whether each elt of SEQ is `cl:sequencep'.~%~@
@@ -3510,9 +3510,7 @@ When SEQ is `cl:null', `cl:stringp', `cl:bit-vector-p', `arrayp', `listp,  retur
                               :initial-contents '\(\(a\) \(b\) \(c\)\)\)\)~%~@
 :SEE-ALSO `mon:each-a-sequence-proper-p',
 `mon:each-a-sequence-proper-or-character-p', `mon:each-a-sequence',
-`mon:each-a-sequence-proper', `mon:each-a-sequence-proper-or-character'.~%►►►")
-
- 
+`mon:each-a-sequence-proper', `mon:each-a-sequence-proper-or-character'.~%▶▶▶")
 
 (fundoc 'each-a-sequence-proper-p
         "Whether each elt of SEQ is a proper sequence.~%~@
@@ -3534,7 +3532,7 @@ When SEQ is `cl:null', `cl:stringp', `cl:bit-vector-p', `arrayp', `listp,  retur
                                        :initial-contents '\(\(a\) \(b\) \(c\)\)\)\)~%~@
 :SEE-ALSO `mon:each-a-sequence-p', `mon:each-a-sequence-proper-or-character-p',
 `mon:each-a-sequence', `mon:each-a-sequence-proper',
-`mon:each-a-sequence-proper-or-character'.~%►►►")
+`mon:each-a-sequence-proper-or-character'.~%▶▶▶")
 
 (fundoc 'each-a-sequence-proper-or-character-p
         "Whether each elt of SEQ is either a proper sequence or `cl:characterp'.~%~@
@@ -3544,7 +3542,7 @@ When SEQ is `cl:null', `cl:stringp', `cl:bit-vector-p', `arrayp', `listp,  retur
  \(each-a-sequence-proper-or-character-p '\(\"a\" #\\a #\(b\) \(b\) \(a . b\)  \(a b . c\)\)\)~%~@
 :SEE-ALSO `mon:each-a-sequence-p', `mon:each-a-sequence-proper-p',
 `mon:each-a-sequence', `mon:each-a-sequence-proper',
-`mon:each-a-sequence-proper-or-character'.~%►►►")
+`mon:each-a-sequence-proper-or-character'.~%▶▶▶")
 
 (fundoc 'each-a-string-or-null-p
         "Whether each elt of STRING-LIST `mon:string-or-null-p'.~%~@
@@ -3561,7 +3559,7 @@ STRING-LIST is a proper-list.~%~@
 `mon:each-a-simple-string', `mon:each-a-string-of-length-1',
 `mon:each-a-sequence', `mon:each-a-sequence-proper',
 `mon:each-a-sequence-proper-or-character', `mon:each-a-simple-string-p',
-`mon:each-a-string-of-length-1-p'.~%►►►")
+`mon:each-a-string-of-length-1-p'.~%▶▶▶")
 
 ;; `cl:char-int'
 (fundoc 'string-all-digit-char-0-or-1-p
@@ -3573,7 +3571,7 @@ Signal an error if not.
  \(string-all-digit-char-0-or-1-p  nil\)
  \(string-all-digit-char-0-or-1-p  \"\"\)
  \(string-all-digit-char-0-or-1-p \"000001e\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'fixnump
 "Whether FIXNUM-MAYBE is of type `cl:fixnum'~%~@
@@ -3588,7 +3586,7 @@ While exactly which integers constitutue a fixnum is implementation-defined the
 spec says that the `cl:fixnum' type is required to be a supertype of
 \(signed-byte 16\).\
 :SEE-ALSO `mon:bignump', `cl:bignum', `cl:integer', `cl:rational', `cl:real',
-`cl:number', `cl:rationalp', `cl:realp', `cl:numberp'.~%►►►")
+`cl:number', `cl:rationalp', `cl:realp', `cl:numberp'.~%▶▶▶")
 
 (fundoc 'standard-test-function-p
  "Return non-nil when TEST-FUN is one of the standard equality test-funcions.~%~@
@@ -3597,7 +3595,7 @@ These include:~%
 :EXAMPLE~%
  \(standard-test-function-p 'eq\)~%
  \(standard-test-function-p 'string-equal\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'logical-pathname-p
 "Whether object is of type: `mon:logical-pathname-designator'.~%~@
@@ -3609,7 +3607,7 @@ These include:~%
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-designator',
 `mon:pathname-designator', `mon:filename-designator',
-`mon:pathname-or-namestring'.~%►►►")
+`mon:pathname-or-namestring'.~%▶▶▶")
 
 (fundoc 'filename-designator-p
 "Whether object is of type: `mon:filename-designator'.~%~@
@@ -3617,7 +3615,7 @@ These include:~%
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:logical-pathname-p', `mon:pathname-designator-p'
 `mon:pathname-or-namestring-p', `mon:logical-pathname-designator',
-`mon:pathname-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:pathname-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (fundoc 'pathname-designator-p
 "Whether object is of type: `mon:pathname-designator'.~%~@
@@ -3625,7 +3623,7 @@ These include:~%
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:logical-pathname-p' `mon:filename-designator-p'
 `mon:pathname-or-namestring-p', `mon:logical-pathname-designator',
-`mon:filename-designator', `mon:pathname-or-namestring'.~%►►►")
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (fundoc 'pathname-or-namestring-p
 "Whether object is of type: `mon:pathname-or-namestring'.~%~@
@@ -3634,14 +3632,14 @@ These include:~%
 :SEE-ALSO `mon:logical-pathname-p' `mon:filename-designator-p'
 `mon:pathname-designator-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
-`mon:filename-designator'.~%►►►")
+`mon:filename-designator'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'singleton-p
 "Is LST a list containing one elt.~%~@
 :EXAMPLE~%
  \(singleton-p '(a))~%~@
-:SEE-ALSO `list-proper-p', `cl:atom' ,`cl:null', `cl:consp'.~%►►►")
+:SEE-ALSO `list-proper-p', `cl:atom' ,`cl:null', `cl:consp'.~%▶▶▶")
 
 #+sbcl 
 (fundoc 'closure-p
@@ -3654,7 +3652,7 @@ These include:~%
      \(closure-p *my-clsr*\)
    \(unintern '*my-clsr*\)\)~%~@
 :SEE-ALSO `closure-obj', `sb-impl::closurep', `functionp',
-`standard-test-function-p', `symbol-function', `fdefinition'.~%►►►")
+`standard-test-function-p', `symbol-function', `fdefinition'.~%▶▶▶")
 
 #+sbcl 
 (fundoc 'variable-special-p
@@ -3663,7 +3661,7 @@ These include:~%
  \(variable-special-p 'mon:*error-table*\)~%
  \(variable-special-p 'bubba\)~%~@
 :SEE-ALSO `mon:boundp', `symbol-value', `mon:bound-and-true-p' 
-`sb-walker:var-globally-special-p'.~%►►►")
+`sb-walker:var-globally-special-p'.~%▶▶▶")
 
 (fundoc 'declared-special-p
         "Return T if SYMBOL is declared special.~%~@
@@ -3675,7 +3673,7 @@ These include:~%
    \(unintern '*tt--bubb*\)\)
  \(find-symbol \"*TT--BUBB*\"\)~%~@
 :SEE-ALSO `mon:variable-special-p', `sb-walker:var-globally-special-p',
-`sb-int:info'.~%►►►")
+`sb-int:info'.~%▶▶▶")
 
 #+sbcl
 (setf (documentation 'featurep 'function)
@@ -3690,7 +3688,7 @@ Handles arbitrary combinations of atoms using `and', `or'.~%~@
 :EXAMPLE~%
  \(featurep :COMMON-LISP\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `sb-int:featurep', `alexandria:featurep'~%►►►"))
+:SEE-ALSO `sb-int:featurep', `alexandria:featurep'~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'type-specifier-valid-p 'function)

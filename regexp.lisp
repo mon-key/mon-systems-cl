@@ -268,7 +268,7 @@
 ;;         "Evaluate FUN-FOR-LINE for each line of file in FILENAMES.~%~@
 ;; :EXAMPLE~%~@
 ;;  { ... <EXAMPLE> ... } ~%~@
-;; :SEE-ALSO `<XREF>'.~%►►►")
+;; :SEE-ALSO `<XREF>'.~%▶▶▶")
 ;;
 ;; (defmacro with-lines-from-files ((var &rest filenames) &body body)
 ;;   `(do-all-lines (lambda (,var) ,@body) ,@filenames))
@@ -299,7 +299,7 @@ Replacement as if by `cl-ppcre:regex-replace-all'.~%~@
  \(string-underscore-to-dash \(string-underscore-to-dash \"i_am_an_ugly_string\"\)\)~%
  \(string-underscore-to-dash \"\"\)~%~@
 :NOTE Included mostly to remind us to use the :PACKAGE cl-ppcre.~%~@
-:SEE-ALSO `dbc:field-name-underscore-to-dash'.~%►►►")
+:SEE-ALSO `dbc:field-name-underscore-to-dash'.~%▶▶▶")
 
 (fundoc 'string-find-matching
         "Find matches for REGEXP in STRINGS.~%~@
@@ -334,22 +334,22 @@ We currently do not allow STRINGS to be containlists of characters regardless of
 whether STRINGS-ONLY is null or not. Indeed, wihile it is a relatively
 straightforward fix to allow this, it is not clear if we even _should_.~%~@
 :SEE-ALSO `cl-ppcre:scan', `cl:find', `cl:find-if', `cl:position',
-`cl:search'.~%►►►")
+`cl:search'.~%▶▶▶")
 
 (fundoc 'string-whitespace-to-char
 "Replace each whitespace character in TARGET-STRING with REPLACEMENT-CHAR.
 Each occurence of an elt in `mon:*whitespace-chars*' is replaced.~%~@
 REPLACEMENT-CHAR should be of type `mon:char-or-char-code-integer-or-string-1'.
 If REPLACEMENT-CHAR is a one character string or of type `char-code-integer' it
-is converted to a character and must satisfy the predicate
+is converted to a character and must satisfy predicate
 `mon:char-not-whitespace-char-p'. An error is signaled if not.~%~@
 Keyword CONVERT-ALL-WHITESPACE is a boolean. When non-nil if TARGET-STRING is
 `mon:string-all-whitespace-p' each whitespace character will be replaced. 
 For large empty strings this may not be desirable, as such the default is NIL.~%~@
 Return value is as if by `cl:values'.
 When TARGET-STRING is not `mon:string-empty' nor `mon:string-all-whitespace-p'
-nth-value 0 and 1 are as if by `cl-ppcre:regex-replace-all'. In addition
-TARGET-STRING is returned as nth-value 2:~%
+`cl:nth-value' 0 and 1 are as if by `cl-ppcre:regex-replace-all'.
+In addition, TARGET-STRING is returned as `cl:nth-value' 2:~%
  REPLACEMENT, <BOOLEAN>, <TARGET-STRING>~%~@
 When TARGET-STRING is `mon:string-empty-p' return:~%
  TARGET-STRING, nil, :string-empty~%~@
@@ -363,13 +363,13 @@ When CONVERT-ALL-WHITESPACE is T return:~%
  \(string-whitespace-to-char \"Q E D\" \"_\"\)~%
  \(string-whitespace-to-char \"Q E D\" \(char-code #\\_\)~%
  \(string-whitespace-to-char \"Q E D\" 95\)~%
- \(string-whitespace-to-char \(format nil \"~{~C~}\" *whitespace-chars*\) #\\_\)~%
- \(string-whitespace-to-char \(format nil \"~{~C~}\" *whitespace-chars*\) 95  :convert-all-whitespace t\)~%
+ \(string-whitespace-to-char \(format nil \"~~{~~C~~}\" *whitespace-chars*\) #\\_\)~%
+ \(string-whitespace-to-char \(format nil \"~~{~~C~~}\" *whitespace-chars*\) 95  :convert-all-whitespace t\)~%
  \(string-whitespace-to-char \"\" #\\_\)~%
 ;; Following fail successfully:~%
  \(string-whitespace-to-char \"a b c\" #\\newline\)~%
  \(string-whitespace-to-char \"a b c\" 'bubba\)~%~@
-:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%►►►")
+:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%▶▶▶")
 
 (fundoc 'string-whitespace-to-underscore
 "Like `string-whitespace-to-char' but with REPLACEMENT-CHAR hardwired to character #\\_.~%~@
@@ -378,7 +378,7 @@ When keyword PRE-TRIM is non-nil string is first processed with
 `mon:string-trim-whitespace'. Default is T.~%~@
 Keyword CONVERT-ALL-WHITESPACE is as `string-whitespace-to-char' but is affected
 by value of PRE-TRIM. Default is NIL. See examples below for usage.~%~@
-:EXAMPLE~%~@
+:EXAMPLE~%
  \(string-whitespace-to-underscore \"Q E D\")~%
  \(string-whitespace-to-underscore \"Q E D\"\)~%
  \(string-whitespace-to-underscore \"Q E D\")~%
@@ -391,7 +391,7 @@ by value of PRE-TRIM. Default is NIL. See examples below for usage.~%~@
  \(string-whitespace-to-underscore \"    \" :pre-trim nil :convert-all-whitespace t\)~%
  \(string-whitespace-to-underscore \"    \" :pre-trim t :convert-all-whitespace t\)~%
  \(string-whitespace-to-underscore \"    \" :pre-trim nil :convert-all-whitespace nil\)~%~@
-:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%►►►")
+:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%▶▶▶")
 
 (fundoc 'string-whitespace-to-dash
 "Like `string-whitespace-to-char' but with REPLACEMENT-CHAR hardwired to character #\\-.~%
@@ -412,7 +412,7 @@ by value of PRE-TRIM. Default is NIL. See examples below for usage.~%~@
  \(string-whitespace-to-dash \"    \" :pre-trim nil :convert-all-whitespace t\)~%
  \(string-whitespace-to-dash \"    \" :pre-trim t :convert-all-whitespace t\)~%
  \(string-whitespace-to-dash \"    \" :pre-trim nil :convert-all-whitespace nil\)~%~@
-:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%►►►")q
+:SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%▶▶▶")
 
 ;;; ==============================
 

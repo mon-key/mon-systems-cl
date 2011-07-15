@@ -87,7 +87,7 @@
 :SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
 `mon:documented-class-with-docs', `mon:make-documented-class',
 `mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%►►►")))
+`mon:*default-class-documentation-table*'.~%▶▶▶")))
 
 (defgeneric documented-class-slot-doc (named-class documented-slot &key)
 (:documentation 
@@ -96,7 +96,7 @@
 :SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
 `mon:documented-class-with-docs', `mon:make-documented-class',
 `mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%►►►")))
+`mon:*default-class-documentation-table*'.~%▶▶▶")))
 
 (defclass documented-class-with-docs ()
   ((documented-class
@@ -228,7 +228,7 @@ of type `cl:type-error' is signaled if not.~%~@
 :SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
 `mon:documented-class-with-docs', `mon:make-documented-class',
 `mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%►►►")
+`mon:*default-class-documentation-table*'.~%▶▶▶")
 
 (fundoc 'classdoc 
 "Retrieve documentation for CLASS.~%~@
@@ -255,7 +255,7 @@ Keyword SLOT-DOC-DEFAULT is a string to return if a documentation string is not 
 :SEE-ALSO `mon:documented-class-slot-doc', `mon:documented-class-with-docs',
 `mon:make-documented-class', `mon:documented-class-verify-init',
 `mon:*default-class-documentation-table*', `mon:fundoc', `mon:vardoc',
-`mon:typedoc'.~%►►►")
+`mon:typedoc'.~%▶▶▶")
 
 (fundoc 'documented-class-verify-init
 "Verify that INITFORM is structured suitably for intializing instances of class
@@ -293,7 +293,7 @@ of a :CLASS-DOC/<DOCSTRING> key/value pair is optional. When provided, the key
 :SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
 `mon:documented-class-with-docs', `mon:make-documented-class',
 `mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%►►►")
+`mon:*default-class-documentation-table*'.~%▶▶▶")
 
 (fundoc '%verify-hash-table-for-documented-class
 "If DOC-HASH-TABLE is ommitted return hash-table of special variable
@@ -305,7 +305,7 @@ Helper function for `mon:make-documented-class' when making instances of class
 :SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
 `mon:documented-class-with-docs', `mon:make-documented-class',
 `mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%►►►")
+`mon:*default-class-documentation-table*'.~%▶▶▶")
 
 
 ;;; ==============================

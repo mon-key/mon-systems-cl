@@ -489,7 +489,7 @@ character designator produced as if by `cl:code-char' e.g.:~%~@
  \(char-numeric= 9657 #\\►\)~%
  \(char-numeric= 9657 9658\)~%
  \(char-numeric= 9657 9658\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'ascii-downcase
 "Return as if by `cl:values' the downcased `cl:char-code' of ASCII CHAR-W-CODE.~%~@
@@ -502,7 +502,7 @@ Second value is t when CHAR-W-CODE was returned as a downcased value.~%~@
   \(ascii-downcase 233\)~%~@
 :SEE-ALSO `mon:*whitespace-chars*', `mon:whitespace-char-p',
 `mon:ascii-downcase', `mon:ascii-downcase', `mon:ascii-char-p',
-`mon:ascii-string-p'.~%►►►")
+`mon:ascii-string-p'.~%▶▶▶")
 
 (fundoc 'ascii-equal
 "Return non-nil when CHAR-A and CHAR-B are `cl:eql' ASCII chars.~%~@
@@ -515,7 +515,7 @@ CHAR-A and CHAR-B before testing for `cl:eql'.~%~@
  \(ascii-equal #\\a #\\A\)~%~@
 :SEE-ALSO :SEE-ALSO `mon:whitespace-char-p' `mon:ascii-string-p',
 `mon:ascii-char-p', `mon:ascii-downcase', `mon:ascii-equal',
-`mon:ascii-control-p', `mon:latin-1-char-p', `mon:latin-1-string-p'.~%►►►")
+`mon:ascii-control-p', `mon:latin-1-char-p', `mon:latin-1-string-p'.~%▶▶▶")
 
 (fundoc 'ascii-string-p
 "Whether every character in the simple-string STRING is `mon:ascii-char-p'.~%~@
@@ -525,7 +525,7 @@ CHAR-A and CHAR-B before testing for `cl:eql'.~%~@
 :SEE info node `(ansicl)Character Syntax'~%~@
 :SEE-ALSO `mon:whitespace-char-p' `mon:ascii-string-p', `mon:ascii-char-p',
 `mon:ascii-downcase', `mon:ascii-equal', `mon:ascii-control-p',
-`mon:latin-1-char-p', `mon:latin-1-string-p'.~%►►►")
+`mon:latin-1-char-p', `mon:latin-1-string-p'.~%▶▶▶")
 
 (fundoc 'ascii-char-p
 "Whether character C is `cl:characterp' with char-codeless than or equal to 127.~%~@
@@ -535,7 +535,7 @@ CHAR-A and CHAR-B before testing for `cl:eql'.~%~@
 :SEE info node `(ansicl)Character Syntax'~%~@
 :SEE-ALSO `mon:whitespace-char-p' `mon:ascii-string-p', `mon:ascii-char-p',
 `mon:ascii-downcase', `mon:ascii-equal', `mon:ascii-control-p',
-`mon:latin-1-char-p', `mon:latin-1-string-p'.~%►►►")
+`mon:latin-1-char-p', `mon:latin-1-string-p'.~%▶▶▶")
 
 (fundoc 'ascii-control-p
   "Whether CHAR is characterp and a control character according to RFC 2616.~%~@
@@ -549,7 +549,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
 :SEE info node `(ansicl)Standard Characters'~%~@
 :SEE-ALSO `mon:whitespace-char-p', `mon:char-length', `mon:ascii-char-p',
 `mon:ascii-string-p', `mon:ascii-equal', `mon:ascii-downcase',
-`mon:*whitespace-chars*', `mon:latin-1-char-p', `mon:latin-1-string-p'.~%►►►")
+`mon:*whitespace-chars*', `mon:latin-1-char-p', `mon:latin-1-string-p'.~%▶▶▶")
 
 (fundoc 'latin-1-char-p
 "Whether character C is `cl:characterp' with char-codeless than or equal to 255.~%~@
@@ -561,7 +561,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
 :SEE info node `(ansicl)Character Syntax'~%~@
 :SEE-ALSO `mon:whitespace-char-p' `mon:ascii-string-p', `mon:ascii-char-p',
 `mon:ascii-downcase', `mon:ascii-equal', `mon:ascii-control-p',
-`mon:latin-1-char-p', `mon:latin-1-string-p'.~%►►►")
+`mon:latin-1-char-p', `mon:latin-1-string-p'.~%▶▶▶")
 
 (fundoc 'latin-1-string-p
 "Whether every character in the simple-string STRING is `mon:latin-1-char-p'.~%~@
@@ -569,7 +569,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
  \(latin-1-string-p \"àéÉíóü\"\)~%
  \(ascii-string-p \"àéÉíóü\"\)~%~@
 :SEE-ALSO `mon:whitespace-char-p' `mon:ascii-string-p', `mon:ascii-char-p',
-`mon:ascii-downcase', `mon:ascii-equal', `mon:ascii-control-p'.~%►►►")
+`mon:ascii-downcase', `mon:ascii-equal', `mon:ascii-control-p'.~%▶▶▶")
 
 (fundoc 'whitespace-char-p
   "Return non-nil when char is a member of `*whitespace-chars*'~%~@
@@ -584,7 +584,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
 `cl:extended-char',`cl:standard-char-p', `cl:graphic-char-p',
 `cl:alpha-char-p',`cl:digit-char-p', `cl:alphanumericp', `cl:upper-case-p', `cl:lower-case-p',
 `cl:both-case-p', `cl:char=', `cl:char/=', `cl:char<', `cl:char>', `cl:char<=', `cl:char>=',
-`cl:char-equal', `char-not-equal'.~%►►►")
+`cl:char-equal', `char-not-equal'.~%▶▶▶")
 
 (fundoc 'char-not-whitespace-char-p
 "Whether MAYBE-NOT-WHITESPACE-CHAR is of type `mon:char-not-whitespace-char'.~%~@
@@ -594,7 +594,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
  \(funcall \(complement #'char-not-whitespace-char-p\) #\\Tab\)
  \(notany #'char-not-whitespace-char-p *whitespace-chars*\)
 :SEE-ALSO `mon:whitespace-char', `mon:whitespace-char-p',
-`mon:*whitespace-chars*'.~%►►►")
+`mon:*whitespace-chars*'.~%▶▶▶")
 
 (fundoc 'hexadecimal-char-p
 "Whether MAYBE-HEX-CHAR is of type `mon:hexadecimal-char'~%~@
@@ -611,7 +611,7 @@ This is the range of ASCII characters in the range 0-31 and 127.~%~@
 `cl:graphic-char-p', `cl:alpha-char-p',`cl:digit-char-p', `cl:alphanumericp',
 `cl:upper-case-p', `cl:lower-case-p', `cl:both-case-p', `cl:char=', `cl:char/=',
 `cl:char<', `cl:char>', `cl:char<=', `cl:char>=', `cl:char-equal',
-`char-not-equal'.~%►►►")
+`char-not-equal'.~%▶▶▶")
 
 ;; When optional arg stream is provided it should satisfy `streamp' and `open-stream-p'.
 ;; Signal an error if not.~%~@
@@ -628,7 +628,7 @@ character in CHAR-BAG is present in STRING. Default is `cl:char='.~%~@
  \(chars-not-in-string-p '\(#\\Q #\\E #\\D\) \"#package.\"\)~%
  \(chars-not-in-string-p '\(#\\Q #\\E #\\D\) \"#package.\" :test #'char-equal\)~%
  \(chars-not-in-string-p '\(#\\# #\\E #\\.\) \"#package.\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'char-to-string
   "Convert CHAR to a string containing that character.~%~@
@@ -655,7 +655,7 @@ be converted to a string as if by `mon:char-code-integer-to-string', if not a
 `base-char', `standard-char', `extended-char',`standard-char-p',
 `graphic-char-p', `alpha-char-p',`digit-char-p', `alphanumericp',
 `upper-case-p', `lower-case-p', `both-case-p', `char=', `char/=', `char<',
-`char>', `char<=', `char>=', `char-equal', `char-not-equal+'.~%►►►")
+`char>', `char<=', `char>=', `char-equal', `char-not-equal+'.~%▶▶▶")
 
 (fundoc 'char-code-integer-to-string
 "Convert CHAR-CODE-INT to string.~%~@
@@ -669,7 +669,7 @@ Signal an error if not.~%~@
  \(char-code-integer-to-string -1\)~%~@
 :SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
 `mon:char-to-string', `char-list-to-string', `mon:char-code-integer',
-`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%►►►")
+`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%▶▶▶")
 
 (fundoc 'char-code-integer-to-char
 "Convert CHAR-CODE-INTEGER-TO-CHAR to an object of type `cl:character'.~%~@
@@ -686,7 +686,7 @@ argument CHAR-CODE-INTEGER-TO-CHAR.
  \(char-code-integer-to-char \"string\"  :w-no-error t\)~%~@
 :SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
 `mon:char-to-string', `char-list-to-string', `mon:char-code-integer',
-`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%►►►")
+`mon:char-or-char-code-integer-or-string-1-ensure-char'.~%▶▶▶")
 
 (fundoc 'char-or-char-code-integer-or-string-1-ensure-char
         "If CHAR-OR-CHAR-CODE-INTEGER-OR-STRING-1 may be coerced to a character do so.~%~@
@@ -705,7 +705,7 @@ Signal an error if char-or-char-code-integer-or-string-1 is not of type:
  \(char-or-char-code-integer-or-string-1-ensure-char 
   \(make-array 2 :element-type 'character :initial-element #\\nul :adjustable t :fill-pointer 0\)\)~%~@
 :SEE-ALSO `mon:char-code-integer-p', `mon:char-code-integer-to-string',
-`mon:char-to-string', `char-list-to-string', `mon:char-code-integer'.~%►►►")
+`mon:char-to-string', `char-list-to-string', `mon:char-code-integer'.~%▶▶▶")
 
 (fundoc 'char-ascii-table
 "Return a list of conses mapping integers to an ASCII string equivalent.~%~@
@@ -721,7 +721,7 @@ When CASE is :LOWER-UPPER map [A,Z] to integers [1,26]
  \(char-ascii-table :case :upper\)~%
  \(char-ascii-table :case :upper-lower\)~%
  \(char-ascii-table :case :lower-upper\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'char-list-to-string
 "Convert charcters of CHAR-LIST to string.~%~@
@@ -739,7 +739,7 @@ Optional arg STREAM is a destination stream default string to.~%~@
    (char-list-to-string '(#\a #\b #\c)     s)
    (char-list-to-string '(97 98 99 9658)   s)
    (get-output-stream-string s))
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'max-char
  "The upper exclusive bound on values produced by CHAR-CODE~%~@
@@ -751,7 +751,7 @@ Optional arg STREAM is a destination stream default string to.~%~@
 `standard-char-p', `graphic-char-p', `alpha-char-p',`digit-char-p',
 `alphanumericp', `upper-case-p', `lower-case-p', `both-case-p', `char=',
 `char/=', `char<', `char>', `char<=', `char>=', `char-equal',
-`char-not-equal+'.~%►►►")
+`char-not-equal+'.~%▶▶▶")
 
 (fundoc 'char-for-readtable-case
 "Return CASE-FROB-CHAR according to the `cl:readtable-case' of READTABLE~%~@
@@ -765,7 +765,7 @@ an error if not. When ommitted default to value of `cl:*readtable*'.~%~@
 :SEE-ALSO `char-invert-case-maybe', `mon:string-invert-case',
 `mon:string-for-readtable-case', `mon:read-symbol-name-preserving-case',
 `mon:read-symbol-name-preserving-case-if', `cl:char-downcase', `cl:char-upcase',
-`cl:upper-case-p', `cl:lower-case-p''.~%►►►")
+`cl:upper-case-p', `cl:lower-case-p''.~%▶▶▶")
 
 (fundoc 'char-invert-case-maybe
 "Convert CHAR-TO-INVERT accoring to MODE of `cl:readtable-case' for `cl:*readtable*'.~%~@
@@ -783,7 +783,7 @@ defaults to :preserve.~%~@
 :SEE-ALSO `char-for-readtable-case', `mon:string-invert-case',
 `mon:string-for-readtable-case', `mon:read-symbol-name-preserving-case',
 `mon:read-symbol-name-preserving-case-if', `cl:char-downcase', `cl:char-upcase',
-`cl:upper-case-p', `cl:lower-case-p''.~%►►►")
+`cl:upper-case-p', `cl:lower-case-p''.~%▶▶▶")
 
 #+sbcl 
 (setf (documentation 'char-length 'function)
@@ -799,7 +799,7 @@ defaults to :preserve.~%~@
 `base-char', `standard-char', `extended-char', `standard-char-p',
 `graphic-char-p', `alpha-char-p',`digit-char-p', `alphanumericp',
 `upper-case-p', `lower-case-p', `both-case-p', `char=', `char/=', `char<',
-`char>', `char<=', `char>=', `char-equal', `char-not-equal+'.~%►►►"))
+`char>', `char<=', `char>=', `char-equal', `char-not-equal+'.~%▶▶▶"))
 
 ;;; ==============================
 

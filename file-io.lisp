@@ -276,13 +276,13 @@ If FILE-NAME exists its contents are overwritten as if by :if-exists :supersede
 :EMACS-LISP-COMPAT Similiar to `with-temp-buffer'.~%~@
 :SEE-ALSO `with-each-stream-line', `with-opened-file', 
 `alexandria:write-string-into-file', `alexandria:read-file-into-string',
-`alexandria:with-input-from-file', `alexandria:with-output-to-file'.~%►►►")
+`alexandria:with-input-from-file', `alexandria:with-output-to-file'.~%▶▶▶")
 
 (fundoc 'with-opened-file
 "Like WITH-OPEN-FILE, but set STREAM to nil if file-error is signaled opening FILESPEC.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'with-each-stream-line
 "<DOCSTR>~%~@
@@ -290,13 +290,13 @@ If FILE-NAME exists its contents are overwritten as if by :if-exists :supersede
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:with-temp-file', `mon:with-opened-file', 
 `alexandria:write-string-into-file', `alexandria:read-file-into-string',
-`alexandria:with-input-from-file', `alexandria:with-output-to-file'.~%►►►")
+`alexandria:with-input-from-file', `alexandria:with-output-to-file'.~%▶▶▶")
  
 (fundoc 'with-output-to-string-or-stream
 "Like `cl:with-output-to-string' but optional arg may be a string or stream.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'with-file-overwritten
 "Evaluate BODY as if by `cl:with-open-file' with output file sa flexi-stream.~%~@
@@ -317,14 +317,14 @@ not exist it is created.~%~@
 	   for byt in '\(0 174 14 13 255\)
 	   do \(write-byte byt v\)\)
 	\(format v \(mapconcat #'identity '\(\"~%a\" \"b\" \"c\" \"d\" \"e\" \"f\"\) \"~~%\"\)\)\)\)~%~@
-:SEE-ALSO `cl:with-open-file'.~%►►►")
+:SEE-ALSO `cl:with-open-file'.~%▶▶▶")
 
 (fundoc 'with-new-file
 "Like `cl:with-open-file', but output STREAM to FILE which must not exist.~%~@
 If file exists signal an error.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'with-new-file-renaming-old
 "Like `mon:with-new-file' but \":if-exists\" file then \":new-version\" ~%~@
@@ -332,7 +332,7 @@ STREAM is a stream variable as per `with-open-file'.~%
 FILE is a filespec pathname designator as per `with-open-file'.~%
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-file-to-string
 "Return contents of FILE as if by `with-output-to-string'.~%~@
@@ -357,7 +357,7 @@ Default is :utf-8.~%~@
 `mon:with-each-stream-line', `mon:with-opened-file', `mon:write-file'
 `mon:with-temp-file', `alexandria:write-string-into-file',
 `alexandria:read-file-into-string', `alexandria:with-input-from-file',
-`alexandria:with-output-to-file'.~%►►►")
+`alexandria:with-output-to-file'.~%▶▶▶")
 
 (fundoc 'write-file
 "Write STRING to FILE as if by `cl:write-string'.~%~@
@@ -377,13 +377,13 @@ Default is :utf-8.~%~@
       \(setf snarfed \(concat snarfed \(read-file-to-string fl\)\)\)
     \(delete-file-if-exists fl\)\)\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-file-forms
 "Read forms in FILE as if by `cl:read' with EOF marker as the empty list.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'write-string-to-file-gzip
 "Write compressing STRING to GZIP-OUTPUT-PATHNAME.
@@ -418,7 +418,7 @@ shell> zcat foo.gz.bak~%~@
 `read-file-gzip-to-gunzip-file', `salza2:with-compressor',
 `salza2:compress-octet-vector', `salza2:make-stream-output-callback',
 `flex:with-output-to-sequence', `chipz:decompress', `sb-ext:octets-to-string',
-`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%►►►")
+`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%▶▶▶")
 
 (fundoc 'read-file-gunzip-to-string
 "Read the decompress contents of GZIP-PATHNAME to a string.~%~@
@@ -435,7 +435,7 @@ GZIP-PATHNAME is a pathname-designator for a gzip'd file to decompress to string
 `read-file-gzip-to-gunzip-file', `salza2:with-compressor',
 `salza2:compress-octet-vector', `salza2:make-stream-output-callback',
 `flex:with-output-to-sequence', `chipz:decompress', `sb-ext:octets-to-string',
-`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%►►►")
+`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%▶▶▶")
 
 (fundoc 'read-file-gzip-to-gunzip-file
 "Decompress contents of GZIP-INPUT-PATHNAME to GZIP-INPUT-PATHNAME.~%~@
@@ -454,22 +454,24 @@ GZIP-OUTPUT-PATHNAME is a pathname-designator to output the decompressed file co
 `read-file-gzip-to-gunzip-file', `salza2:with-compressor',
 `salza2:compress-octet-vector', `salza2:make-stream-output-callback',
 `flex:with-output-to-sequence', `chipz:decompress', `sb-ext:octets-to-string',
-`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%►►►")
+`sb-ext:string-to-octets', `flex:octets-to-string', `flex:string-to-octets'.~%▶▶▶")
 
 (fundoc 'gzip-files-and-delete-source
-        "Compress each file as if by `salza2:gzip-file' each file in FILES-LIST
-and `cl:delete-file' the source.~%~@
-For each file in list return a list of the form:~%
+        "For each file in FILES-LIST, compress it as if by `salza2:gzip-file' and
+`cl:delete-file' the source.~%~@
+For each file in FILES-LIST, return a list of the form:~%
  \(#P<FILE>.gz #P<FILE>\)~%~@
-The car of each list is the pathname of the gzipped file.
-The cadr of each list is the pathname of the deleted file.~%~@
-It is assumed that each file in files-list exists.~%~@
-The compressed file is given a \".gz\" extension. e.g. if a file is named has
-the `cl:file-namestring' \"file.bmp\" its compressed file-namestring is \"file.bmp.gz\".~%~@
-If an existing file with a \".gz\" extension exists for a given file-namestring it is superseded.
+The car of each list is pathname of the gzipped file.
+The cadr of each list is pathname of the deleted file.~%~@
+It is assumed each file in FILES-LIST would satisfy a test with `cl:probe-file'.~%~@
+Compressed files are given a \".gz\" extension.
+For example, if a file name has `cl:file-namestring' \"file.bmp\", its
+compressed `cl:file-namestring' is \"file.bmp.gz\".~%~@
+If an existing file with a \".gz\" extension exists for a given
+`cl:file-namestring' the existing file superseded.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================

@@ -301,14 +301,14 @@ value is a string indicating that class was not yet finalized.~%~@
 Signal an error if CLASS is not found with `cl:find-class'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'class-subclasses
 "Return a list of the names of all subclasses of a given CLASS.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `class-slot-list', `class-slot-initargs',
-`structure-slots'.~%►►►")
+`structure-slots'.~%▶▶▶")
 
 (fundoc 'class-name-of 
 "Return the `cl:class-name' that OBJECT is `cl:class-of'.~%~@
@@ -327,7 +327,7 @@ The C-P-L of standard-object is:~%~@
 However, the class `standard-object' _is_ an instance of `standard-class'
 It is also a superclass of every class that is an instance of `standard-class'
 _except itself_.~%~@
-:SEE-ALSO `mon:find-class-name-as-string'.~%►►►")
+:SEE-ALSO `mon:find-class-name-as-string'.~%▶▶▶")
 
 (fundoc 'find-class-name-as-string
 "Find the class-name of CLASS in PACKAGE.~%~@
@@ -346,13 +346,13 @@ Returned values have the form:~%
  \(find-class-name-as-string 'parsed-ref \"DBC\"\)
  \(find-class-name-as-string 'parsed-ref\)~%
 :SEE-ALSO `cl:find-class', `cl:class-name', `mon:class-name-of',
-`mon:where-is-local'.~%►►►")
+`mon:where-is-local'.~%▶▶▶")
 
 (fundoc 'slot-value-or
         "Like `cl:slot-value' but return DEFAULT if value of OBJ's SLOT is not `slot-boundp'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'copy-instance-of-class-shallowly
@@ -365,7 +365,7 @@ IOW, if one of the slots of INSTANCE-OF-CLASS holds a list, then the slot-value
 of returned instance points to the same list, i.e. it's not \"a deep copy\".~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 #+sbcl
 (setf (documentation 'class-slot-initargs 'function)
@@ -378,7 +378,7 @@ slots are returned, otherwise only the slots with :allocation type :instance are
 returned.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `class-subclasses', `class-slot-list', `structure-slots'.~%►►►"))
+:SEE-ALSO `class-subclasses', `class-slot-list', `structure-slots'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'class-slot-list 'function)
@@ -391,7 +391,7 @@ returned.~%~@
 Otherwise, only the slots with :allocation type :instance are returned.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `class-subclasses', `class-slot-initargs', `structure-slots'.~%►►►"))
+:SEE-ALSO `class-subclasses', `class-slot-initargs', `structure-slots'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'class-slot-list-direct 'function)
@@ -400,7 +400,7 @@ Otherwise, only the slots with :allocation type :instance are returned.~%~@
 CLASS can be a symbol, a class object \(as returned by `class-of'\) or an
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `class-subclasses', `class-slot-initargs', `structure-slots'.~%►►►"))
+:SEE-ALSO `class-subclasses', `class-slot-initargs', `structure-slots'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'structure-slots 'function)
@@ -408,7 +408,7 @@ CLASS can be a symbol, a class object \(as returned by `class-of'\) or an
 "Return the list of slot names of structure STRUCT.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `class-subclasses', `class-slot-list', `class-slot-initargs'.~%►►►"))
+:SEE-ALSO `class-subclasses', `class-slot-list', `class-slot-initargs'.~%▶▶▶"))
 
 ;;; ==============================
 

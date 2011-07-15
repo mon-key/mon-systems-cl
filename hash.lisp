@@ -141,7 +141,7 @@
 ;; Keyword test is the a `hash-table-test'. Default is `eql'.~%~@
 ;; :EXAMPLE~%~@
 ;;  { ... <EXAMPLE> ... }~%~@
-;; :SEE-ALSO `hash-to-alist', `plist-to-alist'.~%►►►"))
+;; :SEE-ALSO `hash-to-alist', `plist-to-alist'.~%▶▶▶"))
 
 ;; hash-from-alist
 ;; hash-car
@@ -356,18 +356,18 @@
 ;; `alexandria:ensure-gethash',
 
 (fundoc 'prime-plusp
-"Is PUTATIVE-PRIME is a positive prime integer in the range of `cl:most-positive-fixnum'?~%~@
+"Is PUTATIVE-PRIME positive prime integer in range of `cl:most-positive-fixnum'?~%~@
 :EXAMPLE~%
  \(prime-plusp 104723\)~%
  \(prime-plusp \(1+ most-positive-fixnum\)\)~%~@
-:SEE-ALSO `mon:prime-or-next-greatest', `mon:number-power-of-two-ceiling'.~%►►►")
+:SEE-ALSO `mon:prime-or-next-greatest', `mon:number-power-of-two-ceiling'.~%▶▶▶")
 
 (fundoc 'prime-or-next-greatest
-"Given any non-negative integer, return it or the next nearest prime.~%~@
+"Given any non-negative integer, return it or its next nearest prime.~%~@
 :EXAMPLE~%
  \(prime-or-next-greatest 104723\)~%
  \(prime-or-next-greatest 104724\)~%~@
-:SEE-ALSO `mon:prime-plusp'.~%►►►")
+:SEE-ALSO `mon:prime-plusp'.~%▶▶▶")
 
 (fundoc 'hash-pop
   "Remove OBJECT from hash-table HT and return it.~%~@
@@ -379,7 +379,7 @@
 `alexandria:maphash-values', `alexandria:hash-table-keys',
 `alexandria:hash-table-values', `alexandria:hash-table-alist',
 `alexandria:hash-table-plist', `alexandria:plist-hash-table',
-`alexandria:ensure-gethash'.~%►►►")
+`alexandria:ensure-gethash'.~%▶▶▶")
 
 (fundoc 'hash-get-keys
  "Return the list of all the keys HASHTABLE.~%~@
@@ -391,7 +391,7 @@
 `alexandria:maphash-values', `alexandria:hash-table-keys',
 `alexandria:hash-table-values', `alexandria:hash-table-alist',
 `alexandria:hash-table-plist', `alexandria:plist-hash-table',
-`alexandria:ensure-gethash'.~%►►►")
+`alexandria:ensure-gethash'.~%▶▶▶")
 
 (fundoc 'hash-merge
 "Merge HASH-A with key/value pairs from HASH-B, return HASH-A.~%~@
@@ -407,47 +407,47 @@ other-bubba.~%~@
 `alexandria:maphash-values', `alexandria:hash-table-keys',
 `alexandria:hash-table-values', `alexandria:hash-table-alist',
 `alexandria:hash-table-plist', `alexandria:plist-hash-table',
-`alexandria:ensure-gethash'.~%►►►")
+`alexandria:ensure-gethash'.~%▶▶▶")
 
 (fundoc 'hash-invert-key-val
 "Return a new hash-table with values of src-hash as keys of new hash.~%~@
-When optional arg DEST-HASH is non-nil it is a hash-table and values of
-SRC-HASH are added as keys of DEST-HASH.~%~@
-:NOTE No effort is made to verify if the hash-table-test of SRC-HASH is
+When optional arg DEST-HASH is non-nil it should satisfy `cl:hash-table' and
+values of SRC-HASH are added as keys of DEST-HASH.~%~@
+:NOTE No effort is made to verify if the `cl:hash-table-test' of SRC-HASH is
 congruent with that of DEST-HASH.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'hash-to-alist
 "Return the key/value pairs of HASH-TABLE as an alist of consed pairs.~%~@
-Keyword :TEST is a `hash-table-test'. Default is `constantly' t.~%~@
+Keyword :TEST is a `cl:hash-table-test'. Default is `cl:constantly' t.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `hash-map-sorted', `hash-resize', `hash-merge', `hash-pop',
-`hash-get-keys', `hash-car'.~%►►►")
+`hash-get-keys', `hash-car'.~%▶▶▶")
 
 (fundoc 'hash-from-alist
-  "Returns a hash table containing the keys and values of the association list ALIST.~%~@
-Hash table is initialized using the HASH-TABLE-INITARGS.~%~@
+  "Returns a hash-table containing key/value pairs of association list ALIST.~%~@
+Hash-table is initialized using HASH-TABLE-INITARGS.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `mon:hash-to-alist'.~%►►►")
+:SEE-ALSO `mon:hash-to-alist'.~%▶▶▶")
 
 (fundoc 'hash-map-sorted
 "Map HASH-TABLE with FUNCTION sorting by PREDICATE, return value is a vector.~%~@
 FUNCTION is a function which accepting a consed pair as its argument.~%~@
-PREDICATE is a function accepting two args as used by `sort' to order return value.~%~@
-Keyword KEY when non-nil is a function accepting two args as used by `sort' to
+PREDICATE is a function accepting two args as used by `cl:sort' to order return value.~%~@
+Keyword KEY, when non-nil, is a function accepting two args as used by `cl:sort' to
 order return value. When KEY is non-nil arg PREDICATE is ignored.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :SEE-ALSO `with-hash-table-iterator', `hash-resize', `hash-merge', `hash-pop',
-`hash-get-keys', `hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%►►►")
+`hash-get-keys', `hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%▶▶▶")
 
 (fundoc 'hash-car
 "Return first hash key/value pair in HASH-TABLE.~%~@
-Return value is as if by `with-hash-table-iterator'
+Return value is as if by `cl:with-hash-table-iterator'
 :EXAMPLE~%
  \(let \(\(tt-hsh \(make-hash-table\)\)\)
    \(loop
@@ -457,32 +457,32 @@ Return value is as if by `with-hash-table-iterator'
    :finally \(multiple-value-bind \(t/nil kk vv\) \(hash-car tt-hsh\) \(and t/nil `\(,kk ,vv\)\)\)\)~%~@
 :SEE-ALSO `hash-map-sorted', `hash-resize', `hash-merge', `hash-pop',
 `hash-get-keys', `hash-car', `hash-to-alist', `hash-print',
-`hash-mapcar'.~%►►►")
+`hash-mapcar'.~%▶▶▶")
 
 (fundoc 'hash-mapcar
-  "Like `maphash' except it accumulates the result in a list as if by mapcar.~%~@
+  "Like `cl:maphash' except it accumulates the result in a list as if by mapcar.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `hash-map-sorted', `hash-resize', `hash-merge', `hash-pop',
-`hash-get-keys', `hash-car', `hash-to-alist', `hash-print'.~%►►►")
+`hash-get-keys', `hash-car', `hash-to-alist', `hash-print'.~%▶▶▶")
 
 (fundoc 'hash-print
 "Print hash-table as if by `cl:format'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `mon:hash-pprint', `cl:print-unreadable-object'.~%►►►")
+:SEE-ALSO `mon:hash-pprint', `cl:print-unreadable-object'.~%▶▶▶")
 
 (fundoc 'hash-pprint
 "Print HASH-TABLE as if by `cl:pprint'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:hash-print', `cl:pprint-newline', `cl:pprint-pop',
-`cl:pprint-logical-block', `cl:print-unreadable-object', `cl:*print-length*', `cl:*print-circle*'.~%►►►")
+`cl:pprint-logical-block', `cl:print-unreadable-object', `cl:*print-length*', `cl:*print-circle*'.~%▶▶▶")
 
 (fundoc 'hash-print-key-value-pairs
         "Print key/value pairs of HASH-TABLE to STREAM as if by `cl:format'.~%~@
-STREAM is a boolean or a destination stream object satisfying `output-stream-p'.
-Mapped key/values are returned one pair per line with the format:~%
+STREAM is a boolean or a destination stream object satisfying `cl:output-stream-p'.
+Mapped key/values are returned one pair per line with the form:~%
  key: ~~S value ~~A~%~@
 :EXAMPLE~%
  \(let \(\(ht \(make-hash-table\)\)\)
@@ -493,26 +493,26 @@ Mapped key/values are returned one pair per line with the format:~%
    \(dotimes \(i 8 \(setf ht \(with-output-to-string \(ht-str\)
                             \(hash-print-key-value-pairs ht ht-str\)\)\)\)
      \(setf \(gethash i ht\) \(format nil \"~~D\" i\)\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; (setf (documentation   'hash-make-readtable 'function)
 ;;       #.(format nil
 ;; "Make a readtable which will be able to read hash-tables with #h\(\).~%~@
 ;; :EXAMPLE~%~%~@
-;; :SEE-ALSO `<XREF>'.~%►►►"))
+;; :SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 
 (fundoc 'hash-or-symbol-p
-"Whether MAYBE-HASH-TABLE is `hash-table-p' or a symbol with `symbol-value' evaluating to one.~%~@
+"Whether MAYBE-HASH-TABLE is `cl:hash-table-p' or a symbol with `cl:symbol-value' evaluating to one.~%~@
 Return as if by `cl:values'.
-When MAYBE-HASH-TABLE is a hash-table return:~%
- (the hash-table MAYBE-HASH-TABLE),HASH-TABLE~%~@
+When MAYBE-HASH-TABLE is a `cl:hash-table-p' return:~%
+ \(the hash-table MAYBE-HASH-TABLE\),HASH-TABLE~%~@
 When MAYBE-HASH-TABLE is a symbol evaluating to a hash-table return:~%
- (the hash-table (symbol-value MAYBE-HASH-TABLE)),SYMBOL,MAYBE-HASH-TABLE~%~@
+ \(the hash-table \(symbol-value MAYBE-HASH-TABLE\)\),SYMBOL,MAYBE-HASH-TABLE~%~@
 When MAYBE-HASH-TABLE is null return:~%
  nil,NULL
 When MAYBE-HASH-TABLE is none of the above and keyword W-NO-ERROR is non-nil return:~%
- MAYBE-HASH-TABLE, (type-of MAYBE-HASH-TABLE)~%~@
+ MAYBE-HASH-TABLE, \(type-of MAYBE-HASH-TABLE\)~%~@
 When keyword W-NO-ERROR is ommited and MAYBE-HASH-TABLE is none of the above
 signal a `cl:type-error'.~%~@
 :EXAMPLE~%
@@ -526,14 +526,14 @@ signal a `cl:type-error'.~%~@
  \(hash-or-symbol-p t\)~%
  \(hash-or-symbol-p \(list 8\)\)~%~@
 :SEE-ALSO `hash-or-symbol-ensured', `mon:hash-table-or-symbol',
-`mon:hash-table-or-symbol-with-hash'.~%►►►")
+`mon:hash-table-or-symbol-with-hash'.~%▶▶▶")
 
 (fundoc 'hash-or-symbol-ensured
 "If MAYBE-HASH-TABLE is `cl:hash-table-p' return it.~%~@
-If MAYBE-HASH-TABLE is a symbol evaluating to hash-table return it.~%~@
-If MAYBE-HASH-TABLE is a symbol but not a hash-table set its `cl:symbol-value' to a
-new hash-table and return it.~%~@
-If MAYBE-HASH-TABLE is NULL or T return a new hash-table.~%~@
+If MAYBE-HASH-TABLE is a symbol evaluating to a hash-table object return it.~%~@
+If MAYBE-HASH-TABLE is a symbol but not a hash-table object set its `cl:symbol-value' to a
+newly generated hash-table object and return it.~%~@
+If MAYBE-HASH-TABLE is NULL or T return a newly generated hash-table object.~%~@
 :EXAMPLE~%
  \(hash-or-symbol-ensured nil\)~%
  \(hash-or-symbol-ensured \(gensym\)\)~%
@@ -557,27 +557,27 @@ If MAYBE-HASH-TABLE is NULL or T return a new hash-table.~%~@
        *tt--hash*\)
    \(unintern '*tt--hash*\)\)~%~@
 :SEE-ALSO `hash-or-symbol-p', `mon:hash-table-or-symbol',
-`mon:hash-table-or-symbol-with-hash'.~%►►►")
+`mon:hash-table-or-symbol-with-hash'.~%▶▶▶")
 
 #+sbcl 
 (setf (documentation 'hash-resize 'function)
       #.(format nil
-"Resize \(grow\) a hash table per NEW-SIZE.~%~@
-As with the SIZE argument to `make-hash-table', the actual NEW-SIZE may
-be larger than the supplied value.~%~@
+"Resize \(grow\) a hash-table per NEW-SIZE.~%~@
+As with SIZE argument to `cl:make-hash-table', NEW-SIZE's actual value may
+be larger than value supplied.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `hash-map-sorted', `hash-merge', `hash-pop', `hash-get-keys',
-`hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%►►►"))
+`hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%▶▶▶"))
 
 (fundoc 'hash-found-p
-"Like `cl:gethash' but nth-value 0 is a closure if key was found.~%~@
+"Like `cl:gethash' but `cl:nth-value' 0 is a closure if KEY was found.~%~@
 :EXAMPLE~%
  \(let \(\(tt-ht \(make-hash-table :test 'equal\)\)\)
    \(setf \(gethash \"bubba\" tt-ht\) \"bubba\"\)
    \(values \(hash-found-p \"bubba\" tt-ht\)
            \(hash-found-p \"no-bubba\" tt-ht \"can't find bubba\"\)\)\)~%
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

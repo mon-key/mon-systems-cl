@@ -708,14 +708,14 @@
 "Expands to an `eval-when' form with all when specifiers present.~%~@
 BODY is wrapped inside a form of the type:~%~@
  \(eval-when \(:compile-toplevel :load-toplevel :execute\)\)~%@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'eval-when-compile
 "Evaluate BODY when :compile-toplevel :load-toplevel.~%~@
 :EXAMPLE~%~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT eval-when-compile is an elisp macro in :FILE lisp/emacs-lisp/byte-run.el.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 ;;; :SYMBOL-MACROS
@@ -728,21 +728,21 @@ A `defsubst'd function is one which is `declaim'd as:~%
 :EXAMPLE~%~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT defsubst is a Lisp macro in :FILE lisp/emacs-lisp/byte-run.el.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'bound-and-true-p
   "Return the value of symbol VAR if it is bound, else nil.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `boundp'.~%►►►")
+:SEE-ALSO `boundp'.~%▶▶▶")
 
 (fundoc 'multiple-value-setf
 "Like `multiple-value-setq', but works with places.~%~@
 A \"place\" of nil means to ignore the corresponding value from FORM.
 Return the primary value of evaluating FORM.~%~@
 :EXAMPLE~%~% { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc '%compose
   "Compose FUNCTIONS or macros of 1 argument into a funcallable lambda form.~%~@
@@ -750,7 +750,7 @@ Return the primary value of evaluating FORM.~%~@
  \(compose abs \(dl-val zz\) 'key\)~%
  ;=> \(lambda \(yy\) \(abs \(funcall \(dl-val zz\) \(funcall key yy\)\)\)\)~%~@
 :NOTE This is macro is different from `alexandria:compose' which returns a closure.~%~@
-:SEE-ALSO `compose-fun', `compose-all'.~%►►►")
+:SEE-ALSO `compose-fun', `compose-all'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -772,14 +772,14 @@ Automates the oft found macro idiom:~%
 different format than the \"On Lisp\" variant, e.g.~%
  \(with-gensyms \(a-sym b-sym\) `\(,a-sym ,b-sym\)\)~%
  \(with-gensyms \(asym  bsym\)  `\(,asym  ,bsym\)\)~%~@
-:SEE-ALSO `gensym', `gentemp', `sb-int:block-gensym'.~%►►►")
+:SEE-ALSO `gensym', `gentemp', `sb-int:block-gensym'.~%▶▶▶")
 
 (fundoc 'w-debug-declared
   "Inline a declaration to produce debuggable/steppable code.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :NOTE Use with <sharp-sign><period> in forms when this is used.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; (defun foo ()
 ;;    \\#\\.(w-debug-declared)
@@ -796,7 +796,7 @@ When evalutated at top of defining form expands to:~%~@
    #.\(w-fast-declared\)
    {... <DO-FAST-STUFF-HERE> ...} \)~%~@
 :NOTE Use with <sharp-sign><period> in forms when this is used.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'retaining-value
   "Evaluate `body' with `bound-symbol' bound to `initial-value' (default NIL).~%~@
@@ -804,7 +804,7 @@ The next time `body' is evaluated, `bound-symbol' will be bound to whatever its
 value was the last time evaluation of `body' ended.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'and-so
 "When AND-X returns non-nil return a list comprised of AND-X and AND-SO.~%~@
@@ -814,7 +814,7 @@ In other words:~%~@
  \(and-so t \"bubba\" \"more-bubba\"\)~%
  \(and-so \(+ 1 3\) \"bubba\" \"more-bubba\"\)~%
  \(and-so \(not t\) \"bubba\" \"more-bubba\"\)~%~@
-:SEE-ALSO `mon:refbind', `mon:retaining-value'.~%►►►")
+:SEE-ALSO `mon:refbind', `mon:retaining-value'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -828,7 +828,7 @@ Utility macro for two `values' predicates.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:type-not', `mon:type-any', `mon:type-every', `cl:typep',
-`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%►►►")
+`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%▶▶▶")
 
 (fundoc 'type-not
  "Whether TYPE-CHECKED is true. Return as if by `cl:values'.~%~@
@@ -836,7 +836,7 @@ Utility macro for type predicates.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:type-and', `mon:type-any', `mon:type-every',
-`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%►►►")
+`cl:subtypep', `cl:type-of', `cl:typecase', `cl:etypecase'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -863,7 +863,7 @@ Then value of last BODY form is returned from the `condition-case' expression.~%
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `cl:define-condition', `cl:make-condition', `cl:handler-case',
 `cl:handler-bind', `cl:restart-case', `cl:restart-bind', `cl:find-restart',
-`cl:restart', `cl:signal', `cl:error'.~%►►►")
+`cl:restart', `cl:signal', `cl:error'.~%▶▶▶")
 
 
 
@@ -875,13 +875,13 @@ Then value of last BODY form is returned from the `condition-case' expression.~%
 "Return percentage value of VV.~%~@
 :EXAMPLE~%
  \(to-percent 1.234\)~%~@
-:SEE-ALSO .~%►►►")
+:SEE-ALSO .~%▶▶▶")
 
 (fundoc   'number-to-double-float
   "Coerce NUM to double float.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -898,13 +898,13 @@ On a Common Lisp return is as if by values.~%~@
   ;=> \(-3 -1 3 1\) \(2\) \(-2\)~%
  \(list-sift '\(1 2 3 -1 -2 -3\) #'plusp #'oddp\)
   ;=> \(3 2 1\) \(-3 -1\) \(-2\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'popn 
    "Pop N-ELTS off PLACE.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
-:SEE-ALSO `cl:pop', `cl:push'.~%►►►")
+:SEE-ALSO `cl:pop', `cl:push'.~%▶▶▶")
 
 (fundoc 'assoc-create
 "Like `assoc' but create requested alist item on-the-fly if not yet existing.~%~@
@@ -923,7 +923,7 @@ On a Common Lisp return is as if by values.~%~@
  \(macroexpand-1 '\(assoc-create 'baz list\)\)~%~@
 :SEE (URL `http://paste.lisp.org/display/13846#2')~%~@
 :SEE info node `(ansicl)get-setf-expansion)'~%~@
-:SEE-ALSO `cl:assoc', `mon:assq'.~%►►►")
+:SEE-ALSO `cl:assoc', `mon:assq'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -937,21 +937,21 @@ until test returns nil.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mon:until', `mon:do-while', `mon:do-until'.~%►►►")
+:SEE-ALSO `mon:until', `mon:do-while', `mon:do-until'.~%▶▶▶")
 
 (fundoc 'for 
    "A curly-braced `for` style function.~%~@
 :EXAMPLE~%
  \(for \(i 0 8\) \(princ i\)\)~%~@
 :SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence',
-`mon:do-while', `mon:do-until', `mon:for'.~%►►►")
+`mon:do-while', `mon:do-until', `mon:for'.~%▶▶▶")
 
 (fundoc 'until 
  "Until TEST is non-nil do BODY.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :NOTE This macro uses `cl:do', the `mon:do-until' macro uses `cl:loop'.
-:SEE-ALSO `mon:while', `mon:do-while', `mon:for'.~%►►►")
+:SEE-ALSO `mon:while', `mon:do-while', `mon:for'.~%▶▶▶")
 
 (fundoc 'do-until
 "Do FORM until TEST evaluates non-nil.~%~@
@@ -959,7 +959,7 @@ until test returns nil.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :NOTE This macros uses `cl:loop' macro, the `mon:until' macro uses `cl:do'.~%~@
 :SEE-ALSO `mon:while', `mon:do-while', `mon:for', `dohash', `collect'
-`mon:dosublists', `mon:dosequence', `mon:do-while', `mon:do-until',.~%►►►")
+`mon:dosublists', `mon:dosequence', `mon:do-while', `mon:do-until',.~%▶▶▶")
 
 (fundoc 'dosublists
 "<DOCSTR>~%~@
@@ -969,7 +969,7 @@ Arg VARIANT ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence',
-`mon:do-while', `mon:do-until', `mon:for'.~%►►►")
+`mon:do-while', `mon:do-until', `mon:for'.~%▶▶▶")
 
 (fundoc 'doenumerated
 "Iterate over SEQUENCE while keeping track of an index.~%~@
@@ -983,7 +983,7 @@ Optional arg RESULT-FORM is as `cl:dotimes'.~%~@
   ;=> 1 a
   ;   2 b
   ;   3 c~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; (var start-form end-form &optional result-form) &body body)
 (fundoc 'dorange  
@@ -999,7 +999,7 @@ Optional arg RESULT-FORM is as the `cl:do' macro.~%~@
       \(frob bar\)
     \(do-range \(i a b\)
       \(format stream \"~~&~~A ~~A\" char \(elt seq i\)\)\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -1014,7 +1014,7 @@ INDEX begins from 0.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mk-array'.~%►►►")
+:SEE-ALSO `mk-array'.~%▶▶▶")
 
 (fundoc 'mk-array      
 "Macrofied `make-array' with :element-type as TYPE.~%~@
@@ -1024,7 +1024,7 @@ When LEN is ommitted make-array of length INIT with :initial-contents as INIT.~%
  \(mk-array 'simple-string '\(\"Mon\" \"Tue\" \"Wed\" \"Thu\" \"Fri\" \"Sat\" \"Sun\"\)\)~%
  \(mk-array 'char \"abcdef\"\)~%
  \(mk-array 'char \"abcdef\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; (vector pos element num &optional (grow-factor 2))
 (fundoc 'vector-insert-element
@@ -1043,14 +1043,14 @@ it happen to be in static space.~%~@
 element into a simple vector.
 :NOTE The arguments should probably be lexicals since some of them are evaluated
 more than once.
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'vector-map 
 "MAP into a simple-array with elements of TYPE and length LEN.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -1062,7 +1062,7 @@ more than once.
 VAL is an object of type `cl:symbol' or `cl:cons'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-append-into     
 "Concatenate ARGS to a string setting return value to symbol OUTPUT-SYM.~%~@
@@ -1075,19 +1075,19 @@ sequences of characters \(lists or vectors\).~%~@
  \(string-append-into *tt--sym* \" string \" #\(#\\a #\\b\)\)~%
  *tt-sym*~%
  \(unintern '*tt--sym*\)~%~@
-:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%►►►")
+:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%▶▶▶")
 
 (fundoc 'string-set      
 "Set INDEX in STRING to character with `cl:char-code' CODE.~%~@
 :EXAMPLE~%
  \(string-set #\\q \"string\" 4\)~%~@
-:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%►►►")
+:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%▶▶▶")
 
 (fundoc 'string-get
 " <DOCSTR> ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%►►►")
+:SEE-ALSO `mon:string-get', `mon:string-set', `mon:string-append'.~%▶▶▶")
 
 (fundoc 'string-case
         "Like `cl:case' but matches value of KEYFORM as if by `cl:string='.~%~@
@@ -1118,7 +1118,7 @@ strings.~%~@
                   \(t \"T-removed-on-expansion-nev3er-found\"\)\)\)~%
 \(macroexpand-1 '\(string-case t
                  \(\"no-see-me\"    \(string-invert-case x :case :invert\)\)\)\)~%
-:SEE-ALSO `mon:string-case-fast' `string-case:string-case'.~%►►►")
+:SEE-ALSO `mon:string-case-fast' `string-case:string-case'.~%▶▶▶")
 
 (fundoc 'string-case-fast
 "Like `mon:string-case' but with a different syntax and potentially much faster.~%~@
@@ -1175,7 +1175,7 @@ The difference in convention is as follows:~%
                   \(\(\"fob\" t \"bob\"\) 'fob-t-bob\)
                   \(\"foobar\" 'hit\)
                   \(t \"T-removed-on-expansion-nev3er-found\"\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'defalias
 "Set DEST-FUN-SYMBOL's function definition to that of SOURCE-FUN-SYMBOL.~%~@
@@ -1216,7 +1216,7 @@ values have one of the following forms:~%
    compiler-macro-function, in which case DEST-FUN-SYMBOL will as well~%
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'output-stream-normalize
         "Normalize STREAM variable if T or NIL was given.~%~@
@@ -1232,7 +1232,7 @@ values have one of the following forms:~%
                \(setf bubba nil\)
                \(output-stream-normalize bubba\)\)\)\)\)~%~@
 :SEE Sonya Keene p. 183~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -1246,7 +1246,7 @@ values have one of the following forms:~%
 Common idiom suboperation in macros and other code-manipulating code.~%~@
 :EXAMPLE~%~%\(sb-int:make-gensym-list 8\)~%~@
 \(macroexpand '\(sb-int:make-gensym-list 8\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►"))
+:SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'symbolicate 'function)
@@ -1254,7 +1254,7 @@ Common idiom suboperation in macros and other code-manipulating code.~%~@
 		"Concatenate together the names of some strings and symbols,
 producing a symbol in the current package.~%~@
 :EXAMPLE~%~% {<EXAMPLE>} ~%~@
-:SEE-ALSO `<XREF>'.~%►►►"))
+:SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 ;;; sbcl/src/code/early-extensions.lisp
 #+sbcl 
@@ -1280,7 +1280,7 @@ When INITIAL-VALUE is supplied for COLLECT, stuff will be RPLACD'd onto the end.
 including macros and lambdas.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►"))
+:SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'dohash 'function)
@@ -1290,7 +1290,7 @@ if the table is a synchronized table.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `collect' `mon:dosublists', `mon:dosequence', `mon:do-while', `mon:do-until'
-`cl:with-hash-table-iterator'.~%►►►"))
+`cl:with-hash-table-iterator'.~%▶▶▶"))
 
 ;;; ==============================
 ;; (find-all-symbols "ONCE-ONLY")
@@ -1335,18 +1335,18 @@ We import Alexandria's b/c SBCL's has a fixme note which basically says,~%
 :FILE sbcl/src/code/early-extensions.lisp
 :FILE alexandria/macros.lisp~%~@
 This docstring was cobbled from the referenced sources above.~%~@
-:SEE-ALSO `<XREF>'.~%►►►"))
+:SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 (fundoc 'ref-bind
   "Anaphoric IF control structure.~%~@
-If TEST returns non-nil then execute THEN, otherwise if ELSE is provided execute ELSE.~%~@
+If TEST returns non-nil execute THEN, otherwise if ELSE is provided execute ELSE.~%~@
 VAR \(a symbol\) is lexcically bound to the primary retrun value of TEST for duration of body.~%~@
 :EXAMPLE~%
  \(ref-bind ref-it \(+ 1 3\) ref-it\)~%
 Like `aif' but potentially cleaner b/c binds dedicated var instead of `it' which
 isn't accesible outside the defining package without a package qualifier,
 however, less clean b/c VAR will become an internal symbol of package.
-:SEE-ALSO `mon:ref-it-if'.~%►►►")
+:SEE-ALSO `mon:ref-it-if'.~%▶▶▶")
 
 (fundoc 'ref-it-if
 "The `aif' anaphora by a different name.~%~@
@@ -1354,10 +1354,10 @@ however, less clean b/c VAR will become an internal symbol of package.
  \(ref-it-if \(+ 1 3\) it\)~%~@
 :NOTE the anaphora `it' is exported from by the :mon package and must be
 accessed as `mon:it' by external calling forms.
-:SEE-ALSO `mon:ref-bind'.~%►►►")
+:SEE-ALSO `mon:ref-bind'.~%▶▶▶")
 
 (fundoc 'byte-octets-for-integer
-        "Return the number of 8 bit bytes required to represent integer in a byte-array.~%~@
+        "Return count of 8 bit bytes required to represent integer in a byte-array.~%~@
 :EXAMPLE~%
  \(loop for ints in '\(#xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
                      #xFFFFFFFFFFFFFFFFFFFFFFFF
@@ -1372,7 +1372,7 @@ accessed as `mon:it' by external calling forms.
                      #x00\)
  collect \(list \(byte-octets-for-integer ints\) \(integer-length ints\) ints\)\)~%~@
 :SEE-ALSO `mon:bytes-round-to-words', `mon:bytes-to-int',
-`mon:byte-request-integer', `cl:byte-size', `cl:byte-position'.~%►►►")
+`mon:byte-request-integer', `cl:byte-size', `cl:byte-position'.~%▶▶▶")
 
 (fundoc 'bytes-round-to-words
 "Return the number of word bytes required to represent N-BYTES.~%~@
@@ -1387,7 +1387,7 @@ Comparatively when N-BYTES is in the range [11,17] it can be represented in 12,
 :EXAMPLE~%~@
  \(macroexpand '\(bytes-round-to-words 17\)\)
 :SEE-ALSO `byte-octets-for-integer', `mon:bytes-to-int', `cl:byte-size',
-`cl:byte-position'.~%►►►")
+`cl:byte-position'.~%▶▶▶")
 
 (fundoc 'multiple-value-nth-p 
 "Whether first two values returned by EXPR are `cl:equal' NTH-LIST.~%~@
@@ -1401,13 +1401,13 @@ predicate, e.g.:~%~% :test equalp~%~@
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
 `cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
-`cl:multiple-value-list'.~%►►►")
+`cl:multiple-value-list'.~%▶▶▶")
 
 (fundoc 'multiple-value-nil-nil-p
 "Whether first two values returned by EXPR are both null.~%~@
-Tests that both (nth-value 0 <EXPR>) and (nth-value 1 <EXPR>) are nil e.g. 
- (equal '(nil nil) ((nth-value 0 <EXPR>) (nth-value 1 <EXPR>)))
-If expr does not return at least two values return nil.
+Test that both \(nth-value 0 <EXPR>\) and \(nth-value 1 <EXPR>\) are nil e.g. 
+ \(equal '\(nil nil\) \(\(nth-value 0 <EXPR>\) \(nth-value 1 <EXPR>\)\)\)
+If expr does not return at least two values, return nil.
 :EXAMPLE~%
  \(multiple-value-nil-nil-p \(values 8 8 3\)\)~%
  \(multiple-value-nil-nil-p \(values nil nil 8\)\)~%
@@ -1419,7 +1419,7 @@ If expr does not return at least two values return nil.
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
 `cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
-`cl:multiple-value-list'.~%►►►")
+`cl:multiple-value-list'.~%▶▶▶")
 
 (fundoc 'multiple-value-nil-t-p
         "Whether first two values returned by EXPR are null an t.~%~@
@@ -1437,7 +1437,7 @@ If expr does not return at least two values return nil.~%
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
 `cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
-`cl:multiple-value-list'.~%►►►")
+`cl:multiple-value-list'.~%▶▶▶")
 
 (fundoc 'multiple-value-t-nil-p
         "Whether first two values returned by EXPR are t and null.~%~@
@@ -1454,7 +1454,7 @@ If expr does not return at least two values return nil.~%~@
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
 `cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
-`cl:multiple-value-list'.~%►►►")
+`cl:multiple-value-list'.~%▶▶▶")
 
 (fundoc 'multiple-value-t-t-p
         "Whether first two values returned by EXPR are both t.~%~@
@@ -1471,7 +1471,7 @@ If expr does not return at least two values return nil.~%~@
 `mon:multiple-value-t-t-p', `mon:multiple-value-t-nil-p',
 `mon:multiple-value-nil-t-p', `mon:multiple-value-nil-nil-p', `cl:values',
 `cl:values-list', `cl:nth-value', `cl:multiple-value-bind',
-`cl:multiple-value-list'.~%►►►")
+`cl:multiple-value-list'.~%▶▶▶")
 
 ;;; ==============================
 

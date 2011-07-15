@@ -418,7 +418,7 @@ compared with elements in VECTOR using TEST, which defaults to EQL."
 Any additional elements are initialized to INITIAL-ELEMENT.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `mon:vector-shrink'.~%►►►")
+:SEE-ALSO `mon:vector-shrink'.~%▶▶▶")
 
 (fundoc 'make-bool-vector
 "Return a new bool-vector \(a simple-bit-vector\) of length LENGTH, using INIT for
@@ -432,7 +432,7 @@ The return ed object will be of type `bool-vector' and will satisfy `bool-vector
  \(equal \(make-bool-vector 8 1\) \(make-array 8 :element-type 'bit :initial-element 1\)\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `bool-vector-p', `bit-vector-replace', `bit-vector-copy',
-`bit-vector-set', `bit-vector-clear'.~%►►►")
+`bit-vector-set', `bit-vector-clear'.~%▶▶▶")
 
 (fundoc 'bool-vector-p
 "Return non-nil if object is a bool-vector \(a simple-bit-vector\).~%~@
@@ -443,14 +443,14 @@ simple-bit-vector with element-type bit.~%~@
  \(bool-vector-p  \(make-array 8 :element-type 'bit :initial-element 1\)\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `make-bool-vector', `bit-vector-replace', `bit-vector-copy',
-`bit-vector-set', `bit-vector-clear'.~%►►►")
+`bit-vector-set', `bit-vector-clear'.~%▶▶▶")
 
 (fundoc 'bit-vector-copy
 "Return a copy of the `simple-bit-vector' BOOL-VEC.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `bool-vector-p', `make-bool-vector', `bit-vector-replace',
-`bit-vector-set', `bit-vector-clear'.~%►►►")
+`bit-vector-set', `bit-vector-clear'.~%▶▶▶")
 
 (fundoc 'bit-vector-replace
 "Replace the bits in IN-BOOL-VEC with the bits in W-BOOL-VEC.~%~@
@@ -458,7 +458,7 @@ Both IN-BOOL-VEC and W-BOOL-VEC are of type `simple-bit-vector'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `bool-vector-p', `make-bool-vector',. `bit-vector-copy',
-`bit-vector-set', `bit-vector-clear'~%►►►")
+`bit-vector-set', `bit-vector-clear'~%▶▶▶")
 
 (fundoc 'string-to-bit-vector
 "Convert the simple-string INPUT-STRING to a bit-vector.~%~@
@@ -472,7 +472,7 @@ Both IN-BOOL-VEC and W-BOOL-VEC are of type `simple-bit-vector'.~%~@
 :SEE-ALSO `mon:bit-vector-to-string', `mon:bit-vector-set',
 `mon:string-ascii-to-byte-array', `mon:byte-array-to-string',
 `mon:string-to-byte-array', `mon:bit-vector-to-string', `mon:string-to-bit-vector',
-`mon:char-char-length', `mon:code-point'.~%►►►")
+`mon:char-char-length', `mon:code-point'.~%▶▶▶")
 
 (fundoc 'bit-vector-to-string
 "Convert INPUT-BIT-VECTOR to a simple-string with each char either #\\1 or #\\0.~%~@
@@ -483,7 +483,7 @@ INPUT-BIT-VECTOR should satisfy `cl:simple-bit-vector-p', signal an error if not
 :SEE-ALSO `mon:string-to-bit-vector', `mon:string-to-number', `mon:string-to-char'
 `mon:string-ascii-to-byte-array', `mon:byte-array-to-string',
 `mon:string-to-byte-array', `mon:bit-vector-to-string', `mon:string-to-bit-vector',
-`mon:char-char-length', `mon:code-point'.~%►►►")
+`mon:char-char-length', `mon:code-point'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'bit-vector-set
@@ -491,7 +491,7 @@ INPUT-BIT-VECTOR should satisfy `cl:simple-bit-vector-p', signal an error if not
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `bool-vector-p', `make-bool-vector', `bit-vector-replace',
-`bit-vector-copy', `bit-vector-clear'.~%►►►")
+`bit-vector-copy', `bit-vector-clear'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'bit-vector-clear
@@ -499,26 +499,26 @@ INPUT-BIT-VECTOR should satisfy `cl:simple-bit-vector-p', signal an error if not
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `bool-vector-p', `make-bool-vector', `bit-vector-replace',
-`bit-vector-copy', `bit-vector-set'.~%►►►")
+`bit-vector-copy', `bit-vector-set'.~%▶▶▶")
 
 (fundoc 'vector-remove-elts
   "Remove the elements in PSN-LST from the vector VEC.~%~@
 :EXAMPLE~%
  \(vector-remove-elts '\(0 1 3 5 7\) #\(a b c d e f g h\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'nshuffle-vector
 "Destructively shuffle VECTOR in place using Fisher-Yates algorithm.
 Return VECTOR.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'shuffle-vector
 "Return a shuffled copy of vector.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `nshuffle-vector'.~%►►►")
+:SEE-ALSO `nshuffle-vector'.~%▶▶▶")
 
 (fundoc 'array-get-undisplaced
 "Return the fundamental array and the start and end positions into
@@ -532,7 +532,7 @@ a displaced array.~%
     -- Erik Naggum, C.L.L :DATE 2004/01/17 Re: simple-array vs displaced-to~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-string-adjustable 
 "Convenience feature for `cl:make-array' specialized for strings.~%~@
@@ -550,7 +550,7 @@ Specs of returned array are as follows:~%
  \(let \(\(v-p-e-string \(make-string-adjustable\)\)\)~%
    \(vector-push-extend #\\a v-p-e-string\)~%
    \(values v-p-e-string \(fill-pointer v-p-e-string\)\)\)~%~@
-:SEE-ALSO `cl:make-string', `cl:with-output-to-string', `cl:format'.~%►►►")
+:SEE-ALSO `cl:make-string', `cl:with-output-to-string', `cl:format'.~%▶▶▶")
 
 ;; #+sbcl (setf (documentation 'dovector 'function)
 ;;       #.(format nil
@@ -559,7 +559,7 @@ Specs of returned array are as follows:~%
 ;;   \(dovector \(v #\(#\\v #\\e #\\c #\\t #\\o #\\r\)
 ;;             \(print \(nreverse gthr\)\)\)
 ;;     \(push \(string v\) gthr\)\)\)~%~@
-;; :SEE-ALSO `<XREF>'.~%►►►"))
+;; :SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 (fundoc 'string-ascii-to-byte-array
   "Convert STRING to an array of type \(simple-array \(unsigned-byte 8\) *\).~%
@@ -577,7 +577,7 @@ Following fails successfully:~%
  \(string-ascii-to-byte-array \"aeiou►\"\)~%
 :SEE-ALSO `mon:string-ascii-to-byte-array', `mon:byte-array-to-string',
 `mon:string-to-byte-array', `mon:bit-vector-to-string', `mon:string-to-bit-vector',
-`mon:char-char-length', `mon:code-point'.~%►►►")
+`mon:char-char-length', `mon:code-point'.~%▶▶▶")
  
 (fundoc 'byte-array-to-hex-string
 "Convert subsequence of VECTOR between START and END to string
@@ -606,7 +606,7 @@ Default is `cl:base-char'.~%~@
  ;=> #\LATIN_SMALL_LETTER_Y_WITH_DIAERESIS~%~@
 :SEE-ALSO `mon:string-ascii-to-byte-array', `mon:byte-array-to-string',
 `mon:byte-array-to-string', `mon:bit-vector-to-string', `mon:string-to-bit-vector',
-`mon:char-char-length', `mon:code-point'.~%►►►")
+`mon:char-char-length', `mon:code-point'.~%▶▶▶")
 
 #+sbcl 
 (fundoc 'byte-array-to-string
@@ -619,7 +619,7 @@ Keyword END is an index into VECTOR to end at.~%~@
  \(byte-array-to-string \(make-array 3 :element-type '\(unsigned-byte 8\)
                                    :initial-contents '\(32 59 102\)\)\)~%
  \(loop for kk being each hash-key of sb-impl::*external-formats* collect kk\)~%~@
-:SEE-ALSO `mon:string-to-byte-array', `mon:string-ascii-to-byte-array'.~%►►►")
+:SEE-ALSO `mon:string-to-byte-array', `mon:string-ascii-to-byte-array'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'string-to-byte-array
@@ -637,7 +637,7 @@ data structures/strings.~%~@
  ;=> #\(225 237 233 201 243\)~%
  \(string-to-byte-array \"áíéÉó\" :null-terminate t\)
  ;=> #\(195 161 195 173 195 169 195 137 195 179 0\)~%
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 (fundoc 'vector-split
@@ -652,7 +652,7 @@ be displaced to the actual subsequences within VECTOR. In such case subsequences
 will share structure with VECTOR.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 ;;
 (fundoc 'vector-positions
 "Return list indices into VECTOR from START to END where ELT satisfies TEST.~%~@
@@ -661,7 +661,7 @@ Keywords START and END ara as `cl:position'~%~@
 Keyword TEST defaults to `cl:eql'
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'vector-binary-search
  "Search for VALUE in VECTOR by binary search.~%~@
@@ -670,7 +670,7 @@ VALUE is an object to be find.~%~@
 Keyword KEY is a function function with which to transform VECTOR elements.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

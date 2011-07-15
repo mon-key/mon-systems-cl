@@ -348,7 +348,7 @@ When optional arg TO-N is non-nil it is a number of type `cl:real' to increment 
 When optional arg INC-BY is non-nil it is a number of type `cl:real' to incrembent by. 
 :EXAMPLE~%
  \(number-sequence-loop 3.3 8.6 1.001\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc  'number-sequence
 "Return a sequence of numbers from FROM to TO (both inclusive) as a list.~%~@
@@ -362,7 +362,7 @@ If INC is zero and TO is neither nil nor numerically equal to FROM, signal an er
 :EXAMPLE~%
  \(number-sequence 0 8 3\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-to-number
   "Parse string as a decimal number and return the number.~%~@
@@ -376,7 +376,7 @@ The radix parameter must be between 2 and 36.~%Default radix is 10.~%~@
  \(string-to-number \"3\" :decimal-character #\\,\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `mon:bytes-to-int', `mon:coerce-int-float', `mon:number-to-string',
-`mon:string-coerce-from'.~%►►►")
+`mon:string-coerce-from'.~%▶▶▶")
 
 (fundoc 'number-to-string
   "Return the decimal representation of NUMBER as a string.~%~@
@@ -386,7 +386,7 @@ NUMBER may be an integer or a floating point number.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `mon:bytes-to-int', `mon:coerce-int-float', `mon:string-to-number',
-`mon:string-coerce-from'.~%►►►")
+`mon:string-coerce-from'.~%▶▶▶")
 
 (fundoc '%
 "Return remainder of X divided by Y.~%~@
@@ -394,14 +394,14 @@ Both must be integers or markers.~%~@
 :EXAMPLE~%
  \(% 8 3\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'coerce-int-float
 "Ensure that the argument is either an integer or a float.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:bytes-to-int', `mon:number-to-string',
-`mon:string-coerce-from'.~%►►►")
+`mon:string-coerce-from'.~%▶▶▶")
 
 (fundoc 'random-number-pairs
 "Return a list of consed pairs with each elt a string and its corresponding wholenum.
@@ -412,20 +412,20 @@ RANDOM-BOUNDS is an integer or positive float suitable for limiting `random'.~%~
 :EXAMPLE~%
  \(mk-random-list-from-string 8 18\)~%~@
 :SEE-ALSO `mon:parse-integer-list', `cl:random-state-p' `cl:*random-state*',
-`cl:random', `cl:make-random-state'.~%►►►")
+`cl:random', `cl:make-random-state'.~%▶▶▶")
 
 (fundoc 'parse-integer-list
 "Parse the integers in string from START to END. Return parse list.~%@
 :EXAMPLE~%
  \(parse-integer-list \"83813\" :start 1 :end 2\)~%@
-:SEE-ALSO `random-number-pairs'.~%►►►")
+:SEE-ALSO `random-number-pairs'.~%▶▶▶")
 
 (fundoc 'length-unit-get
 "Lookup UNIT for `mon:length-unit-get' in `mon:*length-unit*' alist.~%~@
 Signal an error if UNIT will not associate.~%~%
 :EXAMPLE~%
  \(length-unit-get :cm\)~%~@
-:SEE-ALSO .~%►►►")
+:SEE-ALSO .~%▶▶▶")
 
 (fundoc 'length-unit-convert
 "Convert SIZE to UNIT.\n~%~@
@@ -436,7 +436,7 @@ UNIT is a key in `mon:*length-unit*'.~%~@
  \(length-unit-convert 1.03 :mm\)~%
  \(length-unit-convert 1.03 :in\)~%
  \(length-unit-convert 1.03 nil\)~%~@
-:SEE-ALSO `mon:length-unit-get', `mon:*length-unit*'.~%►►►")
+:SEE-ALSO `mon:length-unit-get', `mon:*length-unit*'.~%▶▶▶")
 
 (fundoc 'average-number-seq
   "Calculate the average \(arithmetic mean\) value of numbers in sequence SEQ.~%~@
@@ -458,14 +458,14 @@ since it will perform a multiplication on the average on every step.~%~@
 	   \(average-number-seq seq :large-sum-p nil\)\)\)\)
  ;=> 2.1362305e-4~%~@
 :SEE-ALSO `cl:most-positive-double-float', `cl:most-positive-long-float',
-`cl:most-positive-short-float', `cl:most-positive-single-float'.~%►►►")
+`cl:most-positive-short-float', `cl:most-positive-single-float'.~%▶▶▶")
 
 (fundoc 'number-power-of-two-ceiling
         "The smallest power of two that is equal to or greater than UNSIGNED-INT.~%~@
 UNSIGNED-INT should be of type `mon:index'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `prime-plusp', `prime-or-next-greatest'.~%►►►")
+:SEE-ALSO `prime-plusp', `prime-or-next-greatest'.~%▶▶▶")
 
 
 ;;; ==============================

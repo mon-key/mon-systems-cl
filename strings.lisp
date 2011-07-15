@@ -1054,13 +1054,13 @@ When keyword W-CODE-CHAR is supplied convert car.~%~@
 `extended-char',`standard-char-p', `graphic-char-p',
 `alpha-char-p',`digit-char-p', `alphanumericp', `upper-case-p', `lower-case-p',
 `both-case-p', `char=', `char/=', `char<', `char>', `char<=', `char>=',
-`char-equal', `char-not-equal+'.~%►►►")
+`char-equal', `char-not-equal+'.~%▶▶▶")
 
 (fundoc 'string-cat
  "Concatenate a list of strings into a single one.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'concat
         "Concatenate all the arguments and make the result a string.~%~@
@@ -1085,7 +1085,7 @@ chararacter literals e.g.:~%
  `~~%' as \(#\\Newline\)~%~@
 :NOTE Unlike Emacs' concat it is permissible to pass chararacter literals, e.g.:~%~@
  \(concat #\\a nil #\\b nil #\\c\)~%~@
-:SEE-ALSO `mon:mapconcat', `mon:string-cat'.~%►►►")
+:SEE-ALSO `mon:mapconcat', `mon:string-cat'.~%▶▶▶")
 
 (fundoc 'downcase
   "Convert argument to lower case and return that.~%~@
@@ -1094,7 +1094,7 @@ The argument object is not altered -- the value is a copy.~%~@
 :EXAMPLE~%
  \(downcase \"BUBBA\"\)~%
  \(downcase #\\B\)~%~@
-:SEE-ALSO `capitalize', `upcase',`upcase-initials'.~%►►►")
+:SEE-ALSO `capitalize', `upcase',`upcase-initials'.~%▶▶▶")
 
 (fundoc 'upcase
 "Convert argument to upper case and return that.~%~@
@@ -1108,7 +1108,7 @@ The argument object is not altered -- the value is a copy.~%~@
 `cl:string-downcase', `cl:schar', `cl:char-upcase', `cl:char-downcase',
 `cl:upper-case-p', `cl:lower-case-p', `cl:character', `cl:base-char',
 `cl:standard-char', `cl:extended-char', `cl:standard-char-p',
-`cl:characterp'~%►►►")
+`cl:characterp'~%▶▶▶")
 
 (fundoc 'capitalize
 "Convert argument to capitalized form and return that.~%~@
@@ -1131,46 +1131,46 @@ The argument object is not altered--the value is a copy.~%~@
 `cl:character', `cl:base-char', `cl:standard-char', `cl:extended-char',
 `cl:standard-char-p', `cl:characterp', `sb-impl::**character-database**',
 `sb-impl::*base-char-name-alist*',
-`sb-impl::*unicode-character-name-database*'.~%►►►")
+`sb-impl::*unicode-character-name-database*'.~%▶▶▶")
 
 (fundoc 'downcase-loosely
 "Like `mon:downcase' but supports `char-code-integer's like emacs lisp.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'upcase-loosely
 "Like `mon:upcase' but supports `char-code-integer's like emacs lisp.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'capitalize-loosely
 "Like `mon:capitalize' but supports `char-code-integer's like emacs lisp.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-symbol-or-char-if
 " <DOCSTR> ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `string-symbol-or-char-if', `string-or-char-or-code-point-integer-if',
-`string-symbol-or-char-or-code-point-integer-if'.~%►►►")
+`string-symbol-or-char-or-code-point-integer-if'.~%▶▶▶")
 
 (fundoc 'string-or-char-or-code-point-integer-if
 " <DOCSTR> ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `string-symbol-or-char-if', `string-or-char-or-code-point-integer-if',
-`string-symbol-or-char-or-code-point-integer-if'.~%►►►")
+`string-symbol-or-char-or-code-point-integer-if'.~%▶▶▶")
 
 (fundoc 'string-symbol-or-char-or-code-point-integer-if
 " <DOCSTR> ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `string-symbol-or-char-if', `string-or-char-or-code-point-integer-if',
-`string-symbol-or-char-or-code-point-integer-if'.~%►►►")
+`string-symbol-or-char-or-code-point-integer-if'.~%▶▶▶")
 
 ;; (setf (documentation 'string-simple-string 'function)
 ;;       #.(format nil
@@ -1178,7 +1178,7 @@ The argument object is not altered--the value is a copy.~%~@
 ;; That is, make an array of element-type `character' with THING as its
 ;; initial-contents.~%
 ;; :EXAMPLE~%~%(string-simple-string '(#\s #\i #\m #\p #\l #\e\)\)~% 
-;; :SEE-ALSO `<XREF>'.~%►►►"))
+;; :SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 (fundoc 'substring
   "Return a new string whose contents are a substring of string.~%~@
@@ -1198,7 +1198,7 @@ FROM \(inclusive\) and index TO (exclusive) of that vector argument.~%~@
 :SEE-ALSO `mon:substring', `mon:string-remove-backslashes',
 `mon:string-trim-whitespace', `mon:string-split-newline',
 `mon:string-substitute', `mon:string-split-multi', `mon:string-split-spaces',
-`mon:string-upto-char', `mon:string-split-on-chars'.~%►►►")
+`mon:string-upto-char', `mon:string-split-on-chars'.~%▶▶▶")
 
 (fundoc 'string-upto-char
 "Return left part of string STR up to CHR `(inclusive\).~%~@
@@ -1207,7 +1207,7 @@ If CHR is not found or is the last character of STR return whole string.~%~@
  \(string-upto-char \"bubbam\" #\\a\)~%~@
 :SEE-ALSO `substring', `mon:string-remove-backslashes', `mon:string-trim-whitespace',
 `mon:string-split-newline', `mon:string-substitute', `mon:string-split-multi',
-`mon:string-split-spaces', `mon:string-split-on-chars'.~%►►►")
+`mon:string-split-spaces', `mon:string-split-on-chars'.~%▶▶▶")
 
 (fundoc 'mapconcat
  "Apply FUNCTION to each elt of SEQUENCE, and concatenate the results as strings.~%~@
@@ -1226,26 +1226,26 @@ SEPARATOR is a string or char interspersed between values returned by FUNCTION.~
  \(mapconcat #'identity '\(#\\a 8 #\\c 9\) \"-\"\)~%
  \(mapconcat #'identity #\(#\\a 8 #\\c 9\) \"-\"\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `cl:concatenate', `mon:concat'.~%►►►")
+:SEE-ALSO `cl:concatenate', `mon:concat'.~%▶▶▶")
 
 (fundoc 'string-join-strings
   "Return a new string by joining together the STRINGS,
 separating each string with a SEPARATOR character or string
 :EXAMPLE~%
  \(join-strings '\(\"a\" \"b\" \"ab\" \"some string\"\) #\\*\)~%~@
-:SEE-ALSO `mon:concat', `mon:mapconcat', `mon:string-map', `cl:concatenate'.~%►►►")
+:SEE-ALSO `mon:concat', `mon:mapconcat', `mon:string-map', `cl:concatenate'.~%▶▶▶")
 
 (fundoc 'string-delimited-to-list
   "Split a string with delimiter.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-reduce
   "Join adjacent strings in a list, leave other values intact.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-implode
   "Reduce a string-list of to a single string, inserting separator SEP between them.~%~@
@@ -1257,7 +1257,7 @@ SEP should satisfy `cl:simple-stringp', signal an errro if not.~%@
  \(string-implode \" string\" '\(\"\" \"1\" \"2\" \"3\"\)\)~%
  \(string-implode \", \" '\(\"string\" \"string1\" \"string2\" \"string3\"\)\)~%~@
 :SEE-ALSO `mon:string-explode', `mon:symbol-name-explode', `mon:concat',
-`mon:string-cat', `mon:mapconcat', `cl:concatenate', `cl:make-string'.~%►►►")
+`mon:string-cat', `mon:mapconcat', `cl:concatenate', `cl:make-string'.~%▶▶▶")
 
  ;; (string-implode "string1" " string2" " string3" " string4")
 
@@ -1265,7 +1265,7 @@ SEP should satisfy `cl:simple-stringp', signal an errro if not.~%@
   "Return string as a list of strings.~%~@
 :EXAMPLE~%
  \(string-explode \"bubba\"\)~%~@
-:SEE-ALSO `mon:symbol-name-explode'.~%►►►")
+:SEE-ALSO `mon:symbol-name-explode'.~%▶▶▶")
 
 (fundoc 'symbol-name-explode
   "Return EXPLODE-SYM as a list of characters or strings of length 1.~%~@
@@ -1280,13 +1280,13 @@ list of strings \(the default\).~%~@
  \(symbol-name-explode 'nil t\)~%
  \(symbol-name-explode t\)~%
  \(symbol-name-explode t t\)~%~@
-:SEE-ALSO `mon:string-explode'.~%►►►")
+:SEE-ALSO `mon:string-explode'.~%▶▶▶")
 
 (fundoc 'string-lines-to-array
          "Read lines in STRING, return as array \(as if by `cl:vector'\).~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-replace-all
   "Return a new string in which all the occurences of the FROM-STRING
@@ -1296,7 +1296,7 @@ Keyword test is a predicate to compare by. Default is `cl:char='.~%~@
  \(string-replace-all \"a b B c\" \"b\" \"Q\" :test #'char-equal\)~%
  \(string-replace-all \"a b B c\" \"b\" \"Q\"\)~%~@
 :NTOE To replace without case-sensitivity use :test #'char-equal~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-substitute
 "Substitute in STRING with SUBSTRING using replacement-string~%~@
@@ -1306,7 +1306,7 @@ Signal an error when SUBSTRING is length 0.~%~@
 :SEE-ALSO `mon:substring', `mon:string-remove-backslashes',
 `mon:string-trim-whitespace', `mon:string-split-newline',
 `mon:string-substitute', `mon:string-split-multi', `mon:string-split-spaces',
-`mon:string-upto-char', `mon:string-split-on-chars'.~%►►►")
+`mon:string-upto-char', `mon:string-split-on-chars'.~%▶▶▶")
 
 (fundoc 'string-split-multi
   "Split the STR string on chars.~%~@
@@ -1316,7 +1316,7 @@ Signal an error when SUBSTRING is length 0.~%~@
 :SEE-ALSO `mon:substring', `mon:string-remove-backslashes',
 `mon:string-trim-whitespace', `mon:string-split-newline',
 `mon:string-substitute', `mon:string-split-multi', `mon:string-split-spaces',
-`mon:string-upto-char', `mon:string-split-on-chars'.~%►►►")
+`mon:string-upto-char', `mon:string-split-on-chars'.~%▶▶▶")
 
 #+sbcl 
 (fundoc 'string-remove-backslashes
@@ -1329,7 +1329,7 @@ Keyword END is an index into STRING, default is length of STRING.~%~@
 :SEE-ALSO `sb-impl::remove-backslashes', `substring',
 `string-remove-backslashes', `string-trim-whitespace', `string-split-newline',
 `string-substitute', `string-split-multi', `string-split-spaces', `string-upto-char',
-`string-split-on-chars'.~%►►►")
+`string-split-on-chars'.~%▶▶▶")
 
 (fundoc 'string-split-newline
   "Return STRING as a list of substrings of split on #\\newline.~%~@
@@ -1340,7 +1340,7 @@ empty string between them.~%~@
 :SEE-ALSO `mon:substring', `mon:string-remove-backslashes',
 `mon:string-trim-whitespace', `mon:string-substitute', `mon:string-split-multi',
 `mon:string-split-spaces', `mon:string-upto-char',
-`mon:string-split-on-chars'.~%►►►")
+`mon:string-split-on-chars'.~%▶▶▶")
 
 (fundoc 'string-split-on-chars
 "Split STRING into substrings where there are matches for SEPARATORS.~%~@
@@ -1362,7 +1362,7 @@ splitting STRING when `string-all-whitespace-p'. Defualt is to return STRING unm
  \(string-split-on-chars \(format nil \"~~{~~C~~}\" *whitespace-chars*\)\)~%
  \(string-split-on-chars \(format nil \"~~{~~C~~}\" *whitespace-chars*\) nil t\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-string*
 "Convert ARGS to string multiple times.~%~@
@@ -1388,7 +1388,7 @@ coalescing remaining args.~%
  \(make-string* 3.0 #\\Space #\\x #\\Space \"x\" #\\Space -3.3 #\\Space 3/9\)~% ;=> \"3.0 x x -3.3 1/3\"~%~@
 Highly modified version of function presented on c.l.l here:~%~@
 :SEE (URL `http://groups.google.com/group/comp.lang.lisp/msg/2f64b48bcb0a0519')~%~@
-:SEE-ALSO `cl:make-string', `mon:mapconcat'.~%►►►")
+:SEE-ALSO `cl:make-string', `mon:mapconcat'.~%▶▶▶")
 
 (fundoc 'string-trim-whitespace
         #.`(format nil
@@ -1405,7 +1405,7 @@ Keyword END is a bounding index to trim from STRING. Default to STRING length.~%
 `mon:whitespace-char', `mon:*whitespace-chars*', `mon:substring',
 `mon:string-remove-backslashes', `mon:string-split-newline',
 `mon:string-substitute', `mon:string-split-multi', `mon:string-split-spaces',
-`mon:string-upto-char', `mon:string-split-on-chars'.~%►►►"
+`mon:string-upto-char', `mon:string-split-on-chars'.~%▶▶▶"
   ,@(mapcar #'code-char '(9 12 11 160 9 12 11 160 9 12 11 160 10 13))))
 
 (fundoc 'string-no-upper-p
@@ -1413,7 +1413,7 @@ Keyword END is a bounding index to trim from STRING. Default to STRING length.~%
 :EXAMPLE~%
  \(string-no-upper-p \"abcd\"\)~%
  \(string-no-upper-p \"abcD\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-longest-common-prefix
         "Return the longest string that is a common prefix of STRINGS.~%~@
@@ -1428,7 +1428,7 @@ When optional arg NULL-AS-NIL is non-nil and STRINGS is null return nil.~%~@
 ;; Following fails succesfully:~%
  \(string-longest-common-prefix '\(\"abqe\" . \"abqef\")\)~%~@
 :SEE-ALSO `mon:substring', `mon:string-starts-with', `mon:string-begins',
-`mon:string-upto-char', `mon:string-or-symbol-first-char'.~%►►►")
+`mon:string-upto-char', `mon:string-or-symbol-first-char'.~%▶▶▶")
 
 (fundoc 'string-begins
   "Return non-nil if STR begin with PUTATIVE-START.~%~@
@@ -1436,7 +1436,7 @@ When optional arg NULL-AS-NIL is non-nil and STRINGS is null return nil.~%~@
  \(string-begins \"abcd\" \"ab\"\)~%
  \(string-begins \"abcd\" \"cd\"\)~%
  \(string-begins \"abcd\" \"abcd\"\)~%~@
-:SEE-ALSO `mon:substring', `mon:string-longest-common-prefix'.~%►►►")
+:SEE-ALSO `mon:substring', `mon:string-longest-common-prefix'.~%▶▶▶")
 
 (fundoc 'string-split-spaces
 "Return LINE delimited by chars of type `mon:whitespace-char' as list of strings.~%~@
@@ -1452,13 +1452,13 @@ the trailing whitespace-chars trimmed.~%~@
  \(string-split-spaces \"1sisis    2sisis 3sisis    \" t\)~%~@
 :SEE-ALSO `mon:string-split-multi', `mon:string-split-on-chars',
 `mon:string-split-newline', `mon:string-trim-whitespace',
-`mon:whitespace-char-p', `mon:string-substitute'.~%►►►")
+`mon:whitespace-char-p', `mon:string-substitute'.~%▶▶▶")
 
 (fundoc 'string-coerce-from
 " <DOCSTR> ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-seqs-convert-chars-if
         "Destrutively modify STRING-SEQ by replacing characterp elts with with string equivalent.~%~@
@@ -1469,7 +1469,7 @@ STRING-SEQ is a proper list satisfying `mon:each-a-sequence-proper-or-character'
  \(string-seqs-convert-chars-if nil\)~%
 :SEE-ALSO `mon:concat', `mon:mapconcat', `mon:string-coerce-from',
 `mon:string-convert-tabs', `mon:string-substitute', `mon:make-string*',
-`mon:make-string-adjustable' .~%►►►")
+`mon:make-string-adjustable' .~%▶▶▶")
 
 (fundoc 'string-convert-tabs
 "Convert all occurences of #\Tab char in TABBY-STR to their equivalent in #\\Space chars.~%~@
@@ -1482,7 +1482,7 @@ When optional arg OMIT-LAST-NEWLINE is non-nil if last char of TABBY-STR is
 :SEE-ALSO `mon:string-split-multi', `mon:string-split-on-chars',
 `mon:string-split-newline', `mon:string-underscore-to-dash',
 `mon:string-trim-whitespace', `mon:whitespace-char-p',
-`mon:string-substitute'.~%►►►")
+`mon:string-substitute'.~%▶▶▶")
 
 (fundoc 'string-first-char
  "Return first character in STRING.~%~@
@@ -1492,7 +1492,7 @@ When STRING is null or `mon:simple-string-empty-p' return nil.~%~@
  \(string-first-char \"bubba\"\)~%
  \(string-first-char \"\"\)~%
  \(string-first-char nil\)~%~@
-:SEE-ALSO `mon:string-or-symbol-first-char'.~%►►►")
+:SEE-ALSO `mon:string-or-symbol-first-char'.~%▶▶▶")
 
 (fundoc 'string-or-symbol-first-char
  "Return first character in STRING-OR-SYMBOL.~%~@
@@ -1513,7 +1513,7 @@ Return a boolean when value of STRING-OR-SYMBOL is any of the following:~%
  \(string-or-symbol-first-char \"T\"\)~%
  \(string-or-symbol-first-char nil\)~%
  \(string-or-symbol-first-char \"nil\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-is-nil-like
 "Whether STRING has nil like qualities.~%~@
@@ -1531,7 +1531,7 @@ Return non-nil if STRING satisfies any of the following:
  \(string-is-nil-like \"nil   \"\)~%
  \(string-is-nil-like nil\)~%
  \(string-is-nil-like \(\)\)~%~@
-:SEE-ALSO `mon:string-trim-whitespace'.~%►►►")
+:SEE-ALSO `mon:string-trim-whitespace'.~%▶▶▶")
 
 (fundoc 'string-invert-case
 "Invert the CASE of STRING-TO-INVERT.~%~@
@@ -1543,7 +1543,7 @@ Keyword CASE is as keyword per return value of `cl:readtable-case' e.g. one of:~
  \(string-invert-case \"BuBbá\" :case :downcase\)~%
  \(string-invert-case \"BüBbá\" :case :upcase\)~%~@
 :SEE-ALSO `mon:string-for-readtable-case', `mon:char-for-readtable-case',
-`mon:char-invert-case-maybe'.~%►►►")
+`mon:char-invert-case-maybe'.~%▶▶▶")
 
 (fundoc 'string-for-readtable-case
         "Return CASE-FROB-STRING according to the `cl:readtable-case' of READTABLE~%~@
@@ -1565,14 +1565,14 @@ an error if not. When ommitted default to value of `cl:*readtable*'.~%~@
               \(close read-out\)\)\)~%~@
 :SEE-ALSO `mon:string-invert-case', `mon:read-symbol-name-preserving-case',
 `mon:read-symbol-name-preserving-case-if', `mon:char-for-readtable-case',
-`mon:char-invert-case-maybe'.~%►►►")
+`mon:char-invert-case-maybe'.~%▶▶▶")
 
 (fundoc 'string-split-on-column
 "Split STRING on COLUMN boundaries.~%~@
 :EXAMPLE~%
  \(string-split-on-column 
   \(format nil \"Hello World~%How do yo do?~%Comment ça va?~%\"\) 8\)~%~@
-:SEE-ALSO `mon:string-split-newline', `mon:string-split-multi'.~%►►►")
+:SEE-ALSO `mon:string-split-newline', `mon:string-split-multi'.~%▶▶▶")
 
 ;;; ==============================
 

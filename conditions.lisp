@@ -69,7 +69,7 @@ Direct slot initarg/readers are as follows:
    When provided W-TYPE is a symbol with an associatian in `mon:*error-table*'~%~@
    When ommitted may default to to value of: 
     \(cdr \(assoc 'nil mon:*error-table*\)\)~%~@
-:SEE-ALSO `mon:simple-error-mon'.~%►►►")))
+:SEE-ALSO `mon:simple-error-mon'.~%▶▶▶")))
 
 (define-condition simple-error-mon (error-mon)
   ((w-got 
@@ -99,7 +99,7 @@ Formats slot initargs/readers of direct superclass `mon:error-mon' as follows:~%
  - :W-TYPE ERROR-TYPE
  - :W-SPEC ERROR-SPEC
  - :W-ARGS ERROR-ARGS~%~@
-:SEE-ALSO `mon:*error-table*'.~%►►►")))
+:SEE-ALSO `mon:*error-table*'.~%▶▶▶")))
 
 ;; :SOURCE CLOCC/cllib/port/ext.lisp
 ;; :NOTE :CALLED-BY `sequence-type' :FILE types.lisp
@@ -140,7 +140,7 @@ Formats slot initargs/readers of direct superclass `mon:error-mon' as follows:~%
                               :w-sym 'sequence-type
                               :w-type 'function
                               :w-args \(list 'seq seq 'string 'vector 'list\)\)\)\)\)~%~@
-              :SEE-ALSO `mon:code-error'.~%►►►")))
+              :SEE-ALSO `mon:code-error'.~%▶▶▶")))
 
 ;; :TODO This should inherit `cl:type-error'.
 ;;       The PROPER-SPEC reader should be refactored in lieu of
@@ -171,7 +171,7 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
        :w-type 'function
        :proper-list-error-args `\(bubb-arg ,\(make-hash-table\)\)\)~%~@
 :SEE-ALSO `mon:case-error', `mon:slot-non-existent-error',
-`mon:simple-error-mon' `mon:simple-error-mon-report', `mon:error-mon'.~%►►►")))
+`mon:simple-error-mon' `mon:simple-error-mon-report', `mon:error-mon'.~%▶▶▶")))
 
 (define-condition circular-list-error (type-error error-mon)
   ()
@@ -214,7 +214,7 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
        \(error \(make-condition 'circular-list-error :w-sym 'bubba
                                                      :w-type 'function
                                                      :datum crcl\)\)\)~%~@
-   :SEE-ALSO `mon:list-circular-p', `mon:proper-list-error'.~%►►►")))
+   :SEE-ALSO `mon:list-circular-p', `mon:proper-list-error'.~%▶▶▶")))
 
 (define-condition slot-non-existent-error (cell-error error-mon)
   ;; :NOTE Don't add ":initform nil" to these conditions slots b/c we don't want
@@ -255,7 +255,7 @@ Where ARG names an object not of type `mon:proper-list' and VAL is its value.~%
                              :w-obj object
                              :w-not-slot-value 42\)\)\)~%~@
    :SEE-ALSO `mon:error-mon', `mon:code-error',`cl:unbound-slot', `cl:unbound-variable',
-   `cl:undefined-function'.~%►►►")))
+   `cl:undefined-function'.~%▶▶▶")))
 
 (define-condition package-error-not (type-error simple-error-mon)
   ()
@@ -273,7 +273,7 @@ Sigaled by function `mon:package-error-not'.~%~@
 :report is as per `package-error-not-report'.~%~@
 Report `cl:type-error-datum' and `cl:type-of' for `cl:type-error-datum' as if by
 the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
-:SEE-ALSO `<XREF>'.~%►►►")))
+:SEE-ALSO `<XREF>'.~%▶▶▶")))
 
 (define-condition symbol-not-null-or-string-not-empty-error (type-error simple-error-mon)
   ((symbol-nor-string-locus
@@ -294,7 +294,7 @@ Signaled by function `mon:symbol-not-null-or-string-not-empty-error'.~%~@
 :report is as per `mon:symbol-not-null-or-string-not-empty-error-report'.~%~@
 Report `cl:type-error-datum' and `cl:type-of' for `cl:type-error-datum' as if by
 the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
-:SEE-ALSO `<XREF>'.~%►►►")))
+:SEE-ALSO `<XREF>'.~%▶▶▶")))
 
 (define-condition plist-error (type-error simple-error-mon)
   ((plist-obj-locus
@@ -313,7 +313,7 @@ Signaled by function `mon:plist-error'.~%~@
 :report is as per `mon:plist-error-report'.~%~@
 Report `cl:type-error-datum' and `cl:type-of' for `cl:type-error-datum' as if by
 the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
-:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%►►►")))
+:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%▶▶▶")))
 
 (define-condition plist-not-null-error (plist-error)
   ((plist-obj-locus
@@ -334,7 +334,7 @@ Signaled by function `mon:plist-not-null-error'.~%~@
 :report is as per `mon:plist-error-report'.~%~@
 Report `cl:type-error-datum' and `cl:type-of' for `cl:type-error-datum' as if by
 the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
-:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%►►►")))
+:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%▶▶▶")))
 ;;
 ;; (plist-not-null-error  
 
@@ -352,7 +352,7 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                   Report `cl:type-error-datum' and `cl:type-of' for `cl:type-error-datum' as if by~@
                   the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.~%~@
                   :SEE-ALSO `mon:open-stream-output-stream-p', `mon:stream-or-boolean',~@
-                  `cl:streamp', `cl:open-stream-p', `cl:output-stream-p'.~%►►►")))
+                  `cl:streamp', `cl:open-stream-p', `cl:output-stream-p'.~%▶▶▶")))
 
 
 ;;; ==============================
@@ -834,7 +834,7 @@ If an association is not found or SYMBOL-TYPE is null default to \":LOCUS\"~%~@
  \(format-error-symbol-type 'bubba 'function\)~%
  \(format-error-symbol-type 'bubba 'variable\)~%~@
 :SEE-ALSO `mon:format-error-symbol-type', `mon:signal-error-or-condition',
-`mon:ensure-one-of', `mon:ensure-signal-or-only'.~%►►►")
+`mon:ensure-one-of', `mon:ensure-signal-or-only'.~%▶▶▶")
 
 (fundoc 'ensure-one-of
 "Ensure ITEM is `cl:eql' an element of LIST.~%
@@ -854,7 +854,7 @@ Pass type-error initarg :expected-type as a list of the form:~%
          :format-control \(simple-condition-format-control eoo\)
          :format-arguments \(simple-condition-format-arguments eoo\)\)\)~%~@
 :SEE-ALSO `mon:format-error-symbol-type', `mon:signal-error-or-condition',
-`mon:ensure-signal-or-only', `sb-impl::ensure-one-of'.~%►►►")
+`mon:ensure-signal-or-only', `sb-impl::ensure-one-of'.~%▶▶▶")
 
 (fundoc 'ensure-signal-or-only
 "Whether SIGNAL-OR-ONLY is not null and its value is a valid argument.~%~@
@@ -874,7 +874,7 @@ When SIGNAL-OR-ONLY is either condition, condition-only, or the symbol t return 
 ;; Fails successfully:~%
  \(ensure-signal-or-only 'bubba\)~%~@
 :SEE-ALSO `mon:format-error-symbol-type', `mon:signal-error-or-condition',
-`mon:ensure-one-of', `mon:ensure-signal-or-only'.~%►►►")
+`mon:ensure-one-of', `mon:ensure-signal-or-only'.~%▶▶▶")
 
 (fundoc 'signal-error-or-condition
 "Signal, error, or return condition according to value of CHK-SIGNAL-OR-ONLY.~%~@
@@ -897,12 +897,12 @@ When SIGNAL-OR-ONLY is either condition, condition-only, or the symbol t return 
              :format-control   \(simple-condition-format-control ste\)
              :format-arguments \(simple-condition-format-arguments ste\)\)\)\)\)~%~@
 :SEE-ALSO `mon:format-error-symbol-type', `mon:ensure-one-of',
-`mon:ensure-signal-or-only'.~%►►►")
+`mon:ensure-signal-or-only'.~%▶▶▶")
 
 (fundoc 'simple-error-mon-report
 	"Helper function for reporting conditions of type `mon:simple-error-mon'.~%~@
 :CALLED-BY `mon:simple-error-mon'.~%~@
-:SEE-ALSO `mon:*error-table*'.~%►►►")
+:SEE-ALSO `mon:*error-table*'.~%▶▶▶")
 
 (fundoc 'simple-error-mon
 "Signal a condition of type `mon:simple-error-mon'.~%~@
@@ -953,7 +953,7 @@ eventually provide restarts, handlers, etc.~%~@
  \(simple-error-mon :w-sym nil :w-spec 8\)~%
  \(simple-error-mon :w-spec 8\)~%
  \(simple-error-mon :w-spec #\(\) :w-args \(list 88\)\)~%~@
-:SEE-ALSO `mon:simple-error-mon'.~%►►►")
+:SEE-ALSO `mon:simple-error-mon'.~%▶▶▶")
 
 (fundoc 'circular-list-error
 "Signal a condition of type `mon:circular-list-error'.~%
@@ -974,7 +974,7 @@ not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
                        :w-type 'function\)\)~%
  \(let \(\(crcl \(alexandria:circular-list 'a 'b\)\)\)
   \(circular-list-error crcl\)\)~%~@
-:SEE-ALSO `mon:circular-list-p', `mon:list-dotted-p'.~%►►►")
+:SEE-ALSO `mon:circular-list-p', `mon:list-dotted-p'.~%▶▶▶")
 
 (fundoc 'proper-list-error
 "Signal an error of type `mon:proper-list-error'.~%~@
@@ -1003,7 +1003,7 @@ not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
    \(list \(error-sym cond-obj\) 
          \(error-sym-type cond-obj\)
          \(proper-args cond-obj\)\)\)~%~@
-:SEE-ALSO `mon:circular-list-error'.~%►►►")
+:SEE-ALSO `mon:circular-list-error'.~%▶▶▶")
 
 (fundoc 'symbol-not-null-or-error
 "If CHK-SYMBOL is not of type `mon:symbol-not-null' signal an error.~%~@
@@ -1018,7 +1018,7 @@ not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
  \(symbol-not-null-or-error nil :w-locus 'bubba :signal-or-only nil\)~%~@
  \(symbol-not-null-or-error 8\)~%
  \(symbol-not-null-or-error 'bubba\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'package-error-not
 "Signal an error of type `mon:package-error-not'~%~@
@@ -1029,7 +1029,7 @@ not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
                     :w-spec \"Arg PACKAGE provided but `mon:find-package*'~~
                              doesn't find it\"
                     :signal-or-only nil\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-empty-error
         "Signal an `simple-mon-error'.~%
@@ -1043,11 +1043,11 @@ Arg W-LOCUS is the locus of the value that was `mon:string-empty-p'.~%~@
                      :w-locus 'some-value\)~%
  \(string-empty-error\)~%~@
 :SEE-ALSO `mon:string-no-whitespace-p', `mon:string-all-whitespace-p',
-`mon:string-contains-whitespace-p', `mon:string-trim-whitespace'.~%►►►")
+`mon:string-contains-whitespace-p', `mon:string-trim-whitespace'.~%▶▶▶")
 
 (fundoc 'symbol-not-null-or-string-not-empty-error-report
 "Helper function for reporting `symbol-not-null-or-string-not-empty-error' conditions.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'symbol-not-null-or-string-not-empty-error
         "Error for objects not of type `mon:symbol-not-null-or-string-not-empty'.~%~@
@@ -1068,11 +1068,11 @@ if not.~%~@
                                             :w-obj-locus \(cons 'a 'b\)\)~%
  \(symbol-not-null-or-string-not-empty-error \(make-array 1\) 
                                            :w-spec \(cons \"a~~S\" \"b~~A\"\)\)~%
-:SEE-ALSO `string-empty-error'.~%►►►")
+:SEE-ALSO `string-empty-error'.~%▶▶▶")
 
 (fundoc 'plist-error-report
 "Helper function for reporting `mon:plist-error' conditions.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'plist-error
 "Error for objects not of type `mon:proper-plist'.~%~@
@@ -1088,7 +1088,7 @@ if not.~%~@
               :w-obj-locus \"bubba\"\)~%
  \(plist-error '\(1 . b\)
               :w-obj-locus \(make-array 1\)\)~%~@
-:SEE-ALSO `mon:plist-not-null-error', `mon:plist-proper-p', `mon:proper-plist'.~%►►►")
+:SEE-ALSO `mon:plist-not-null-error', `mon:plist-proper-p', `mon:proper-plist'.~%▶▶▶")
 
 (fundoc 'plist-not-null-error
 "Error for objects not of type `mon:proper-plist-not-null'.~%~@
@@ -1102,11 +1102,11 @@ if not.~%~@
  \(plist-not-null-error :w-sym 'bubba 
                         :w-type 'function 
                         :w-obj-locus \"bubba\"\)~%
-:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%►►►")
+:SEE-ALSO `mon:plist-proper-p', `mon:proper-plist'.~%▶▶▶")
 
 (fundoc 'open-stream-output-stream-error-report
 "Helper function for reporting `mon:open-stream-output-stream-error' conditions.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'open-stream-output-stream-error
 "Singal an `open-stream-output-stream-error' condition.~%~@
@@ -1123,7 +1123,7 @@ The default is 'stream.
   :w-type 'function
   :w-obj-locus \"SOME-ARG\"
   :expected-type 'stream-or-boolean\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================  
 

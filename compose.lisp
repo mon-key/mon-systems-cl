@@ -43,7 +43,7 @@
 ;;   "Like `compose' but return nil when an intermediate value is nil.~%~@
 ;; :EXAMPLE~%~%~@
 ;;  { ... <EXAMPLE> ... } ~%~@
-;; :SEE-ALSO `compose-fun', `compose-all'.~%►►►"))
+;; :SEE-ALSO `compose-fun', `compose-all'.~%▶▶▶"))
 ;;
 ;;; ==============================
 
@@ -58,14 +58,14 @@ All FUNCTIONS should take one argument, except for the last one, which can take
 several.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `compose-fun', `compose-all', `%compose'.~%►►►")
+:SEE-ALSO `compose-fun', `compose-all', `%compose'.~%▶▶▶")
 
 (fundoc 'compose-all
  "Return the composition of all the arguments.~%~@
 All the values from nth function are fed to the n-1th of FUNCTIONS.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `compose-fun', `compose-all', `%compose'.~%►►►")
+:SEE-ALSO `compose-fun', `compose-all', `%compose'.~%▶▶▶")
 
 ;;; ==============================
 

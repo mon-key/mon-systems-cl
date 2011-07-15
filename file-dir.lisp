@@ -612,7 +612,6 @@
   (declare (type pathname-designator pathname))
   (cl-fad:pathname-as-directory pathname))
 
-
 (defun make-pathname-user-homedir (&key user path)
   (declare (string-or-null user)
            (proper-list path))
@@ -955,7 +954,7 @@
 :EXAMPLE~%
  \(directorize-namestring
    \(directory-namestring \"/home/me/some/path/to-a/filesys.lisp\"\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc  'file-name-directory
          "Return the directory component in file name FILENAME.~%~@
@@ -965,7 +964,7 @@ Given a Unix syntax file name, returns a string ending in slash.~%~@
 EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'pathname-file-if
         "Is PUTATIVE-PATHNAME `cl:stringp' or `cl:pathnamep' probe it as if by `cl:probe-file'.~%~@
@@ -985,7 +984,7 @@ _not_ the truename of the symbolic-link.~%~@
  \(pathname-file-if \(namestring \(user-homedir-pathname\)\) :allow-directory t\)~%
  \(pathname-file-if #P\"~~/\" :allow-directory t\)~%
  \(pathname-file-if 42\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'pathname-file-list-if 
 "Filter any string or pathname in NAMESTRING-LIST for which `pathname-file-if' retrurns null.
@@ -1000,14 +999,14 @@ Keyword AS-PATHNAMES when non-nil returns each valid string or pathname as if by
  \(pathname-file-list-if
   \(directory \(merge-pathnames \(make-pathname :name :wild :type :wild\)
                               \(user-homedir-pathname\)\)\) :allow-directory t\)~%
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc  'file-truename
 "Return the truename of FILENAME.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;; (function 'file-directory-p
 ;;   "Return non-nil if filename names an existing directory.~%~@
@@ -1017,7 +1016,7 @@ Keyword AS-PATHNAMES when non-nil returns each valid string or pathname as if by
 ;;  \(file-directory-p *default-pathname-defaults*\)~%
 ;;  \(file-directory-p \(merge-pathnames \(make-pathname :name \"bubba\" :type \".lisp\"\)\)\)~%~@
 ;; :EMACS-LISP-COMPAT~%~@
-;; :SEE-ALSO `<XREF>'.~%►►►")
+;; :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'directory-file-name
 "Returns the file name of the directory named directory.~%~@
@@ -1028,13 +1027,13 @@ In Unix-syntax, this function just removes the final slash.~%~@
 :EXAMPLE~%
  \(directory-file-name *default-pathname-defaults*\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'to-directory
 "Helper function for `mon:expand-file-name'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'probe-directory
@@ -1055,7 +1054,7 @@ Return as if by `cl:values' one of the following forms:~%
  \(probe-directory \"   \"\)~%
  \(probe-directory 42\)~%
 :SEE-ALSO `mon:pathname-native-file-kind', `file-directory-p', `cl:probe-file',
-`cl:ensure-directories-exist'.~%►►►")
+`cl:ensure-directories-exist'.~%▶▶▶")
 
 (fundoc 'ensure-file-exists
         "Return PATHNAME as if by `cl:open' :direction :probe.~%~@
@@ -1070,7 +1069,7 @@ Return as if by `cl:values' one of the following forms:~%
           \(format strm \"existent-file: ~~S~~%with-name: ~~S\" \(cl-fad:file-exists-p strm\) mp\)
           \(format nil \"existent-file: ~~S~~%with-name: ~~S\" \(cl-fad:file-exists-p strm\) mp\)\)
      \(delete-file mp\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'pathname-directory-merged
         "Return `cl:pathname-directory' merging DIRNAME with PATHNAME-DEFAULTS.~%~@
@@ -1090,14 +1089,14 @@ The merged pathname is generated as if by `cl:merge-pathnames' with:~%
                dflts\)\)\)\)\)
   \(setf rtn `\(,\(equal \(car rtn\) \(cdr rtn\)\) ,@rtn\)\)\)~%~@
 :SEE-ALSO `mon:pathname-directory-append', `mon:pathname-absolute-p',
-`mon:pathname-components'.~%►►►")
+`mon:pathname-components'.~%▶▶▶")
 
 (fundoc 'pathname-directory-append
         "Merge DIRNAME as if by `cl:merge-pathnames' with :defaults PATHNAME-DEFAULTS.~%~@
 PATHNAME-DEFAULTS is a pathname desigator of an absolute parent of directory with DIRNAME.~%~@
 :EXAMPLE~%
  \(pathname-directory-append \"bubba\" \(user-homedir-pathname\)\)~%
-:SEE-ALSO `mon:pathname-directory-merged'.~%►►►")
+:SEE-ALSO `mon:pathname-directory-merged'.~%▶▶▶")
 
 (fundoc 'rename-file*
 "Rename FILE with NEW-NAME.~%~@
@@ -1108,20 +1107,20 @@ Like `rename-file' but avoid a null pathname-type.~%~@
 causes a null \(pathname-type new-name\) to be replaced by \(pathname-type file\),
 which is \"almost\" certainly not want one wants.~%~@
 :SEE-ALSO `fad:delete-directory-and-files', `replace-file',
-`sb-posix:rmdir'.~%►►►")
+`sb-posix:rmdir'.~%▶▶▶")
 
 (fundoc 'unix-dot-directory-p
 "Whether PATH is directory of the form \".\" or \"..\".~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'pathname-strip-filespec
 "Remove name, type, and version components from PATHNAME.~%~@
 Return value is as if by `cl:make-pathname'~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-pathname-directory-wildcard
 "Return PATHNAME with `cl:pathname-name' and `cl:pathname-type' :wild~%~@
@@ -1133,15 +1132,22 @@ PATHNAME designates a pathname its type should be `mon:filename-designator'.
                 \(make-pathname-directory-wildcard \(cadr ntv\)\)\)
           ntv\)\)~%~@
 :NOTE Implementated as a wrapper around `cl-fad::directory-wildcard'.~%~@
-:SEE-ALSO `make-pathname-directory-w-type-wild'.~%►►►")
+:SEE-ALSO `make-pathname-directory-w-type-wild'.~%▶▶▶")
 
 (fundoc 'pathname-directory-pathname
 "Return PATHNAME's the pathname of PATHNAMES pathname-directory.~%~@
 :EXAMPLE~%
  \(let \(\(ntv \(list \(sb-ext:native-namestring *default-pathname-defaults* :as-file t\)\)\)\)
    \(adjoin \(pathname-directory-pathname \(car ntv\)\) ntv\)\)~%~@
-:NOTE A wrapper around `cl-fad:pathname-as-directory'.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:NOTE A wrapper around `cl-fad:pathname-as-directory'.~%
+ ,----
+ | Return a pathname reperesenting the given pathname in `directory normal form',
+ | i.e. with all the name elements in the directory component and NIL in the name
+ | and type components. Can not be used on wild pathnames because there's not
+ | portable way to convert wildcards in the name and type into a single directory
+ | component. Returns its argument if name and type are both nil or :unspecific.
+ `----~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'substitute-in-file-name
 "Substitute environment variables referred to in filename.~%~@
@@ -1157,7 +1163,7 @@ If `//' appears, everything up to and including the first of those `/' is discar
 :EMACS-LISP-COMPAT~%~@
 :SEE \(man \"environ\"\)~%~@
 :SEE \(man \"getenv\"\)~%~@
-:SEE-ALSO `sb-ext:posix-environ' `sb-ext:posix-getenv'.~%►►►")
+:SEE-ALSO `sb-ext:posix-environ' `sb-ext:posix-getenv'.~%▶▶▶")
 
 
 
@@ -1269,7 +1275,7 @@ argument is appropriate for the intended caller!~%~@
 `pathname-version', `fad:copy-file', `fad:copy-stream', `fad:delete-directory-and-files',
 `fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%►►►")
+`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
 
 (fundoc 'file-newer-than-file-p
 "Return T if file FILE1 is newer than file FILE2.~%~@
@@ -1282,7 +1288,7 @@ If FILE1 does not exist, return nil; otherwise, if FILE2 does not exist, return 
 `fad:delete-directory-and-files', `fad:directory-exists-p',
 `fad:directory-pathname-p', `fad:file-exists-p', `fad:list-directory',
 `fad:pathname-as-directory', `fad:pathname-as-file', `fad:walk-directory',
-`fad::component-present-p', `fad::directory-wildcard'.~%►►►")
+`fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
 
 (fundoc 'find-file-search-path
  "Return first complete pathname of an existing file.~%~@
@@ -1297,7 +1303,7 @@ Return nil if an existing file is not found.~%~@
    :search-path \(list \(pathname-system :mon\)\)\)~%~@
 :SEE-ALSO `mon:pathname-directory-system', `mon:pathname-system',
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `cl:probe-file'.~%►►►")
+`fad:walk-directory', `cl:probe-file'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'pathname-native-file-kind
@@ -1319,21 +1325,21 @@ When PUTATIVE-PATHNAME is some other type return values have the form:~%
  \(pathname-native-file-kind \"   \"\)
  \(pathname-native-file-kind 42\)~%~@
 :SEE-ALSO `sb-ext:native-namestring', `sb-unix:unix-lstat', `sb-unix:unix-stat',
-`sb-posix:lstat', `sb-posix:stat'.~%►►►")
+`sb-posix:lstat', `sb-posix:stat'.~%▶▶▶")
 
 #+sbcl 
 (fundoc 'remove-directory
 "Remove directory specified by PATHNAME.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-posix:rmdir', `file-directory-p', `probe-file'.~%►►►")
+:SEE-ALSO `sb-posix:rmdir', `file-directory-p', `probe-file'.~%▶▶▶")
 
 (fundoc 'replace-file
   "Like RENAME-FILE, but deletes TO if it exists, first.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `remove-directory', `delete-file-if-exists',
-`rename-file', `sb-posix:rmdir', `fad:delete-directory-and-files'.~%►►►")
+`rename-file', `sb-posix:rmdir', `fad:delete-directory-and-files'.~%▶▶▶")
 
 (fundoc 'directory-parent
 "Return the parent directory PATHNAME~%~@
@@ -1342,7 +1348,7 @@ When PUTATIVE-PATHNAME is some other type return values have the form:~%
 :SEE-ALSO `fad:copy-file', `fad:copy-stream', `fad:delete-directory-and-files',
 `fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%►►►")
+`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
 
 (fundoc 'make-pathname-user-homedir
         "Return a directory pathname for USER with directory components of PATH.~%~@
@@ -1356,7 +1362,7 @@ PATH is a proper-list of strings identifiying directores beneath USER's
 Following each fail successfully:~%
  \(make-pathname-user-homedir :user \"\"\)~%
  \(make-pathname-user-homedir :path '\(\"a\" . \"b\"\)\)~%~@
-:SEE-ALSO `cl:make-pathname', `sb-ext:native-namestring', `sb-ext:native-pathname'.~%►►►")
+:SEE-ALSO `cl:make-pathname', `sb-ext:native-namestring', `sb-ext:native-pathname'.~%▶▶▶")
 
 #+asdf
 (fundoc 'pathname-directory-system
@@ -1379,7 +1385,7 @@ inspects the asdf:system class object in behind the key.~%~@
  \(pathname-directory-system t\)~%
  \(pathname-directory-system \"\"\)~%
  \(pathname-directory-system nil\)~%~@
-:SEE-ALSO .~%►►►")
+:SEE-ALSO .~%▶▶▶")
 
 #+asdf
 (fundoc 'pathname-directory-system-ensure
@@ -1389,7 +1395,7 @@ the `cl:truename' of its `asdf:system-definition-pathname', else nil.~%~@
 :EXAMPLE~%
  \(pathname-directory-system :mon\)~%~@
 :SEE-ALSO `mon:pathname-directory-system', `mon:namestring-system',
-`mon:pathname-directory-system'.~%►►►")
+`mon:pathname-directory-system'.~%▶▶▶")
 
 #+asdf
 (fundoc 'pathname-system
@@ -1397,7 +1403,7 @@ the `cl:truename' of its `asdf:system-definition-pathname', else nil.~%~@
 SYSTEM is found as if by `mon:pathname-directory-system'.~%~@
 :EXAMPLE~%
  \(pathname-system :mon\)~%~@
-:SEE-ALSO `mon:namestring-system', `mon:pathname-directory-system-ensure'.~%►►►")
+:SEE-ALSO `mon:namestring-system', `mon:pathname-directory-system-ensure'.~%▶▶▶")
 
 #+asdf
 (fundoc 'namestring-system
@@ -1405,7 +1411,7 @@ SYSTEM is found as if by `mon:pathname-directory-system'.~%~@
 SYSTEM is found as if by `mon:pathname-directory-system'.~%~@
 :EXAMPLE~%
  \(namestring-system :mon\)~%~@
-:SEE-ALSO `mon:pathname-system', `mon:pathname-directory-system-ensure'.~%►►►")
+:SEE-ALSO `mon:pathname-system', `mon:pathname-directory-system-ensure'.~%▶▶▶")
 
 ;;; ==============================
 

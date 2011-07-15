@@ -141,7 +141,7 @@ The third integer gives the microsecond count.~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `sb-ext:get-time-of-day', `mon:time-string-right-now'
 `cl:get-internal-real-time', `cl:get-decoded-time', `cl:decode-universal-time',
-`cl:encode-universal-time'.~%►►►")
+`cl:encode-universal-time'.~%▶▶▶")
 
 (fundoc 'time-string-right-now
         "Print the current time to destination stream out \(defaults to t\).~%~@
@@ -154,7 +154,7 @@ The third integer gives the microsecond count.~%~@
    \(get-output-stream-string get-tm\)\)~%~@
 :SEE-ALSO `mon:time-string-yyyy-mm-dd', `mon:current-time',
 `cl:get-internal-real-time', `cl:get-decoded-time', `cl:decode-universal-time',
-`cl:encode-universal-time'.~%►►►")
+`cl:encode-universal-time'.~%▶▶▶")
 
 (fundoc 'time-string-yyyy-mm-dd
 "Return UNIVERSAL-TIME formatted as an ISO-8601-ish string.~%~@
@@ -176,13 +176,13 @@ When provided return value is output to STREAM.~%~@
  \(with-output-to-string \(s\) \(time-string-yyyy-mm-dd nil s\)\)~%
 :SEE-ALSO `mon:time-string-right-now', `mon:current-time',
 `cl:get-internal-real-time', `cl:get-decoded-time', `cl:decode-universal-time',
-`cl:encode-universal-time'.~%►►►")
+`cl:encode-universal-time'.~%▶▶▶")
 
 (fundoc 'time-zone-to-string
 "Convert the CL timezone \(rational [-24;24], multiple of 3600\) to a string.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'timestamp-for-file
   "Timestamp string for use when generating unique file names.~%~@
@@ -191,7 +191,7 @@ Return value has the format:~%
 :EXAMPLE~%
  \(timestamp-for-file\)~%~@
 :NOTE Ommision of puctuation chars #\\: and #\\. is intentional!
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

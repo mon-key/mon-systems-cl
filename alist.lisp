@@ -63,33 +63,33 @@ The value is actually the first element of A-LIST whose car is KEY.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'alist-eql
 "Check that the two association lists have the same values.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `plist-eql'.~%►►►")
+:SEE-ALSO `plist-eql'.~%▶▶▶")
 
 (fundoc 'alist-sort-keys
   "Sort keys of ALIST.~%~@
 Optional arg SORT-PRED is a predicate to sort keys by, default is `cl:string<'.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `plist-to-alist'.~%►►►")
+:SEE-ALSO `plist-to-alist'.~%▶▶▶")
 
 (fundoc   'alist-to-plist
 
 "Transform an ALIST to a PLIST as if by `cl:nconc', consing.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
-:SEE-ALSO `nalist-to-plist', `nplist-to-alist', `plist-to-alist'.~%►►►")
+:SEE-ALSO `nalist-to-plist', `nplist-to-alist', `plist-to-alist'.~%▶▶▶")
 
 (fundoc   'nalist-to-plist
 "Destructively transform ALIST to a PLIST as if by `do'/`setf', non-consing.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `nalist-to-plist', `nplist-to-alist', `plist-to-alist', `alist-to-plist'.~%►►►")
+:SEE-ALSO `nalist-to-plist', `nplist-to-alist', `plist-to-alist', `alist-to-plist'.~%▶▶▶")
 
 ;;; ==============================
 

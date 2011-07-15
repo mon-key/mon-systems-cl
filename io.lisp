@@ -288,7 +288,7 @@ When :upcase set it :upcase.~%~@
 When :capitalize signal a warning and do nothing.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `cl:with-standard-io-syntax'.~%►►►")
+:SEE-ALSO `cl:with-standard-io-syntax'.~%▶▶▶")
 
 (fundoc 'query-string
 		"Query user with QUERY-STRING.~%~@
@@ -301,13 +301,13 @@ Keyword :TRIM-CHARS are removed when read and will reprompt.
  { ... <EXAMPLE> ... } ~%~@
 :NOTE On SBCL passing the following form will prevent successfull entry of
 carriage returns, e.g. character #\\RETURN.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'print-spaces
 "Print NUMBER spaces to STREAM as if by `write-char'~%~@
 :EXAMPLE~%~@
   { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-string-with-escapes
 "Read a string containing C style character escapes and convert to CL style.~%~@
@@ -327,13 +327,13 @@ Following table maps the corresponding conversions:~%
 `sb-int:backspace-char-code', `sb-int:tab-char-code',
 `sb-int:line-feed-char-code', `sb-int:form-feed-char-code',
 `sb-int:return-char-code', `sb-int:escape-char-code',
-`sb-int:rubout-char-code'.~%►►►")
+`sb-int:rubout-char-code'.~%▶▶▶")
 
 (fundoc 'eof-p
 "Return non-nil if STREAM has no more data left in it to be read.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-next-term-char
 "Read next char from stream.~%~@
@@ -345,7 +345,7 @@ Optional arge STREAM defaults to `*query-io*'.%~@
 :SEE-ALSO `mon:query-string', `cl:read-char', `sb-posix:tcgetattr',
 `sb-posix:tcsetattr', `sb-posix:tcsadrain', `sb-posix:termios-lflag',
 `sb-posix:termios-cc', `sb-posix:icanon', `sb-posix:echo', `sb-posix:echoe',
-`sb-posix:echok', `sb-posix:echonl', `sb-posix:vmin', `sb-posix:vtime'.~%►►►")
+`sb-posix:echok', `sb-posix:echonl', `sb-posix:vmin', `sb-posix:vtime'.~%▶▶▶")
 
 (fundoc 'open-stream-output-stream-p
 "Return true if STREAM satisfies both `cl:open-stream-p' and `cl:output-stream-p'.~%~@
@@ -381,7 +381,7 @@ type `mon:open-stream-output-stream-error'.~%~@
                                     :w-error t\)
      \(list str-strm fp-strm-p \(type-of str-strm\)\)\)\)~%~@
 :SEE-ALSO `mon:stream-or-boolean', `cl:streamp', `cl:open-stream-p',
-`cl:output-stream-p' `mon:open-stream-output-stream-error-report'.~%►►►")
+`cl:output-stream-p' `mon:open-stream-output-stream-error-report'.~%▶▶▶")
 
 
 ;;; ==============================

@@ -26,6 +26,9 @@
 
 
 
+;; file-local-variables-alist
+;; slime-mode-hook
+;; (cdr (assq 'show-trailing-whitespace file-local-variables-alist))
 ;;; ==============================
 ;;; :SEQ-PREDICATE-PREDICATE-LIKE
 ;;; ==============================
@@ -723,25 +726,25 @@
 setfable~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'interleave ;;; LMH
   "Interleave the two lists LST-A and LST-B.~%
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-take 
   "TAKE-N elements FROM-LST.~%~@
 :EXAMPLE~%
  \(list=take 2 '\(a b c d e\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'last-cons 
       "Get the last cons IN-LIST.~%~@
 :EXAMPLE~%
  \(last-cons '\(a b c \(d . \(a\)\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-dotted-p-destructure
  "Return tail of dotted-list for destructuring.~%~@
@@ -763,13 +766,13 @@ When OBJECT is of type `mon:circular-list' signal a `mon:circular-list-error'.~%
    \(list-dotted-p-destructure list\)\)~%~@
 :SEE-ALSO `mon:list-proper-p', `mon:list-dotted-p', `mon:list-circular-p',
 `mon:last-cons', `mon:nth-sane', `mon:list-from-singleton',
-`mon:list-get-singleton', `mon:car-safe', `mon:cdr-safe', `cl:last'.~%►►►")
+`mon:list-get-singleton', `mon:car-safe', `mon:cdr-safe', `cl:last'.~%▶▶▶")
 
 (fundoc 'list-drop 
   "~%DROP-N elements FROM-LST~%~@
 :EXAMPLE~%
  \(drop 2 '\(a b c d e\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'last-elt 
   "Return the car of the `last' elt in LST.~%~@
@@ -777,14 +780,14 @@ When OBJECT is of type `mon:circular-list' signal a `mon:circular-list-error'.~%
  \(last-elt '(a b c d))~%
  \(last-elt '\(a b c . d\)\)~%
  \(last-elt '\(a b c . \(d \(a\)\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'freqs 
   "Return an alist of (num . freq) of elements of the SEQ.~%~@
 The alist is sorted by decreasing frequencies. TEST defaults to `eql'.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
-:SEE-ALSO `sequence-zero-len-p'.~%►►►")
+:SEE-ALSO `sequence-zero-len-p'.~%▶▶▶")
 
 (fundoc 'list-group-by 
   "Group list items by TEST with KEY.~%~@
@@ -799,7 +802,7 @@ than calls which must instead dispatch on `group-by-list'.~%~@
  \(time \(progn 
 	 \(list-group-by *nums* :test #'\(lambda \(x y\) \(eql x y\)\)
 			:key #'\(lambda \(x\) \(mod x 100\)\)\) nil\)\)~%~@
-:SEE-ALSO `group-by-w-hash', `group-by-w-seq'.~%►►►")
+:SEE-ALSO `group-by-w-hash', `group-by-w-seq'.~%▶▶▶")
 
 (fundoc 'group-by-w-seq 
   "Group LIST items by TEST with KEY.~%~@
@@ -809,7 +812,7 @@ Helper function for list-group-by~%~@
                  #'\(lambda \(x\) \(> length 2\)\)  #'length \)~%~@
 :NOTE When TEST is an equality function satisfying the precicate
 `standard-test-function-p' it is faster to evaluate LIST with `group-by-w-hash'.
-:SEE-ALSO `group-by-w-hash'.~%►►►")
+:SEE-ALSO `group-by-w-hash'.~%▶▶▶")
 
 (fundoc 'subseq-count
 "Return the number of occurences of SUBSEQUENCE in SEQUENCE.~%~@
@@ -824,14 +827,14 @@ SUBSEQUENCE is a sequence of elements occuring sequentially in SEQUENCE.~%~@
  \(subseq-count '\(#\\d #\\o #\\g\) \"dog cat dog cat dog\"\)
 :NOTE Does not match conses
  \(subseq-count '\(\(a b\)\) '\(a b '\(a b\) '\(a b\) a b c d '\(a b\)\)\)
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'group-by-w-hash
   "Group LIST items by TEST with KEY.~%~@
 Helper function for `list-group-by' called when TEST satisfies precicate `standard-test-function-p'.~%~@
 :EXAMPLE~%
  \(group-by-w-hash '\(\"the\" \"tan\" \"ant\" \"gets\" \"some\" \"fat\"\) #'equal #'length \)~%~@
-:SEE-ALSO `group-by-w-seq'.~%►►►")
+:SEE-ALSO `group-by-w-seq'.~%▶▶▶")
 
 (fundoc  'add-to-list
   "Add element to the value of list-var if it isn't there yet.~%~@
@@ -844,7 +847,7 @@ The return value is the new value of list-var.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mon:add-to-nth-list', `cl:pushnew'.~%►►►")
+:SEE-ALSO `mon:add-to-nth-list', `cl:pushnew'.~%▶▶▶")
 
 (fundoc 'add-to-nth-list
 "cdr down LIST N times, push THING into the car of cons cell at N. Return LIST.~%~@
@@ -864,35 +867,35 @@ If N exceeds the bounds of LIST's lenth List is extended if necessary.~%~@
       for new = \(copy-seq lst\)
       collect \(list :at-nth add \(add-to-nth-list new \"bubba\" add\)\) into rtn
       finally \(return \(nconc `\(\(:original ,lst\)\) rtn\)\)\)\)~%~@
-:SEE-ALSO `mon:add-to-list', `cl:pushnew'.~%►►►")
+:SEE-ALSO `mon:add-to-list', `cl:pushnew'.~%▶▶▶")
 
 (fundoc  'setcar  
   "Set the car of CELL to be NEWCAR.  Return NEWCAR.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc  'setcdr  
   "Set the cdr of CELL to NEWCDR, return NEWCDR.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc  'car-safe 
 "Return the car of OBJECT if it is a cons cell, else NIL.~%~@
 :EXAMPLE~%~@
  { ... EXAMPLE ... }~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'cdr-safe 
 "Return the cdr of OBJECT if it is a cons cell, or else nil.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `car-safe'.~%►►►")
+:SEE-ALSO `car-safe'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -922,7 +925,7 @@ If N exceeds the bounds of LIST's lenth List is extended if necessary.~%~@
  `cl:remf', `cl:remprop'~%
 :SEE \(info \"\(ansicl\)eq\"\)~%
 :SEE-ALSO `mon:car-eq', `mon:not-eq', `mon:memq', `mon:position-eq', `delq',
-`mon:remq', `mon:adjoinq', `mon:union-eq-keep-first'.~%►►►")
+`mon:remq', `mon:adjoinq', `mon:union-eq-keep-first'.~%▶▶▶")
 
 (fundoc 'car-eq 
  "Return non-nil when car of LST-X is `eq' OBJ-B.~%~@
@@ -938,7 +941,7 @@ If N exceeds the bounds of LIST's lenth List is extended if necessary.~%~@
  (eql 1.0 1.0)~%~%
 :SEE-ALSO `mon:not-eq', `mon:memq', `mon:position-eq', `delq', `mon:remq',
 `mon:adjoinq', `mon:union-eq-keep-first', `cl:catch', `cl:throw', `cl:get',
-`cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'adjoinq 
   "Add ITEM to LIST as if by `cl:adjoin' with :test arg `cl:eq'~%~@
@@ -946,7 +949,7 @@ If N exceeds the bounds of LIST's lenth List is extended if necessary.~%~@
  { ... EXAMPLE ... }~%~@
 :SEE-ALSO `mon:car-eq', `mon:not-eq', `mon:memq', `mon:position-eq', `delq',
 `mon:remq', `mon:union-eq-keep-first', `cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'memq 
  "Return non-nil if elt is an element of list.~%~@
@@ -973,7 +976,7 @@ elisp> \(member 'b '\(a . b\)\) ;=> nil
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `mon:not-eq', `mon:memq', `mon:position-eq', `delq', `mon:remq',
 `mon:union-eq-keep-first', `mon:car-eq', `mon:adjoinq', `cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'position-eq
         "Return the position of the first element in LST `eq' to ITEM.~%~@
@@ -991,7 +994,7 @@ Like \(position {...} :test #'eq\)~%~@
 :SEE-ALSO `cl:position', `mon:not-eq', `mon:memq', `mon:position-eq', `mon:delq',
 `mon:remq', `mon:union-eq-keep-first', `mon:car-eq', `mon:adjoinq', `cl:catch',
 `cl:throw', `cl:get', `cl:get-properties', `cl:getf', `cl:remf',
-`cl:remprop'.~%►►►")
+`cl:remprop'.~%▶▶▶")
 
 (fundoc 'union-eq-keep-first
 "An alternative set union operation.~%~@
@@ -1002,7 +1005,7 @@ of a duplicate is preserved.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:not-eq', `mon:memq', `mon:position-eq', `mon:delq', `mon:remq',
 `mon:union-eq-keep-first', `mon:car-eq', `mon:adjoinq', `cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'delq
   "Delete by side effect any occurrences of elt as a member of list.~%~@
@@ -1013,7 +1016,7 @@ The modified list is returned.  Comparison is as if by `cl:eq'.~%~@
 :SEE-ALSO `cl:delete', `cl:remove', `mon:delete-dups', `mon:delete-w-count',
 `mon:not-eq', `mon:memq', `mon:position-eq', `mon:remq',
 `mon:union-eq-keep-first', `mon:car-eq', `mon:adjoinq', `cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'remq  
   "Return LIST with all occurrences of ELT removed.~%~@
@@ -1026,7 +1029,7 @@ notmodified.~%~@
 :SEE-ALSO `cl:delete', `cl:remove', `mon:delete-dups', `mon:delete-w-count',
 `mon:not-eq', `mon:memq', `mon:position-eq', `delq', `mon:remq',
 `mon:union-eq-keep-first', `mon:car-eq', `mon:adjoinq', `cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 (fundoc 'delete-all-elts-eq
 "Delete all `cl:eq' elts IN-SUBLIST FROM-LIST~%~@
@@ -1034,7 +1037,7 @@ notmodified.~%~@
  \(delete-all-elts-eq '\(e d a q\) '\(a q \(a b c\) e d \(f g h\) \(a b c\) \(q e d\)\)\)~%~@
 :SEE-ALSO `cl:delete', `cl:remove', `mon:delete-w-count', `mon:delete-dups',
 `mon:delete-all-elts-eq', `mon:car-eq', `mon:adjoinq'`cl:catch', `cl:throw',
-`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%►►►")
+`cl:get', `cl:get-properties', `cl:getf', `cl:remf', `cl:remprop'.~%▶▶▶")
 
 ;;; ==============================
 (fundoc 'delete-dups
@@ -1046,7 +1049,7 @@ Of several `cl:equal' occurrences of an element in LIST, the first one is kept.~
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `mon:delete-w-count', `mon:delete-dups', `delete-all-elts-eq',
-`cl:delete', `cl:remove'.~%►►►")
+`cl:delete', `cl:remove'.~%▶▶▶")
 
 (fundoc 'delete-w-count
 "Like `cl:delete' but also return as if by `values' the number of items deleted.~%~@
@@ -1056,7 +1059,7 @@ Of several `cl:equal' occurrences of an element in LIST, the first one is kept.~
   ;  2~%~@
 :NOTE This is what `cl:delete' should have been \(and was on the LispMs\).~%~@
 :SEE-ALSO `mon:delete-dups', `delete-all-elts-eq', `cl:delete',
-`cl:remove'.~%►►►")
+`cl:remove'.~%▶▶▶")
 
 (fundoc 'copy-sequence  
     "Return a copy of a list, vector, string or char-table.~%~@
@@ -1065,39 +1068,39 @@ Of several `cl:equal' occurrences of an element in LIST, the first one is kept.~
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `cl:copy-tree', `cl:copy-seq', `cl:copy-alist', `cl:copy-list',
-`cl:copy-structure'.~%►►►")
+`cl:copy-structure'.~%▶▶▶")
 
 (fundoc 'nsublist 
  "Return the part of list LST between POS0 and POS1, *destructively*.~%~@
 0 Indexed.~%~@
 :EXAMPLE~%
  \(nsublist '(1 2 3 4 5) nil 2\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'flatten 
 "Traverses the tree in order, collecting non-null leaves into a list.~%~@
 :EXAMPLE~%
  \(flatten \(1 \(2\) \(3 \(4\) \(5 \(6\) 7\) 8\) 9\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-subsets 
 "Return a list of all subsets of the given set \(represented as a list\).~%~@
 :EXAMPLE~%
  \(list-subsets '\(a b a b c d\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-to-array 
 "Convert the list to an array of given dimensions DIM, assuming row-major order.~%~@
 :EXAMPLE~%
  \(list-to-array '\(0 1 3 5 7\) 5\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-to-intervals 
 "Return the intervals for conses in LIST.~%~@
 :EXAMPLE~%
  \(list-to-intervals '\(10 9 8 5 4 3 1\)\)~% 
  ;=> \(\(10 . 10\) \(9 . 9\) \(8 . 8\) \(5 . 5\) \(4 . 4\) \(3 . 3\) \(1 . 1\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-split-odd-even 
         "Split LIST into odd and even numbered elements.~%~@
@@ -1115,7 +1118,7 @@ When optional arg RETURN-LIST is non-nil return valuis is a two element list:
    \(reverse \(pairlis \(car mkpairs\) \(cadr mkpairs\)\)\)\)~%
  \(multiple-value-bind \(even odd\) \(list-split-odd-even \(number-sequence 1 10\)\)
    \(reverse \(pairlis even odd\)\)\)~%~@
-:SEE-ALSO `cl:pairlist', `cl:acons'.~%►►►")
+:SEE-ALSO `cl:pairlist', `cl:acons'.~%▶▶▶")
 
 (fundoc 'split-seq 
 "Return a list of subseq's of SEQ, split on predicate PRED.~%~@
@@ -1124,26 +1127,26 @@ If STRICT is non-nil, collect zero-length sub-sequences too.~%~@
  \(split-seq SEQ PRED &key \(start 0\) end key strict\)~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'list-from-singleton 
 "When ARG is an atom a list containing the atom is returned, else return ARG.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `singleton-p', `list-get-singleton'.~%►►►")
+:SEE-ALSO `singleton-p', `list-get-singleton'.~%▶▶▶")
 
 (fundoc 'list-get-singleton 
 "When ARG is a list with a single element return ARG as singleton.~%~@
 When ARG is not single element list return ARG.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `singleton-p', `list-from-singleton'.~%►►►")
+:SEE-ALSO `singleton-p', `list-from-singleton'.~%▶▶▶")
 
 (fundoc 'list-quote-elts 
 "Quote the elements in list lst.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'car-less-than-car 
 "Return T if \(car A\) is numerically less than \(car B\).~%~@
@@ -1156,7 +1159,7 @@ Signal an error if car of either A or B is not `cl:realp'
  \(car-less-than-car '\(2  a\)  '\(b  3\)\)~%
  \(car-less-than-car '\(2  a\)  nil\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mon:car-greater-than-car'.~%►►►")
+:SEE-ALSO `mon:car-greater-than-car'.~%▶▶▶")
 
 (fundoc 'car-greater-than-car
 "Return T if \(car A\) is numerically greater than \(car B\).~%~@
@@ -1168,7 +1171,7 @@ Signal an error if car of either A or B is not `cl:realp'
 ;; Following errors successfully:~% 
  \(car-less-than-car '\(3  a\)  '\(b  2\)\)~%
  \(car-less-than-car nil  '\(b  2\)\)~%~@
-:SEE-ALSO `mon:car-less-than-car'.~%►►►")
+:SEE-ALSO `mon:car-less-than-car'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -1184,7 +1187,7 @@ DOTTED-LIST must be a dotted list or a proper list.~%~@
 `mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
 `mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
 `mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
-`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%▶▶▶")
 
 (fundoc 'list-circular-lengths
 "Return the length of a circular-list.~%~@
@@ -1197,7 +1200,7 @@ the cyclic circlular portion.
 `mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
 `mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
 `mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
-`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%▶▶▶")
 
 ;; (values nil nil)
 ;; (export (find-symbol "LIST-LENGTHS"))
@@ -1246,7 +1249,7 @@ Return as if by `cl:values' as follows:~%
 `mon:list-proper-p', `mon:proper-list', `mon:list-proper-not-null-p',
 `mon:proper-list-not-null', `mon:list-dotted-p', `mon:dotted-list',
 `mon:circular-list', `mon:list-circular-p', `mon:each-a-sequence-proper',
-`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%►►►")
+`mon:sequencep', `mon:sequence-zerop', `mon:sequence-type'.~%▶▶▶")
 
 
 
@@ -1269,7 +1272,7 @@ Signal a `cl:type-error' if INT is not of type `mon:fixnum-0-or-over'.~%~@
 ;; Following successfully signal an error:~%
  \(list-length-n-p '\(nil . t\) 0\)~%
  \(list-length-n-p '\(\) -1\) ~%~@
-:SEE-ALSO `mon:sequence-zerop', `cl:list-length', `cl:length', `cl:endp'.~%►►►")
+:SEE-ALSO `mon:sequence-zerop', `cl:list-length', `cl:length', `cl:endp'.~%▶▶▶")
 
 (fundoc 'list-transpose 
 "Turn a list-of-lists on its side.~%~@
@@ -1277,7 +1280,7 @@ If the rows are of unequal length, truncate uniformly to the shortest.~%~@
 :EXAMPLE~%
  \(transpose-lists '\(\(ONE TWO THREE\) \(1 2\)\)\)~%
  ;=> \(\(ONE 1\) \(TWO 2\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'mapcar-sharing
   "A simple \(one list arg\) version of `cl:mapcar'~%~@
@@ -1285,7 +1288,7 @@ Avoids consing up a new list as long as the results of calling FUN on the
 elements of LIST are eq to the original. An Emacs lisp style mapcar.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `%sharing-cons'.~%►►►")
+:SEE-ALSO `%sharing-cons'.~%▶▶▶")
 
 (fundoc '%sharing-cons
   "If CAR is eq to the car of OLD-CONS and CDR is eq to the CDR, return
@@ -1293,7 +1296,7 @@ OLD-CONS, otherwise return \(cons CAR CDR\).~%~@
 Helper function for `mon:mapcar-sharing'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -1342,7 +1345,7 @@ Keyword KEY isa a designator for a function of one argument. Default is nil.~%~@
 `split-sequence:split-sequence-if-not', `cl:substitute-if',
 `cl:substitute-if-not', `cl:nsubstitute', `cl:nsubstitute-if',
 `cl:nsubstitute-if-not', `cl:position', `cl:position-if',
-`cl:position-if-not'.~%►►►")
+`cl:position-if-not'.~%▶▶▶")
 
 #+split-sequence
 (fundoc 'split-sequence:split-sequence-if
@@ -1374,7 +1377,7 @@ Keyword KEY isa a designator for a function of one argument. Default is nil.~%~@
 :SEE-ALSO `split-sequence:split-sequence',
 `split-sequence:split-sequence-if-not', `cl:substitute', `cl:substitute-if-not',
 `cl:nsubstitute', `cl:nsubstitute-if', `cl:nsubstitute-if-not', `cl:position',
-`cl:position-if', `cl:position-if-not'.~%►►►")
+`cl:position-if', `cl:position-if-not'.~%▶▶▶")
 
 #+split-sequence
 (fundoc 'split-sequence:split-sequence-if
@@ -1406,7 +1409,7 @@ Keyword KEY isa a designator for a function of one argument. Default is nil.~%~@
 :SEE-ALSO `split-sequence:split-sequence', `split-sequence:split-sequence-if',
 `cl:substitute', `cl:substitute-if', `cl:nsubstitute', `cl:nsubstitute-if',
 `cl:nsubstitute-if-not', `cl:position', `cl:position-if',
-`cl:position-if-not'.~%►►►")
+`cl:position-if-not'.~%▶▶▶")
 
 ;;; ==============================
 
@@ -1415,6 +1418,7 @@ Keyword KEY isa a designator for a function of one argument. Default is nil.~%~@
 ;; indent-tabs-mode: nil
 ;; show-trailing-whitespace: t
 ;; mode: lisp-interaction
+;; paragraph-ignore-fill-prefix: nil
 ;; package: mon
 ;; End:
 

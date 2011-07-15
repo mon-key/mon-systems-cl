@@ -187,12 +187,12 @@
          1 2 3 4\)~%~@
 :NOTE Stolen/adapted from PCL chap 18 pg 229.~%
 :SEE \(URL `http://www.gigamonkeys.com/book/a-few-format-recipes.html'\)
-:SEE-ALSO `mon:format-delimited-english-list'.~%►►►")
+:SEE-ALSO `mon:format-delimited-english-list'.~%▶▶▶")
 
 (fundoc 'format-list-items-by-n
 "Format elts of LIST with FORMAT-DIRECTIVE grouping output BY-N.~%~@
 STREAM is as an output stream per `cl:format'.~%~@
-PREFIX-STR is a string to prepend to output of preceding the formatted LIST.~%~@
+PREFIX-STR is a string to prepend to output of preceding formatted LIST.~%~@
 BY-N is an integer value to group elts of LIST by.~%~@
 FORMAT-DIRECTIVE is a format directive to format elts of LIST with.~%~@
 :EXAMPLE~%~@
@@ -200,17 +200,17 @@ FORMAT-DIRECTIVE is a format directive to format elts of LIST with.~%~@
                          \(loop for i from 0 to 10 collect \(expt 1.065 i\)\)\)
  \(format-list-items-by-n t 8 \"~~,2F\"
                          \(loop for i from 0 to 25 collect \(expt 1.065 i\)\)\)
-:SEE-ALSO `mon::%format-list-items'.~%►►►")
+:SEE-ALSO `mon::%format-list-items'.~%▶▶▶")
 
 (fundoc '%format-list-items
         "Helper function for `mon:format-list-items-by-n'.~%~@
 Return directive as a format-directive repeated N times.~%~@
 :EXAMPLE~%
  \(%format-list-items 8 \"~~S\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'format-delimited-english-list
-"Return a format control string for presenting enumerated lists grammatically.~%~@
+"Return a format control-string for presenting enumerated lists grammatically.~%~@
 DIRECTIVE is a format directive to be inserted at appropriate places in returned
 format control-string.~%~@
 CONJUNCTION is a coordinating conjunctive, a string of one or more words, e.g.:~%
@@ -244,14 +244,14 @@ Default is \"~~{\".~%~@
  \(format nil \(format-delimited-english-list \"~~S\" \"or\" :delimiter #\\;\)
          '\(\"bubba\" \"Bubba\" \"buBBa\"\)\)~%~@
 :SEE (URL `http://www.gigamonkeys.com/book/a-few-format-recipes.html')~%
-:SEE-ALSO `mon:*format-delimited-english-list-templates*'.~%►►►")
+:SEE-ALSO `mon:*format-delimited-english-list-templates*'.~%▶▶▶")
 
 (fundoc 'format-emit-tab 
 "Emit a tab to COLUMN as if by \(formatter \"~~V,0t\"\).~%~@
 Column is a positivie integer value 0,80.~%~@
 :EXAMPLE~%
  \(progn \(format-emit-tab 18 t\) \(format t \"str\"\)\)~%~@
-:SEE-ALSO `cl:formatter'.~%►►►")
+:SEE-ALSO `cl:formatter'.~%▶▶▶")
 
 ;;; ==============================
 

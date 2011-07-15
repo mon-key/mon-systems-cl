@@ -11,7 +11,7 @@
   (declare (proper-plist plist))
   #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `nplist-to-alist' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
   (do ((ll plist (cdr ll))) ((null (cdr ll)) plist)
@@ -25,15 +25,15 @@
 ;;; :SOURCE fare-utils/base/lists.lisp :`WAS `plist->alist'
 (defun plist-to-alist (plist)
   (declare (proper-plist plist))
-  #-sbcl 
+  #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `plist-to-alist' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
   (loop :for (key val) :on plist by #'cddr :collect (cons key val)))
-#| 
+#|
 
- (if (null plist) 
+ (if (null plist)
      nil
      (acons (car plist) (cadr plist) (plist->alist (cddr plist))))
 |#
@@ -42,11 +42,11 @@
 (defun plist-eql (p1 p2 &key (test #'eql))
   (declare (proper-plist p1 p2))
   #-sbcl (and (not (assert (plist-proper-p p1)
-                           () 
+                           ()
                            ":FUNCTION `plist-eql' -- expected an object of type `mon:proper-plist'~%~
                             got: ~S~%" p1))
               (not (assert (plist-proper-p p1)
-                           () 
+                           ()
                            ":FUNCTION `plist-eql' -- expected an object of type `mon:proper-plist'~%~
                             got: ~S~%" p1)))
   (macrolet ((p= (a b)
@@ -57,7 +57,7 @@
                     (return nil)))))
     (and (p= p1 p2) (p= p2 p1))))
 
-(defun put (symbol propname value) 
+(defun put (symbol propname value)
   (setf (get symbol propname) value))
 
 (defun putf (sym propname value)
@@ -77,7 +77,7 @@
 ;; PROP is a symbol and VALUE is any object.~%
 ;; If PROP is already a property on the list, its value is set to VALUE,
 ;; otherwise the new PROP VALUE pair is added.~%
-;; The new plist is returned; use: 
+;; The new plist is returned; use:
 ;;  \(setq x \(plist-put x prop val\)\)~%
 ;; to be sure to use the new value.~%
 ;; The PLIST is modified by side effects.~%"
@@ -99,7 +99,7 @@
 ;;; ==============================
 
 ;;; ==============================
-;;; :SOURCE rucksack/cache.lisp 
+;;; :SOURCE rucksack/cache.lisp
 ;; (defun sans (plist &rest keys)
 ;;   "Returns PLIST with keyword arguments from KEYS removed."
 ;;   ;; From Usenet posting <3247672165664225@naggum.no> by Erik Naggum.
@@ -121,9 +121,9 @@
 (defun plist-remove (plist &rest keys)
   (declare (proper-plist plist)
            (optimize (speed 3)))
-  #-sbcl 
+  #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `plist-remove' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
   ;; :FIXME possible optimization: (plist-remove '(:x 0 :a 1 :b 2) :a)
@@ -136,35 +136,35 @@
 ;; :SOURCE alexandria/lists.lisp :WAS `delete-from-plist'
 (defun plist-delete (plist &rest keys)
   (declare (proper-plist plist))
-  #-sbcl 
+  #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `plist-delete' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
   ;; :FIXME should not cons
   (apply 'plist-remove plist keys))
 ;;
-(define-modify-macro plist-removef (&rest keys) 
+(define-modify-macro plist-removef (&rest keys)
   plist-remove)
 
-(define-modify-macro plist-deletef (&rest keys) 
+(define-modify-macro plist-deletef (&rest keys)
   plist-delete)
 
 ;;; ==============================
 ;; :SOURCE sbcl/src/pcl/ctor.lisp
 (defun plist-keys (plist &key test)
   (declare (proper-plist plist))
-  #-sbcl 
+  #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `plist-keys' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
-  (loop 
+  (loop
      :for (key . more) :on plist :by #'cddr
      ;; :WAS
-     ;; :if (null more) 
+     ;; :if (null more)
      ;;  :do (error "Not a property list: ~S" plist)
-     ;; :else 
+     ;; :else
      :if (or (null test)
              (funcall test key))
      :collect key))
@@ -172,17 +172,17 @@
 ;; :SOURCE sbcl/src/pcl/ctor.lisp
 (defun plist-values (plist &key test)
   (declare (proper-plist plist))
-  #-sbcl 
+  #-sbcl
   (assert (plist-proper-p plist)
-          () 
+          ()
           ":FUNCTION `plist-values' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
-  (loop 
+  (loop
      :for (key . more) :on plist :by #'cddr
      ;; :WAS
-     ;; :if (null more) 
+     ;; :if (null more)
      ;; :do (error "Not a property list: ~S" plist)
-     ;; :else 
+     ;; :else
      :if (or (null test)
              (funcall test (car more)))
      :collect (car more)))
@@ -200,7 +200,7 @@
 `mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
 `mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
-`cl:symbol-plist'.~%►►►")
+`cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-remove
  "Return propery-list PLIST with same KEYS and values, except that keys
@@ -214,7 +214,7 @@ Keys are compared using EQ.~%~@
 `mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
 `mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
-`cl:symbol-plist'.~%►►►")
+`cl:symbol-plist'.~%▶▶▶")
 
 ;; plist-eq
 (fundoc 'plist-eql
@@ -225,7 +225,7 @@ Keys are compared using EQ.~%~@
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-to-alist
  "Transform PLIST of consecutive pairs into an alist as if by `cl:cons', consings.~%~@
@@ -235,7 +235,7 @@ Keys are compared using EQ.~%~@
 `mon:plist-eql' `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist' .~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist' .~%▶▶▶")
 
 (fundoc 'nplist-to-alist
 "Destructively transform a PLIST to an alist as if by `do'/`setf',  non-consing.~%~@
@@ -246,7 +246,7 @@ Keys are compared using EQ.~%~@
 `mon:plist-delete', `mon:plist-remove', `mon:plist-get', `mon:plist-put',
 `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
-`cl:symbol-plist' .~%►►►")
+`cl:symbol-plist' .~%▶▶▶")
 
 (fundoc 'put
   "Store symbol's propname property with value value.~%~@
@@ -256,7 +256,7 @@ Keys are compared using EQ.~%~@
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'putf
   "Like `cl:put' but uses the generalized accessor `cl:getf' instead of `cl:get'.~%~@
@@ -267,7 +267,7 @@ Search the property list stored in SYM (a place) for a property EQ to PROPNAME.~
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-put
   "Change value in SYM's symbol-plist of PROP to VAL.~%~@
@@ -285,7 +285,7 @@ The plist is modified by side effects as if by `cl:setf'/`cl:getf'.~%~@
 `mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
 `mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
-`cl:symbol-plist'.~%►►►")
+`cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-get
   "Extract a value from a property list.~%~@
@@ -300,9 +300,9 @@ is not one of the properties on the list.~%~@
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
-;; 
+;;
 (fundoc 'plist-values
 "Collect values in PLIST.~%~@
 Keyword TEST is a function predicate applied to each value of PLIST.~%~@
@@ -313,7 +313,7 @@ Keyword TEST is a function predicate applied to each value of PLIST.~%~@
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-keys
 "Collect keys in PLIST.~%~@
@@ -325,7 +325,7 @@ Keyword TEST is a function predicate applied to each key of PLIST.
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-removef
         "Modify macro for `mon:plist-remove'.~%~@
@@ -333,7 +333,7 @@ Keyword TEST is a function predicate applied to each key of PLIST.
 `mon:nplist-to-alist', `mon:plist-to-alist', `mon:plist-delete',
 `mon:plist-remove', `mon:plist-get', `mon:plist-put', `mon:putf', `mon:put',
 `mon:plist-proper-p', `mon:proper-plist' `cl:get-properties', `cl:get',
-`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%►►►")
+`cl:getf', `cl:remf', `cl:remprop', `cl:symbol-plist'.~%▶▶▶")
 
 (fundoc 'plist-deletef
 "Modify macro for `mon:plist-delete'.~%~@
@@ -341,7 +341,7 @@ Keyword TEST is a function predicate applied to each key of PLIST.
 `mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
 `mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
-`cl:symbol-plist'.~%►►►")
+`cl:symbol-plist'.~%▶▶▶")
 
 ;;; ==============================
 

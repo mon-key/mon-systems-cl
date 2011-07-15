@@ -451,7 +451,7 @@
 :EXAMPLE%~%~@
  { ... <EXAMPLE> ... } ~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `fdefinition', `fmakunbound', `featurep'.~%►►►")
+:SEE-ALSO `fdefinition', `fmakunbound', `featurep'.~%▶▶▶")
 
 (fundoc 'intern-soft
 		"Return the canonical symbol named NAME, or nil if none exists.~%~@
@@ -475,7 +475,7 @@ Default is to limit search to value of current value of `cl:*package*'.~%~@
  \(intern-soft \"INTERN-SOFT\" \"COMMON-LISP-USER\"\)~%
  \(intern-soft \"INTERN-SOFT\" \"NON-EXISTEN-PACKAGE\"\)~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-keyword-sanely
 "Intern the string designated by KEYWORD-STRING in the KEYWORD package.~%~@
@@ -484,7 +484,7 @@ If KEYWORD-STRING contains interior whitespace signal an error.~%~@
 :EXAMPLE~%
  \(make-keyword-sanely \"bubba\"\)~%
  \(make-keyword-sanely \"bub ba\"\)~%~@
-:SEE-ALSO `mon:keyword-prune',`sb-int:symbolicate', `sb-int:keywordicate'.~%►►►")
+:SEE-ALSO `mon:keyword-prune',`sb-int:symbolicate', `sb-int:keywordicate'.~%▶▶▶")
 
 (fundoc 'keyword-prune
 "Return ARG-LIST with KEYS removed.~%~@
@@ -510,7 +510,7 @@ position is of type `mon:symbol-not-null'.~%~@
  \(keyword-prune '\(bubba-a \"bubba-a\" nil \"nil\" bubba-b \"bubba-b\"\) 'bubba-a\)~%
  \(keyword-prune '\(bubba-a \"bubba-a\" NIL \"NIL\" bubba-b \"bubba-b\"\) 'nil\)~%
  \(keyword-prune '\(nil 'nil bubba-a \"bubba-a\" bubba-b \"bubba-b\"\)\)~%~@
-:SEE-ALSO `mon:make-keyword-sanely'.~%►►►")
+:SEE-ALSO `mon:make-keyword-sanely'.~%▶▶▶")
 
 (fundoc 'where-is
 "Like `cl:find-all-symbols' but ensures that SYMBOL-NAME is `cl:string-upcase'd.~%~@
@@ -518,7 +518,7 @@ Signal an error if SYMBOL-NAME is not of type `mon:string-not-empty'.~%~@
 Keyword W-CASE-PRESERVED when supplied is as per `mon:string-for-readtable-case'.~%~@
 :EXAMPLE~%~@
  \(where-is \"where-is\"\)~%
-:SEE-ALSO `mon:where-is-local', `cl:find-symbol'.~%►►►")
+:SEE-ALSO `mon:where-is-local', `cl:find-symbol'.~%▶▶▶")
 
 (fundoc 'where-is-local
 "Like `cl:find-symbol' but ensures that SYMBOL-NAME is `cl:string-upcase'd.~%~@
@@ -533,7 +533,7 @@ Keyword W-CASE-PRESERVED when supplied is as per `mon:string-for-readtable-case'
 ;; These succesffuly signal an error:~%
  \(where-is-local \"where-is-local\" :BUBBA\)~%
  \(where-is-local \"where-is-local\" \"BUBBA\"\)~%~@
-:SEE-ALSO `mon:where-is', `mon:print-symbol-name-qualified', `symbol-external-p'.~%►►►")
+:SEE-ALSO `mon:where-is', `mon:print-symbol-name-qualified', `symbol-external-p'.~%▶▶▶")
 
 (fundoc 'symbol-external-p
         "Whether SYMBOL is :external in PACKAGE.~%~@
@@ -542,9 +542,9 @@ Optional arg PACKAGE is the package-name of a package to locate symbol in.
 If package is provided but `mon:find-package*' does not find PACKAGE signal with
 `mon:package-error-not'.~%~@
 Keyword W-CASE-PRESERVED when supplied is as per `mon:string-for-readtable-case'.~%~@
-Return value is as if by `cl:values'.
-First value is T when SYMBOL is exported from package.
-Second value is a list of the form:~%~@
+Return value is as if by `cl:values':~%
+ - First value is T when SYMBOL is exported from package.~%
+ - Second value is a list of the form:~%
  \( { :SYMBOL <SYMBOL> } ;; if found in <PACKAGE>
    { :INTERNAL | :EXTERNAL | :INHERITED | :PRESENT | } { T | NIL }
      :PACKAGE \(package-name <PACKAGE>\)
@@ -556,7 +556,7 @@ Second value is a list of the form:~%~@
  :following  successfully signal errors:~%
  \(symbol-external-p \" \"\)~%
  \(symbol-external-p \"consp\" \"bubba\"\)~%~@
-:SEE-ALSO `mon:package-external-symbols', `mon:find-package*'.~%►►►")
+:SEE-ALSO `mon:package-external-symbols', `mon:find-package*'.~%▶▶▶")
 
 (fundoc 'keyword-property-to-function
         "Return the `cl:symbol-function' associated with PROPERTY.~%~@
@@ -585,31 +585,31 @@ not found in the package COMMON-LISP. Default is nil.~%~@
                              \(plist-keys 
                               \(pathname-components path :list-or-plist :plist\)\)\)\)\)\)
   \(mapcar #'\(lambda \(x\) \(funcall x path\)\) funs\)\)~%~@
-:SEE-ALSO `mon:keyword-prune', `mon:plist-keys'.~%►►►")
+:SEE-ALSO `mon:keyword-prune', `mon:plist-keys'.~%▶▶▶")
 
 (fundoc 'package-external-symbols
 "Return the symbols :external to PACKAGE.~%~@
 Return value is as if by `cl:values'.
-First value is a list of symbols or nil
-Second value is a package designator or PACKAGE if none was found.
+ - First value is a list of symbols or nil.
+ - Second value is a package designator or PACKAGE if none was found.
 :EXAMPLE~%
  \(package-external-symbols \"mon\"\)~%
  \(package-external-symbols \"bubba\"\)~%~@
-:SEE-ALSO `mon:find-package*', `mon:symbol-external-p'.~%►►►")
+:SEE-ALSO `mon:find-package*', `mon:symbol-external-p'.~%▶▶▶")
 
 (fundoc 'do-all-symbols-to-stream
 "Return the external symbols of WITH-PACKAGES to STREAM.~%~@
 WITH-PACKAGES is a list of package-names or package-designators, 
 If WITH-PACKAGES is an atom it is converted to a list.~%~@
-When keywords WITH-CL and WITH-CL-USER are non-nil include the symbols external
-to the COMMON-LISP and COMMON-LISP-USER packages.~%~@
+When keywords WITH-CL and WITH-CL-USER are non-nil include symbols external
+to COMMON-LISP and COMMON-LISP-USER packages.~%~@
 :EXAMPLE~%
  \(do-all-symbols-to-stream nil :with-packages \"mon\"\)~%
  \(do-all-symbols-to-stream t :with-packages '\(\"MON\"\)\)~%
  \(with-output-to-string \(strm\)
   \(do-all-symbols-to-stream strm :with-packages '\(\"MON\"\)\)\)~%~@
 :SEE-ALSO `mon:package-external-symbols', `cl:do-symbols', `cl:do-all-symbols',
-`cl:with-package-iterator'.~%►►►")
+`cl:with-package-iterator'.~%▶▶▶")
 
 (fundoc 'find-package*
 "Like `cl:find-package' except when PACKAGE is `stringp', in which case, frob it
@@ -627,10 +627,10 @@ with `string-for-readtable-case' unless optional arg W-CASE-PRESERVED is non-nil
 ;; Following error successfully and differently:~%
  \(find-package* :bubba\)~%
  \(find-package*  \"bubba\"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'print-symbol-name-qualified
-"Print the fully qualified symbol name of OBJECT.~%~@
+"Print fully qualified symbol name of OBJECT.~%~@
 Return full symbol-name including package i.e.: \"<package>::<name>\"~%~@
 Call from format string with the  ~~/.../ construct. e.g.:~%
  \(format nil \"~~/mon:print-symbol-name-qualified/\" <SYMBOL>\)~%
@@ -639,11 +639,11 @@ Call from format string with the  ~~/.../ construct. e.g.:~%
  \(format nil \"~~/MON:PRINT-SYMBOL-NAME-QUALIFIED/\" 'nth-value\)~%
  \(format nil \"~~/MON:PRINT-SYMBOL-NAME-QUALIFIED/\" 'print-symbol-name-qualified\)~%~@
 :SEE \(URL `http://groups.google.com/group/comp.lang.lisp/msg/9494248dd2c231e0'\)~%~@
-:SEE-ALSO `mon:where-is', `mon:where-is-local'.~%►►►")
+:SEE-ALSO `mon:where-is', `mon:where-is-local'.~%▶▶▶")
 
 (fundoc 'symbol-string-name-check
         "Check that STRING-SYM-NAME is of type `mon:string-not-empty'.~%~@
-If so return value is a copy of STRING-SYM-NAME as if by `cl:copy-seq'.~%~@
+If so, return value is a copy of STRING-SYM-NAME as if by `cl:copy-seq'.~%~@
 When STRING-SYM-NAME is `mon:string-empty-p' signal a `mon:simple-mon-error' condition.
 :EXAMPLE~%~@
  \(symbol-string-name-check \"bubba\"\)
@@ -652,7 +652,7 @@ When STRING-SYM-NAME is `mon:string-empty-p' signal a `mon:simple-mon-error' con
  \(symbol-string-name-check \" \"\)~%~@
 The function `mon:read-symbol-name-preserving-case-if' checks this function's
 return value for `mon:string-contains-whitespace-p'.~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'symbol-string-name-chk-whitespace
 "Check for `mon:*whitespace-chars*' in STRING-SYM-NAME-MAYBE-WSPC and maybe remove them.~%~@
@@ -669,30 +669,30 @@ Signal a simple-mon-error condition if STRING-SYM-NAME-MAYBE-WSPC is
  Following succesffuly signal an error:~%
  \(symbol-string-name-chk-whitespace \" a b \" :trim-whitespace t\)~%
  \(symbol-string-name-chk-whitespace \" a \"\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-symbol-name-preserving-case-if
 "Helper function for `mon:read-symbol-name-preserving-case'.~%~@
 When SYMBOL-STRING-NAME is `mon:string-empty-p' signal a `mon:string-empty-error'.~%
 When SYMBOL-STRING-NAME is `mon:string-contains-whitespace-p' signal with
 `mon:simple-error-mon'.~%~@
-If both of the above constraints are satisfied return T.~%~@
+If both of the above constraints are satisfied, return T.~%~@
 :EXAMPLE~%
  \(read-symbol-name-preserving-case-if \"string-ok\"\)~%
  \(read-symbol-name-preserving-case-if \"\"\)~%
  \(read-symbol-name-preserving-case-if \"string-has-wspc-> \"\)~%~@
 :SEE-ALSO `mon:string-for-readtable-case', `mon:string-invert-case',
 `mon:string-no-whitespace-p', `mon:string-all-whitespace-p',
-`mon:string-contains-whitespace-p', `mon:string-trim-whitespace'.~%►►►")
+`mon:string-contains-whitespace-p', `mon:string-trim-whitespace'.~%▶▶▶")
 
 (fundoc 'read-symbol-name-preserving-case
 "Read SYMBOL-STRING-NAME in a readtable with `cl:readtable-case' :preserve.~%~@
 Dynamically binds `cl:*readtable*' to `cl:copy-readtable'd duplicate of itself.~%~@
-SYMBOL-STRING-NAME is a string satisfying
-`mon:read-symbol-name-preserving-case-if' signal an error if not.~%~@
+SYMBOL-STRING-NAME is a string satisfying `mon:read-symbol-name-preserving-case-if',
+signal an error if not.~%~@
 Return value is as if by `cl:values'. 
 The first two values are as per `cl:read-from-string'~%
- - First value is a symbol read .~%
+ - First value is a symbol read.~%
  - Second value is an integer value zero or above indicating the length of
    string read.~%
  - Third value is :preserve.~%~@
@@ -707,7 +707,7 @@ The first two values are as per `cl:read-from-string'~%
            :finally \(return \(nconc prsrv stndrd\)\)\)\)\)
    \(prog1 gthr
      \(mapc #'\(lambda \(x\) \(unintern \(car x\)\)\) gthr\)\)\)~%~@
-:SEE-ALSO `mon:string-for-readtable-case', `mon:string-invert-case'.~%►►►")
+:SEE-ALSO `mon:string-for-readtable-case', `mon:string-invert-case'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'symbolicate
@@ -715,14 +715,14 @@ The first two values are as per `cl:read-from-string'~%
  producing a symbol in the current package.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate'.~%►►►")
+:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'keywordicate
 	  "Like `symbolicate', but producing keywords.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate', `sb-int:sane-package'.~%►►►")
+:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate', `sb-int:sane-package'.~%▶▶▶")
 
 #+sbcl
 (setf (documentation 'sb-int:sane-package 'function)
@@ -736,17 +736,17 @@ to make, so let's try to recover gracefully instead.~%~@
 :EXAMPLE~%
  \(sb-int:sane-package\)~%~@
 :SEE-ALSO `mon:where-is', `mon:where-is-local', `sb-int:symbolicate',
-`sb-int:keywordicate'.~%►►►"))
+`sb-int:keywordicate'.~%▶▶▶"))
 
 
 #+sbcl 
 (setf (documentation 'sb-impl::symbol-hash 'function)
       #.(format nil
-"Return the built-in SBCL hash value for SYMBOL.~%~@
+"Return built-in SBCL hash value for SYMBOL.~%~@
 :EXAMPLE~%
  \(sb-impl::symbol-hash 'sb-impl::symbol-hash\)~%~@
 :SEE-ALSO `symbol-name', `symbol-value', `symbol-plist',
-`symbol-global-value', `symbol-package'.~%►►►"))
+`symbol-global-value', `symbol-package'.~%▶▶▶"))
 
 #+sbcl
 (setf (documentation 'function-arglist 'function)

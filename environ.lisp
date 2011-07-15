@@ -139,7 +139,7 @@ Evaluated at system loadtime by `mon:username-for-system-var-bind'.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `sb-posix:getpwnam', `sb-posix:passwd-name', `sb-ext::machine-type',
 `sb-ext::machine-version', `sb-ext::machine-instance', `sb-ext:posix-environ',
-`cl:user-homedir-pathname'.~%►►►")
+`cl:user-homedir-pathname'.~%▶▶▶")
 
 (fundoc 'username-for-system-var-bind
         "Bind and return symbol-value of BIND-IT if `mon:username-for-system-var-p' returns non-nil.~%~@
@@ -153,7 +153,7 @@ Evaluated at system loadtime with value
  \(username-for-system-var-bind '*user-name*\)~%~@
 :SEE-ALSO `sb-posix:getpwnam', `sb-posix:passwd-name', `sb-ext:posix-environ',
 `sb-ext::machine-type', `sb-ext::machine-version', `sb-ext::machine-instance',
-`cl:user-homedir-pathname'.~%►►►")
+`cl:user-homedir-pathname'.~%▶▶▶")
 
 (fundoc 'lisp-implementation-description
 "Return string describing the current lisp implementation environment~%~@
@@ -168,7 +168,7 @@ Evaluated at system loadtime with value
 `sb-impl::unix-host-unparse-directory-separator', `sb-impl::*fasl-file-type*',
 `sb-impl::*default-external-format*', `sb-impl::unix-host-customary-case',
 `sb-impl::*unix-host*', `sb-impl::short-site-name', `sb-impl::long-site-name'
-`sb-ext:*posix-argv*', `sb-sys::get-machine-version'.~%►►►")
+`sb-ext:*posix-argv*', `sb-sys::get-machine-version'.~%▶▶▶")
 
 ;;; ==============================
 

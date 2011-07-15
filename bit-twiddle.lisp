@@ -401,7 +401,7 @@ If BOOLEAN is not T, NIL, 0, or 1 return: NIL,<BOOLEAN>~%~@
  \(boolean-to-bit 0 t\)~%
  \(boolean-to-bit 1 t\)~%~@
 :SEE-ALSO `mon:digit-char-0-or-1', `mon:not-null', `mon:integer-or-null',
-`mon:string-all-digit-char-0-or-1', `symbol-not-null'.~%►►►")
+`mon:string-all-digit-char-0-or-1', `symbol-not-null'.~%▶▶▶")
 
 (fundoc 'boolean-to-bit
 "Convert BOOLEAN to a bit \(an integer either 0 or 1\).~%~@
@@ -427,7 +427,7 @@ If BOOLEAN is not T, NIL, 0, or 1 return: NIL,<BOOLEAN>~%~@
  \(boolean-to-bit 0 t\)~%
  \(boolean-to-bit 1 t\)~%~@
 :SEE-ALSO `mon:digit-char-0-or-1', `mon:not-null', `mon:integer-or-null',
-`mon:string-all-digit-char-0-or-1', `symbol-not-null'.~%►►►")
+`mon:string-all-digit-char-0-or-1', `symbol-not-null'.~%▶▶▶")
 
 (fundoc 'byte-swap
 "Return the CODE with its bytes rotated of CODE.~%~@
@@ -442,7 +442,7 @@ e.g~%
  61695 \(16 bits, #xF0FF, #o170377, #b1111000011111111\)
  65520 \(16 bits, #xFFF0, #o177760, #b1111111111110000\)~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'string-to-sha1-byte-array
         "Return string as a SHA1 byte-array as if by `ironclad:make-digest'.~%~@
@@ -456,7 +456,7 @@ Emacs lisp' `sha1-binary':
         => #\(32 193 148 189 4 164 89 163 52 78 106 202 121 61 200 118 132 25 134 11\)
  elisp> \(vconcat \(sha1-binary \"bubba\"\)\)
          => [32 193 148 189 4 164 89 163 52 78 106 202 121 61 200 118 132 25 134 11]~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'number-to-byte-array
 "Return NUMBER as if by `cl:values' a byte-array and the count of its elements.~%~@
@@ -477,7 +477,7 @@ in 128 bits.~%~@
  \(multiple-value-bind \(ba len\) \(number-to-byte-array 825973027016\)
    \(byte-request-integer ba 0 len\)\)
  => 825973027016~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'byte-request-integer
   "Decode an integer of LENGTH octets from ARRAY starting at OFFSET.~%~@
@@ -515,14 +515,14 @@ sign extension:
       with sign extension\"\) family of instructions.~%~@
 :EXAMPLE~%~@
   \(byte-request-integer \(byte-number-to-byte-array 281474976710654\) 0 6\)~%
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'bytes-to-int
 "Like request-integer but likely slower as results are accumulated as if by
 `cl:reduce'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'octet-to-bit-vector
 "Convert an unsigned-byte-8 integer to an array of type (SIMPLE-BIT-VECTOR 8).~%~@
@@ -536,7 +536,7 @@ The returned array containins the bits of integer set 1/0 according to the
  \(loop
     for x upfrom 0 below 256
     collect \(octet-to-bit-vector x\)\)
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'octet-set-bit-vector-index
 "Set the value of INDEX in BIT-VECTOR to 1-or-0.
@@ -547,7 +547,7 @@ INDEX is an integer of type: \(mod 8\).~%~@
  \(let \(\(bv \(make-array 8 :element-type 'bit\)\)\)
    \(octet-set-bit-vector-index bv 7 \(octet-logbitp-1-or-0 0 255\)\)
    bv\)
-:SEE-ALSO `octet-logbitp-1-or-0'.~%►►►")
+:SEE-ALSO `octet-logbitp-1-or-0'.~%▶▶▶")
 
 (fundoc 'octet-logbitp-1-or-0
         "Like `cl:logbitp' but return 1 or 0 instead of T or NIL.~%~@
@@ -575,7 +575,7 @@ Arg UNSIGNED-BYTE-8 is an integer of type `mon:unsigned-byte-8'.~%
     finally \(return \(list :downfrom x-rslt :upfrom \(nreverse y-rslt\)\)\)\)
  => \(:DOWNFROM \(\(7 . 1\) \(6 . 1\) \(5 . 1\) \(4 . 1\) \(3 . 0\) \(2 . 1\) \(1 . 1\) \(0 . 1\)\)
      :UPFROM   \(\(7 . 1\) \(6 . 1\) \(5 . 1\) \(4 . 1\) \(3 . 0\) \(2 . 1\) \(1 . 1\) \(0 . 1\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'octet-bit-vector-zeroed
         "Return an object of type `mon:bit-vector-octet' with all bits zeroed.~%~@
@@ -583,7 +583,7 @@ Arg UNSIGNED-BYTE-8 is an integer of type `mon:unsigned-byte-8'.~%
  \(octet-bit-vector-zeroed\)~%
  \(typep \(octet-bit-vector-zeroed\) 'bit-vector-octet\)~%
  \(loop for bit across \(octet-bit-vector-zeroed\) always \(zerop bit\)\)~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-array-of-octet-bit-vectors
 "Return an array of 256 elts each containing an array of type: \(SIMPLE-BIT-VECTOR 8\)~%~@
@@ -597,7 +597,7 @@ The elts of array are indexed by their octet value as generated with `mon:octet-
  (equal (aref (make-array-of-octet-bit-vectors) 247) 
         (octet-to-bit-vector 247))
  => T~%~@
-:SEE-ALSO `<XREF>'.~%►►►")
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 
