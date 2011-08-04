@@ -37,6 +37,68 @@
 (in-package #:mon)
 ;; *package*
 
+
+;; 
+(defun number-to-bit-list (unsigned-integer) 
+  (declare (type (integer 0 *) unsigned-integer)
+           (optimize (speed 3)))
+  (let ((int-len (integer-length unsigned-integer)))
+    (loop 
+       for i below int-len
+       collect (or (and (logbitp i unsigned-integer) 1) 0) into rslt
+       finally (return (nreverse rslt)))))
+;;
+;; Variant of above with tail-call.
+;; (defun number-to-bit-list (unsigned-integer) 
+;;   (declare (type (integer 0 *) unsigned-integer)
+;;            (optimize (speed 3)))
+;;   (if (or (zerop unsigned-integer)
+;;           (eq unsigned-integer 1))
+;;       (list unsigned-integer)
+;;       (let ((mod-ui-list (list (mod unsigned-integer 2))))
+;;         (nconc (number-to-bit-list (ash unsigned-integer -1))
+;;                mod-ui-list))))
+
+
+(defun number-to-bit-vector (unsigned-integer)
+  (declare ((integer 0 *) unsigned-integer)
+           (optimize (speed 3)))
+  (flet ((number-to-bit-vector-fixnum (fixnum-int)
+           (declare (fixnum-0-or-over fixnum-int))
+           (let* ((mk-len  (the fixnum-bit-width (integer-length fixnum-int)))
+                  (bv-29   (make-array (the fixnum-bit-width mk-len)
+                                       :element-type    'bit
+                                       :initial-element 0
+                                       :adjustable      nil)))
+             (declare (fixnum-bit-width mk-len)
+                      (simple-bit-vector bv-29))
+             (loop 
+                for i-lb from 0 below mk-len
+                do (and (logbitp i-lb fixnum-int)
+                        (setf (sbit bv-29 i-lb) 1))
+                finally (return (nreverse bv-29)))))
+         (number-to-bit-vector-bignum (bignum-int)
+           (declare (bignum-0-or-over bignum-int))
+           (let* ((mk-big-len  (the bignum-bit-width (integer-length bignum-int)))
+                  (bv-big      (make-array (the bignum-bit-width mk-big-len)
+                                           :element-type    'bit
+                                           :initial-element 0
+                                           :adjustable      nil)))
+             (declare (bignum-bit-width mk-big-len)
+                      (simple-bit-vector bv-big))
+             (loop 
+                for i-lb from 0 below mk-big-len
+                do (and (logbitp i-lb bignum-int)
+                        (setf (sbit bv-big i-lb) 1))
+                finally (return (nreverse bv-big))))))
+    (etypecase unsigned-integer
+      (fixnum-0-or-over (the simple-bit-vector 
+                          (number-to-bit-vector-fixnum
+                           (the fixnum-0-or-over unsigned-integer))))
+      (bignum-0-or-over  (the simple-bit-vector
+                           (number-to-bit-vector-bignum
+                            (the bignum-0-or-over unsigned-integer)))))))
+
 (defun boolean-to-bit (boolean &optional no-error)
   (declare (optimize (speed 3)))
   (multiple-value-bind (boolp boolval) (booleanp boolean)    
@@ -330,6 +392,7 @@
   ;; (reduce (lambda (x y) (+ (* 256 x) y)) bytes :start start :end end))
   (reduce (lambda (x y) (logior (ash x 8) y)) bytes :start start :end end))
 
+;;
 (defun number-to-byte-array (num)
   ;; (number-to-byte-array 825973027016)
   ;; (logand 825973027016 255)          ;=> 200
@@ -598,6 +661,16 @@ The elts of array are indexed by their octet value as generated with `mon:octet-
         (octet-to-bit-vector 247))
  => T~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'number-to-bit-list
+        "Convert UNSIGNED-INTEGER \(a non-negative integer\) into a list of 1's and 0's.~%~@
+:EXAMPLE~%
+ \(number-to-bit-list most-positive-fixnum\)
+ \(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1\)~%
+ \(number-to-bit-list \(1+ most-positive-fixnum\)\)
+ => \(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
 
 ;;; ==============================
 

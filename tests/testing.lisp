@@ -40,6 +40,52 @@
 ;;
 ;; (mapconcat-TEST)
 
+
+(defun pathname-not-wild-empty-or-dotted-p-TEST (paths-and-results)
+  (flet ((get-test-result (path-and-result)
+           (destructuring-bind (pth result) path-and-result
+             (let ((chk-rslt (equal (multiple-value-list (pathname-not-wild-empty-or-dotted-p pth)) result)))
+               (values  chk-rslt pth result)))))
+    (loop 
+       for p-and-r in paths-and-results
+       collect (multiple-value-bind (pass-or-fail w-path expecting)  (get-test-result p-and-r)
+                 (list :PASSED pass-or-fail :WITH-PATH w-path :RESULT-EXPECT expecting)))))
+#+nil
+(pathname-not-wild-empty-or-dotted-p-TEST
+ `(("/some/valid-path/designator"   (T (:STRING "/some/valid-path/designator")))
+   (#P"/some/valid-path/designator" (T (:PATHNAME #P"/some/valid-path/designator")))
+   (""     (NIL (:PATHNAME-EMPTY #P"")))
+   (#P""   (NIL (:PATHNAME-EMPTY #P"")))
+   (#P"*"  (NIL (:WILD #P"*")))
+   ("*.*"  (NIL (:WILD #P"*.*")))
+   ("."    (NIL (:STRING-DOTTED ".")))
+   (".."   (NIL (:STRING-DOTTED "..")))
+   (#P"."  (NIL (:PATHNAME-DOTTED #P".")))
+   (#P".." (NIL (:PATHNAME-DOTTED #P"..")))
+   (,(pathname (concatenate 'string *whitespace-chars*))
+     (NIL (:PATHNAME-WHITESPACE ,(pathname (concatenate 'string *whitespace-chars*)))))
+   (,(concatenate 'string *whitespace-chars*)    
+     (NIL (:STRING-WHITESPACE ,(concatenate 'string *whitespace-chars*))))))
+
+#+nil
+(equal (map 'list  #'cadr 
+            (pathname-not-wild-empty-or-dotted-p-TEST
+             `(("/some/valid-path/designator"   (T (:STRING "/some/valid-path/designator")))
+               (#P"/some/valid-path/designator" (T (:PATHNAME #P"/some/valid-path/designator")))
+               (""     (NIL (:PATHNAME-EMPTY #P"")))
+               (#P""   (NIL (:PATHNAME-EMPTY #P"")))
+               (#P"*"  (NIL (:WILD #P"*")))
+               ("*.*"  (NIL (:WILD #P"*.*")))
+               ("."    (NIL (:STRING-DOTTED ".")))
+               (".."   (NIL (:STRING-DOTTED "..")))
+               (#P"."  (NIL (:PATHNAME-DOTTED #P".")))
+               (#P".." (NIL (:PATHNAME-DOTTED #P"..")))
+               (,(pathname (concatenate 'string *whitespace-chars*))
+                 (NIL (:PATHNAME-WHITESPACE ,(pathname (concatenate 'string *whitespace-chars*)))))
+               (,(concatenate 'string *whitespace-chars*)    
+                 (NIL (:STRING-WHITESPACE ,(concatenate 'string *whitespace-chars*)))))))
+       '(T T T T T T T T T T T T))
+
 (sb-rt:deftest each-a-string-or-null-p-TEST
  (values 
   (mon:each-a-string-or-null-p '("a" "b" "c"))
@@ -50,6 +96,50 @@
   (mon:each-a-string-or-null-p '("a" . "b"))
   (mon:each-a-string-or-null-p '("a" "b" . "c")))
  T T T NIL NIL NIL NIL)
+;;
+;; (sb-rt:do-test  'each-a-string-or-null-p-TEST)
+
+;; testing `mon:pathname-or-namestring-not-empty-dotted-or-wild-p'
+(sb-rt:deftest pathname-or-namestring-not-empty-dotted-or-wild-p-TEST
+    (values 
+     (let ((possibilities '("" "." ".." " "  #P"" #P"." #P".." #P" " 
+                            "*" "*." "*.*" #P"*" #P"*." #P"*.*"
+                            "./" "../" #P"./" #P"../")))
+       (list 
+        (map 'list #'mon::pathname-or-namestring-not-empty-dotted-or-wild-p possibilities)
+        (map 'list #'(lambda (x) 
+                       (mon::pathname-or-namestring-not-empty-dotted-or-wild-p x :no-relatives t))
+             possibilities)))
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p ".")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "..")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p " ")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P".")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"..")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P" ")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "*")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "*.")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "*.*")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"*")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"*.")
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"*.*")
+     ;;
+     (not (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "./"))
+     (not (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "../"))
+     (not (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"./"))
+     (not (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"../"))
+     ;;
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "./"    :no-relatives t)
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p "../"   :no-relatives t)
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"./"  :no-relatives t)
+     (mon::pathname-or-namestring-not-empty-dotted-or-wild-p #P"../" :no-relatives t))
+  ;;
+   ((NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL T T T T)
+    (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL))
+   NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL)
+;;
+;; (sb-rt:do-test 'pathname-or-namestring-not-empty-dotted-or-wild-p-TEST)
 
 ;; testing `mon:concat'
 (sb-rt:deftest concat-TEST

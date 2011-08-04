@@ -25,6 +25,7 @@
    ;;
  ;; tests/testing.lisp
    ;;
+   #:pathname-not-wild-empty-or-dotted-p-TEST
    #:mapconcat-TEST))
 
 ;;; ==============================

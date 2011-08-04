@@ -130,7 +130,7 @@
                        :error-args (list (quote strings) strings-list)))
   (if (each-a-string-p strings-list)
       strings-list
-      (simple-error-mon  :w-sym 'string-find-matching 
+      (simple-error-mon  :w-sym  "string-find-matching"
                          :w-type 'function
                          :w-spec "elt in list not `cl:stringp'~% ~
                                  found element of type: ~S~% ~"
@@ -151,7 +151,7 @@
            (the list (list list)))
       (and (each-a-string-or-vector-in-list (the list list))
            (the list list))
-      (simple-error-mon :w-sym 'string-find-matching 
+      (simple-error-mon :w-sym  "string-find-matching"
                         :w-type 'function
                         :w-spec "With keyword STRINGS-ONLY null, arg STRINGS invalid~% ~
                                  found element of type: ~S~% ~"
@@ -172,12 +172,13 @@
   ;; => (#(#\a #\b #\c #\d))
   ;; (%string-find-matching-verify-vector-for-strings-only-null "abc" nil)
   ;; => ("abc")
+  ;; (%string-find-matching-verify-vector-for-strings-only-null "abc" t)
   (declare ((and vector (not bit-vector)) vector)
            (boolean strings-only)
            (inline %string-find-matching-verify-char-seq)
            (optimize (speed 3)))
   (unless (null strings-only)
-    (simple-error-mon  :w-sym 'string-find-matching 
+    (simple-error-mon  :w-sym "string-find-matching"
                        :w-type 'function
                        :w-spec "With keyword STRINGS-ONLY T found arg STRINGS was `cl:vectorp'"
                        :w-got vector
@@ -191,7 +192,7 @@
       (the list (list vector))
       (if (each-a-string-or-vector-in-vector vector)
           (the vector vector)
-          (simple-error-mon  :w-sym 'string-find-matching 
+          (simple-error-mon  :w-sym  "string-find-matching"
                              :w-type 'function
                              :w-spec "With keyword STRINGS-ONLY non-nil, elt in list neither `cl:stringp' nor `cl:vectorp'~% ~
                                     found element of type: ~S~% ~"
@@ -238,6 +239,18 @@
     (flet ((filter-matches (str)
              (cl-ppcre:scan scanner str)))
       (remove-if-not #'filter-matches chk-strings))))
+
+;; :SOURCE mccme-helpers/packages:file mccme-helpers/parsetype 
+;; :WAS `escape-for-regex'
+(defun string-escape-for-regex (string-for-regex)
+  (let ((anchor-brace (cl-ppcre:create-scanner "\\[\\^]"))
+        (slashes-4 (cl-ppcre:create-scanner (make-string 2 :initial-element #\\))) ;; "\\\\"
+        (slashes-8 (make-string 4 :initial-element #\\))) ;;  "\\\\\\\\"
+    (cl-ppcre:regex-replace-all anchor-brace 
+                                (cl-ppcre:regex-replace-all slashes-4
+                                                            (cl-ppcre:regex-replace-all "(.)" string-for-regex "[\\1]")
+                                                            slashes-8)
+                                "\\^")))
 
 
 ;;; ==============================
@@ -386,7 +399,7 @@ by value of PRE-TRIM. Default is NIL. See examples below for usage.~%~@
  \(string-whitespace-to-underscore \(format nil \"~~{~~C~~}\" *whitespace-chars*\))~%
  \(string-whitespace-to-underscore \(format nil \"~~{~~C~~}\" *whitespace-chars*\) :convert-all-whitespace t\)~%
  \(string-whitespace-to-underscore \"\")~%
- \(string-whitespace-to-underscore \"    \"\)
+ \(string-whitespace-to-underscore \"    \"\)~%
  \(string-whitespace-to-underscore \"    \" :pre-trim t :convert-all-whitespace nil\)~%
  \(string-whitespace-to-underscore \"    \" :pre-trim nil :convert-all-whitespace t\)~%
  \(string-whitespace-to-underscore \"    \" :pre-trim t :convert-all-whitespace t\)~%
@@ -413,6 +426,24 @@ by value of PRE-TRIM. Default is NIL. See examples below for usage.~%~@
  \(string-whitespace-to-dash \"    \" :pre-trim t :convert-all-whitespace t\)~%
  \(string-whitespace-to-dash \"    \" :pre-trim nil :convert-all-whitespace nil\)~%~@
 :SEE-ALSO `mon:string-whitespace-to-dash' `mon:string-whitespace-to-underscore'.~%▶▶▶")
+
+(fundoc 'string-escape-for-regex
+        "Create a cl-ppcre:scanner closure from STRING-FOR-REGEX that \"won't miss\" when string contains regexp meta-chars.~%~@
+:EXAMPLE
+ \(let* \(\(date-str    \"2011-07-24\"\)
+        \(date-str-re \(cl-ppcre:create-scanner 
+                      \(string-escape-for-regex date-str\)\)\)
+        \(repl-str    \"bubba\"\)\)
+   \(cl-ppcre:regex-replace-all date-str-re date-str repl-str\)\)
+ => \"bubba\", T~%
+ \(cl-ppcre:regex-replace-all \(tt--string-escape-for-regex \"bub?a\"\) \"bubba\" \"howdy\"\)
+ => \"bubba\", NIL~%
+ \(string-escape-for-regex \"^/b*ub\\\\?a./$\"\)
+ => \"\\\\^[/][b][*][u][b][\\\\\\\\][?][a][.][/][$]\", T~%
+ \(cl-ppcre:regex-replace \(string-escape-for-regex \"^/b*ub\\\\?a./$\"\) \"^/b*ub\\\\?a./$\" \"bubba\"\)
+ => \"bubba\", T~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
 
 ;;; ==============================
 

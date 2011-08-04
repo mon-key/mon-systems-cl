@@ -42,8 +42,10 @@ file-dir.lisp
 file-io.lisp
 format.lisp
 hash.lisp
+image-rotate.lisp
 introspect.lisp
 io.lisp
+loadtime-bind.lisp
 macros.lisp
 numbers.lisp
 package.lisp
@@ -53,7 +55,6 @@ seqs.lisp
 specials.lisp
 strings.lisp
 types.lisp
-loadtime-bind.lisp
 LICENSE.txt
 make-mon-systems-etags.sh
 mon-systems-move-to-git.sh"

@@ -14,6 +14,9 @@
 (deftype not-null ()
   '(not null))
 
+(deftype null-or-nil ()
+  '(or null (eql null)))
+
 (deftype not-t ()
   '(or null (not boolean)))
 
@@ -73,6 +76,14 @@
 
 (deftype logical-pathname-designator ()
   '(and pathname logical-pathname))
+;;
+;; :SOURCE sbcl/src/code/deftypes-for-target.lisp
+(deftype pathname-designator ()
+  '(or string pathname file-stream)) ;; logical-pathname subclassses pathname
+
+;; :SOURCE sbcl/src/code/deftypes-for-target.lisp :WAS `filename'
+(deftype filename-designator () 
+  '(and pathname-designator (not file-stream))) ;; logical-pathname
 
 ;; :NOTE Should `pathname-designator', `filename-designator', and
 ;; `pathname-or-namestring' fail for the empty string, e.g.:
@@ -81,16 +92,11 @@
 ;;  (make-pathname :host "") => #P"" 
 ;;  (namestring #P"") => ""
 ;;  (pathname "") => #P""
+;; However, in general the emtpy-string/pathname is rarely of use. As such,
+;; there are provisions which take this into account in :FILE
+;; mon-systems/file-dir.lisp
 (deftype pathname-or-namestring ()
-  '(or string pathname))
-;;
-;; :SOURCE sbcl/src/code/deftypes-for-target.lisp
-(deftype pathname-designator ()
-  '(or string pathname file-stream)) ;; logical-pathname
-;;
-;; :SOURCE sbcl/src/code/deftypes-for-target.lisp :WAS `filename'
-(deftype filename-designator () 
-  '(or string pathname)) ;; logical-pathname
+  '(or simple-string pathname))
 
 
 ;;; ==============================
@@ -262,7 +268,6 @@
 (deftype string-all-digit-char-0-or-1 ()
   `(satisfies string-all-digit-char-0-or-1-p))
 
-
 ;; :NOTE Keep sequencep before `list-proper-p'
 (declaim (inline sequencep))
 (defun sequencep (object)
@@ -405,9 +410,15 @@
   #-sbcl '(integer 0 #x1FFFFFFD)
   #+sbcl `(integer 0 ,array-dimension-limit))
 
+(deftype index-from-1 ()
+  #-sbcl '(integer 0 #x1FFFFFFD)
+  ;; #+sbcl `(integer 1 ,array-dimension-limit))
+  #+sbcl '(integer 1 #.array-dimension-limit))
+
 (deftype index-plus-1 ()
   #-sbcl '(integer 0 #x1FFFFFFE)
-  #+sbcl `(integer 0 ,(1+ array-dimension-limit)))
+  ;; :WAS #+sbcl `(integer 0 ,(1+ array-dimension-limit)))
+  #+sbcl '(integer 0 #.(1+ array-dimension-limit)))
 
 ;; :SOURCE sbcl/src/code/early-extensions.lisp
 ;; :NOTE most-positive-fixnum is specified as being:
@@ -415,8 +426,10 @@
 ;;       (<= array-dimension-limit <M-P-F>))
 ;;
 (deftype index-or-minus-1 ()
-  #+sbcl `(integer -1 ,array-dimension-limit)
-  #-sbcl `(integer -1  ,(- most-positive-fixnum 2)))
+  ;; :WAS #+sbcl `(integer -1 ,array-dimension-limit)
+  ;;      #-sbcl `(integer -1  ,(- most-positive-fixnum 2)))
+  #+sbcl '(integer -1  #.array-dimension-limit)
+  #-sbcl '(integer -1  #.(- most-positive-fixnum 2)))
 
 ;;; :SOURCE alexandria/types.lisp
 (deftype array-index (&optional (length array-dimension-limit))
@@ -429,23 +442,46 @@
   ;; allegro 32bit is   (unsigned-byte 29)
   `(integer 0 ,length))
 
+(deftype fixnum-bit-width ()
+  #-sbcl '(integer 0 #.(integer-length most-positive-fixnum))
+  #+sbcl '(integer 0 #.sb-vm:n-positive-fixnum-bits))
+
+;; ,----
+;; | #lisp 2011-07-26
+;; | <mon_key> Anyone know what the upperbounds is on SBCL's x86-32 for bignums.
+;; | Specifically, is it possible for a bignum to have a type signature which extends beyond 
+;; | (unsigned-byte #.most-positive-fixnum)
+;; | <pkhuong> mon_key: max length for a bignum on 32 bit sbcl is (2^24 - 2) words.
+;; |
+;; | cl-user> #.(- (expt 2 24) 2)
+;; | => 16777214
+;; `----
+(deftype bignum-bit-width ()
+  #-sbcl '(integer #.(integer-length most-positive-fixnum) *)
+  ;; :NOTE x86-32 only
+  #+sbcl '(integer #.sb-vm:n-positive-fixnum-bits #.(- (expt 2 24) 2)))
+
 ;; clisp-2.49/src/array.d for LISPFUN make_array around this comment 
 ;; /* table for assignment  ATYPE-byte -> vector type info */ 
 ;; suggests maybe more room could be had?
 (deftype fixnum-exclusive ()
-  #+sbcl `(integer ,(lognot array-dimension-limit) ,array-dimension-limit)
-  #-sbcl `(integer ,(+ most-negative-fixnum 2) ,(- most-positive-fixnum 2)))
+  ;; :WAS #-sbcl `(integer ,(+ most-negative-fixnum 2) ,(- most-positive-fixnum 2))
+  ;; #+sbcl `(integer ,(lognot array-dimension-limit) ,array-dimension-limit))
+  #-sbcl '(integer #.(+ most-negative-fixnum 2)     #.(- most-positive-fixnum 2))
+  #+sbcl '(integer #.(lognot array-dimension-limit) #.array-dimension-limit))
 
 (deftype fixnum-0-or-over ()
-  #-sbcl `(integer 0 ,most-positive-fixnum)
-  ;; #+sbcl `(,@(or (and (= sb-vm:n-machine-word-bits 32)
-  ;;                '(unsigned-byte 29))
-  ;;           `(integer 0 ,most-positive-fixnum)))
-  #+sbcl `(unsigned-byte ,sb-vm:n-positive-fixnum-bits))
-
+  ;; :WAS #-sbcl `(integer 0 ,most-positive-fixnum)
+  ;; :WAS #+sbcl `(unsigned-byte ,sb-vm:n-positive-fixnum-bits))
+  #-sbcl '(unsigned-byte #.(integer-length most-positive-fixnum))
+  #+sbcl '(unsigned-byte #.sb-vm:n-positive-fixnum-bits))
+;;
 ;; (type-specifier-p 'fixnum-0-or-over)
 ;; (typep most-positive-fixnum `(integer 0 ,most-positive-fixnum)) 
 ;; (typep 536870912 `(integer 0 ,most-positive-fixnum))
+
+(deftype bignum-0-or-over ()
+  '(and (integer 0 *) (not fixnum)))
 
 ;;; ==============================
 ;; #b00000000000000000000000000001111 0-15          4 bits  1 octet
@@ -1276,6 +1312,7 @@
 ;;  mon:string-empty-p (mon:string-not-empty-or-all-whitespace-p "")
 
 ;;; ==============================
+;; why not (notevery #'whitespace-char-p  (the string maybe-good-string))
 (defun %fast-string-all-whitespace-p (maybe-good-string)
   ;; Like `mon:string-all-whitespace-p' but doesn't signal its type assertion
   ;; error when maybe-good-string is not `cl:stringp'
@@ -1483,6 +1520,11 @@
     (declare (optimize (speed 3)))
   (typep maybe-logical-pathname 'logical-pathname-designator))
 
+(declaim (inline file-stream-designator-p))
+(defun file-stream-designator-p (maybe-file-stream)
+  (declare (optimize (speed 3)))
+  (typep maybe-file-stream 'file-stream))
+
 (declaim (inline filename-designator-p))
 (defun filename-designator-p (maybe-filename-designator)
     (declare (optimize (speed 3)))
@@ -1497,6 +1539,16 @@
 (defun pathname-or-namestring-p (maybe-pathname-or-namestring)
   (declare (optimize (speed 3)))
   (typep maybe-pathname-or-namestring 'pathname-or-namestring))
+
+(defun pathname-empty-p (maybe-empty-pathname) ;; &key (defaults (make-pathname :host (pathname-host *default-pathname-defaults*)))
+  (declare (optimize (speed 3)))
+  (unless (pathnamep maybe-empty-pathname)
+    (return-from pathname-empty-p nil))
+  (let ((surely-empty-pathname
+         (make-pathname :host nil :device nil :directory nil :name nil :type nil :version nil))) 
+    (declare (pathname maybe-empty-pathname surely-empty-pathname))
+    #-sbcl (equal maybe-empty-pathname surely-empty-pathname)
+    #+sbcl (sb-impl::pathname= maybe-empty-pathname surely-empty-pathname)))
 
 
 ;;; ==============================
@@ -1513,6 +1565,29 @@
   (declare (optimize (speed 3)))
   (the boolean
     (typep bignum-maybe 'bignum)))
+
+(declaim (inline fixnum-0-or-over-p))
+(defun fixnum-0-or-over-p (maybe-fixnum)
+  (declare (optimize (speed 3)))
+  (the boolean
+    (typep maybe-fixnum 'fixnum-0-or-over)))
+
+(declaim (inline bignum-0-or-over-p))
+(defun bignum-0-or-over-p (maybe-bignum)
+  (declare 
+   (inline fixnum-0-or-over-p)
+   (optimize (speed 3)))
+  (the boolean
+    (when (integerp maybe-bignum)
+      (and (typep (the integer maybe-bignum) '(integer 0 *))
+           (not (fixnum-0-or-over-p (the (integer 0 *) maybe-bignum)))))))
+
+(declaim (inline fixnum-bit-width-p))
+(defun fixnum-bit-width-p (integer)
+  (declare (optimize (speed 3)))
+  (the boolean
+    (and (integerp integer)
+         (typep (the integer integer) 'fixnum-bit-width))))
 
 ;;; ==============================
 
@@ -1541,9 +1616,9 @@
 ;; :SOURCE clack-doc/src/doc/util.lisp
 (defun declared-special-p (symbol)
   #+lispworks (sys:declared-special-p symbol)
-  #+allegro (eq (sys:variable-information symbol) :special)
-  #+clozure (ccl:proclaimed-special-p symbol)
-  #+sbcl (variable-special-p symbol))
+  #+allegro   (eq (sys:variable-information symbol) :special)
+  #+clozure   (ccl:proclaimed-special-p symbol)
+  #+sbcl      (variable-special-p symbol))
 
 ;;; ==============================
 ;; (defun variablep (symbol)
@@ -1640,10 +1715,27 @@
 `mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
 
 (typedoc 'filename-designator
-"An object of this type names a \"file\".~%~@
+"An object of this type names a file.~%~@
+A file is any object for which `cl:stringp' or `cl:pathnamep' is true.~%~@
 Like `mon:pathname-designator' but does not specifiy `cl:file-stream'.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
+`mon:pathname-or-namestring-p', `mon:logical-pathname-p',
+`mon:logical-pathname-designator', `mon:pathname-designator',
+`mon:filename-designator', `mon:pathname-or-namestring'.~%▶▶▶")
+
+(fundoc 'file-stream-designator-p
+"Whether object MAYBE-FILE-STREAM is of type `cl:file-stream'.~%~@
+:EXAMPLE~%
+ \(let \(\(pn \(make-pathname :directory '\(:absolute \"tmp\"\) 
+                          :name \"test-file-stream-designator-p\"\)\)\)
+   \(unwind-protect
+        \(with-open-file \(s pn 
+                           :direction :output
+                           :element-type 'character\)
+          \(file-stream-designator-p s\)\)
+     \(delete-file pn\)\)\)~%~@
 :SEE-ALSO `mon:filename-designator-p' `mon:pathname-designator-p',
 `mon:pathname-or-namestring-p', `mon:logical-pathname-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
@@ -2139,6 +2231,20 @@ Helper composite type for `mon:byte-array'.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(typedoc 'fixnum-bit-width
+"The bit width of positive fixnums.
+A positive fixnum is an integer in the range [0,cl:most-positive-fixnum]~%~@
+:EXAMPLE~%
+ \(typep 29 'fixnum-bit-width\)~%
+ \(typep 30 'fixnum-bit-width\) ; should fail on x86-32~%
+ \(typep 64 'fixnum-bit-width\)~%
+ \(typep 65 'fixnum-bit-width\) ; should fail on x86-64~%
+ \(typep  0 'fixnum-bit-width\)~%
+ \(typep -1 'fixnum-bit-width\)~%
+ \(typep  t 'fixnum-bit-width\)~%~@
+:SEE-ALSO `mon:fixnum-bit-width-p', `mon:fixnum-exclusive',
+`mon:fixnum-0-or-over', `cl:fixnum', `cl:bignum'.~%▶▶▶")
+
 (typedoc 'fixnum-0-or-over
 "The range of fixnums from 0 to `cl:most-positive-fixnum'.~%~@
 On a 32bit machine this is equivalent to \(unsigned-byte 29\).~%~@
@@ -2148,6 +2254,13 @@ On a 32bit machine this is equivalent to \(unsigned-byte 29\).~%~@
  \(typep \(1+ most-positive-fixnum\) 'fixnum-0-or-over\)~%
  \(typep -1 'fixnum-0-or-over\)~%~@
 :SEE-ALSO `mon:fixnum-exclusive', `mon:octet', `mon:index-or-minus-1'.~%▶▶▶")
+
+(typedoc 'bignum-0-or-over
+"An integer which is postive and not of type `mon:fixnum-0-or-over'.~%~@
+:EXAMPLE~%
+ \(typep  most-positive-fixnum 'bignum-0-or-over\)
+ \(typep \(1+ most-positive-fixnum\) 'bignum-0-or-over\)~%~@
+:SEE-ALSO `cl:fixnum' `cl:bignum'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-128
 "An object of type: \(unsigned-byte 128\)~%~@
@@ -2463,6 +2576,21 @@ On non-SBCL systems this is the integer range:~%~@
 :SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:fixnump',
 `mon:bignump', `cl:array-dimension-limit' `cl:most-positive-fixnum'.~%▶▶▶")
 
+(typedoc 'index-from-1
+ "Type for indexing into arrays, and \"stepped\" quantities, e.g. list lengths.~%~@
+On SBCL, an index this is integer range:~%
+ \[1,CL:ARRAY-DIMENSION-LIMIT\]~%~@
+On non-SBCL systems this is the integer range:~%~@
+ \[1,#x1FFFFFFD\]~%~@
+:EXAMPLE~%~@
+ \(typep cl:array-dimension-limit 'index-from-1\)~%
+ \(typep 0 'index-from-1\)~%
+ \(typep 1 'index-from-1\)~%
+ \(typep #x1FFFFFFD 'index-from-1\)~%
+ \(typep \(1+ #x1FFFFFFD\) 'index-from-1\)~%~@
+:SEE-ALSO `mon:index-or-minus-1', `mon:array-index', `mon:fixnump',
+`mon:bignump', `cl:array-dimension-limit' `cl:most-positive-fixnum'.~%▶▶▶")
+
 (typedoc 'index-plus-1 
 "Type for indexing into arrays in cl:loop forms where the stepped quantity may
 increment from 0 \(or above\) by 1 to a value one beyond `cl:array-dimension-limit'~%~@
@@ -2544,6 +2672,17 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
  \(typep t   'not-null\)~%
 :SEE-ALSO `mon:proper-list-not-null', `mon:standard-char-or-null',
 `mon:booleanp', `cl:null'.~%▶▶▶")
+
+(typedoc 'null-or-nil
+"An object with a value that is either `cl:null' or is `cl:eq' the symbol `cl:null'.~%~@
+:EXAMPLE~%
+ \(typep nil      'null-or-nil\)~%
+ \(typep 'null    'null-or-nil\)~%
+ \(typep \(values\) 'null-or-nil\)~%
+ \(typep \(nth-value 0 \(values nil\)\)      'null-or-nil\)~%
+ \(typep \(nth-value 0 \(values 'null\)\)    'null-or-nil\)~%
+ \(typep \(nth-value 1 \(values \(values\)\)\) 'null-or-nil\)~%~@
+:SEE-ALSO `mon:not-null' `mon:not-t'.~%▶▶▶")
 
 (typedoc 'symbol-not-null
 "Whether OBJECT is symbolp and not null.~%~@
@@ -3575,7 +3714,7 @@ Signal an error if not.
 
 (fundoc 'fixnump
 "Whether FIXNUM-MAYBE is of type `cl:fixnum'~%~@
-:EXAMPLE~%~@
+:EXAMPLE~%
  \(fixnump most-negative-fixnum\)~%
  \(fixnump most-positive-fixnum\)~%
  \(fixnump \(1+ most-positive-fixnum\)\)~%
@@ -3587,6 +3726,26 @@ spec says that the `cl:fixnum' type is required to be a supertype of
 \(signed-byte 16\).\
 :SEE-ALSO `mon:bignump', `cl:bignum', `cl:integer', `cl:rational', `cl:real',
 `cl:number', `cl:rationalp', `cl:realp', `cl:numberp'.~%▶▶▶")
+
+(fundoc 'bignum-0-or-over-p
+        "whether MAYBE-BIGNUM is a postive integer and not of type `mon:fixnum-0-or-over'.~%~@
+:EXAMPLE~%
+ \(bignum-0-or-over-p  most-positive-fixnum\)
+ \(bignum-0-or-over-p \(1+ most-positive-fixnum\)\)~%~@
+:SEE-ALSO `cl:fixnum' `cl:bignum'.~%▶▶▶")
+
+(fundoc 'fixnum-bit-width-p 
+"Whether INTEGER is of type `mon:fixnum-bit-width'.~%~@
+:EXAMPLE~%
+ \(fixnum-bit-width-p 29\)~%
+ \(fixnum-bit-width-p 30\) ;should fail on x86-32~%
+ \(fixnum-bit-width-p 64\)~%
+ \(fixnum-bit-width-p 65\) ;should fail on x86-64~%
+ \(fixnum-bit-width-p 0\)~%
+ \(fixnum-bit-width-p -1\)~%
+ \(fixnum-bit-width-p  t\)~%~@
+:SEE-ALSO `mon:fixnump', `mon:fixnum-bit-width-p', `mon:fixnum-exclusive',
+`mon:fixnum-0-or-over', `cl:fixnum', `cl:bignum'.~%▶▶▶")
 
 (fundoc 'standard-test-function-p
  "Return non-nil when TEST-FUN is one of the standard equality test-funcions.~%~@
@@ -3633,6 +3792,16 @@ These include:~%
 `mon:pathname-designator-p',
 `mon:logical-pathname-designator', `mon:pathname-designator',
 `mon:filename-designator'.~%▶▶▶")
+
+(fundoc 'pathname-empty-p
+"Whether MAYBE-EMPTY-PATHNAME is an empty pathname.~%
+An empty pathname is one with all components nil, it is equivalent to return value of following form:
+ \(make-pathname :host nil :device nil :directory nil :name nil :type nil :version nil\)~%
+:EXAMPLE~%
+ \(pathname-empty-p #P\"\"\)~%
+ \(pathname-empty-p \(make-pathname\)\)~%
+ \(pathname-empty-p \(make-pathname:defaults \"\"\)\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 #+sbcl
 (fundoc 'singleton-p

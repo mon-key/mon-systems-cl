@@ -16,6 +16,28 @@
 ;; plist-not-null-error                       (plist-error)
 ;; open-stream-output-stream-error            (TYPE-ERROR simple-error-mon)
 ;;
+;;
+;;; ==============================
+;;   Slot initarg/readers for simple-error-mon and subclasses are as follows:
+;; - :W-SYM     error-sym
+;; - :W-TYPE    error-sym-type  ;; key with an association in `mon:*error-table*'
+;; - :W-SPEC    error-spec      ;; a format-control string or list of strings to be concatenated into one 
+;; - :W-ARGS    error-args      ;; format-arguments in the form of a list
+;; - :W-GOT     error-got       ;; 
+;; - :W-TYPE-OF w-type-of       ;; a boolean
+;; 
+;;  :SIGNAL-OR-ONLY is available as a key for function `simple-error-mon'.
+;;   Possible values are:
+;;    { signal signal-only condition condition-only t nil }
+;; When SIGNAL-ONLY is either of the symbols:~%
+;;   signal signal-only~%~@
+;; CONDITION-OBJ is passed to `cl:signal' and associated handlers can
+;; respond accordingly.
+;; When SIGNAL-ONLY is any of the symbols:~%
+;;  condition condition-only T~%~@
+;; CONDITION-OBJ is returned and no additional invocation of `cl:error' or `cl:signal' occurs.
+;;
+;;; ==============================
 
 ;;; ==============================
 
@@ -64,9 +86,9 @@
 Direct slot initarg/readers are as follows:
  - :W-SPEC ERROR-SPEC is a format-control spec.~%~@
  - :W-ARGS ERROR-ARGS are arguments to format-control spec of slot W-SPEC.~% 
- - :W-SYM ERROR-SYM name a symbol originating the condition.~%~@
+ - :W-SYM  ERROR-SYM name a symbol originating the condition.~%~@
  - :W-TYPE ERROR-TYPE name the type of W-SYM. 
-   When provided W-TYPE is a symbol with an associatian in `mon:*error-table*'~%~@
+   When provided W-TYPE is a symbol with an association in `mon:*error-table*'~%~@
    When ommitted may default to to value of: 
     \(cdr \(assoc 'nil mon:*error-table*\)\)~%~@
 :SEE-ALSO `mon:simple-error-mon'.~%▶▶▶")))
@@ -101,6 +123,7 @@ Formats slot initargs/readers of direct superclass `mon:error-mon' as follows:~%
  - :W-ARGS ERROR-ARGS~%~@
 :SEE-ALSO `mon:*error-table*'.~%▶▶▶")))
 
+
 ;; :SOURCE CLOCC/cllib/port/ext.lisp
 ;; :NOTE :CALLED-BY `sequence-type' :FILE types.lisp
 (define-condition case-error (error-mon)
@@ -115,13 +138,13 @@ Formats slot initargs/readers of direct superclass `mon:error-mon' as follows:~%
     :reader case-args))
   (:report (lambda (ce-condtion ce-stream)
              (declare (condition ce-condtion)
-                      (stream ce-stream))
+                      (stream    ce-stream))
              (format ce-stream "~A~@[~?~]"
                      (format-error-symbol-type (error-sym ce-condtion) (error-sym-type ce-condtion))
-                     (case-spec ce-condtion)                     
-                     `(,(first  (case-args ce-condtion))
-                        ,(second (case-args ce-condtion))
-                        ,(type-of (second (case-args ce-condtion)))
+                     (case-spec   ce-condtion)
+                     `(,(first     (case-args ce-condtion))
+                        ,(second   (case-args ce-condtion))
+                        ,(type-of  (second (case-args ce-condtion)))
                         ,(nthcdr 2 (case-args ce-condtion))))))
   (:documentation
    #.(format nil 
@@ -339,7 +362,9 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
 ;; (plist-not-null-error  
 
 (define-condition open-stream-output-stream-error (type-error simple-error-mon)
-  ()
+  ((pathname-arg-locus
+    :initarg :pathname-arg-locus
+    :reader pathname-arg-locus))
   (:report (lambda (osose-condition osose-stream)
              (declare (type condition osose-condition)
                       (type stream osose-stream))
@@ -354,6 +379,30 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                   :SEE-ALSO `mon:open-stream-output-stream-p', `mon:stream-or-boolean',~@
                   `cl:streamp', `cl:open-stream-p', `cl:output-stream-p'.~%▶▶▶")))
 
+(define-condition file-error-wild-pathname (file-error simple-error-mon)
+  ((pathname-wild-arg-locus
+    :initarg :pathname-wild-arg-locus
+    :reader pathname-wild-arg-error-locus))
+  ;; 
+  (:report  (lambda (fewp-condition fewp-stream )
+              (declare (condition fewp-condition)
+                       (stream fewp-stream))
+              (file-error-wild-pathname-report fewp-condition fewp-stream)))
+  ;; (:default-initargs :w-spec "Arg was `cl:wild-pathname-p'")
+  (:documentation 
+   #.(format nil "A condition for objects which are `cl:wild-pathname-p'.~@
+                  Value of slot :PATHNAME designates the object of the condition,~@
+                  it may be accessed with the reader `cl:file-error-pathname'.~@
+                  Value of slot :PATHNAME-WILD-LOCUS designates the locus of the~@
+                  condition, e.g. if a signaller is a function with an argument~@
+                  WANTS-NON-WILD-PATHNAME this is its locus.~@
+                  It may be accessed with the reader `mon:pathname-wild-arg-error-locus'.~%~@
+                  :NOTE The convenience function `mon:file-error-wild-pathname'
+                  is the established interface to this condition as it will take
+                  care to pass the correct arguments for a reasonable invocation
+                  of `file-error-wild-pathname-report'.~%~@
+                  :SEE-ALSO `<XREF>'.~%▶▶▶")))
+
 
 ;;; ==============================
 ;;; :CONDITION-FUNCTIONS
@@ -363,37 +412,43 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
 ;; :MODIFICATIONS 
 ;;  :ADDED arg signal-or-only :REMOVED arg of-type 
 ;;  :CHANGED intitargs :expected-type :format-arguments
-(defun ensure-one-of (item list &key signal-or-only)
+(defun ensure-one-of (ensure-item in-list &key signal-or-only)
   (or 
-   (and (member item list))
-   (let ((ste (make-condition 'simple-type-error
-                              :datum item
-                              :expected-type `(member ,@list)
-                              :format-control "~@<Can not satisfy test of form:~_ \(member ~S ~S\)~
-                                                ~_Need ~S to be `cl:eql' one of:~_ ~A~:>"
-                              :format-arguments  
-                              (list item list item (format nil (format-delimited-english-list "~S" "or") list)))))
-     (declare (type condition ste))
-     (funcall (function signal-error-or-condition) signal-or-only ste))))
+   (and (member ensure-item in-list))
+   (let ((eoo-sys-type-err 
+          (make-condition 'simple-type-error
+                          :datum            ensure-item
+                          :expected-type   `(member ,@in-list)
+                          :format-control   "~@<Can not satisfy test of form:~_ \(member ~S ~S\)~
+                                             ~_Need ~S to be `cl:eql' one of:~_ ~A~:>"
+                          :format-arguments  (list ensure-item
+                                                   in-list
+                                                   ensure-item
+                                                   (format nil (format-delimited-english-list "~S" "or") in-list)))))
+     (declare (type condition eoo-sys-type-err))
+     (funcall (function signal-error-or-condition) signal-or-only eoo-sys-type-err))))
 
 (defun ensure-signal-or-only (&optional signal-or-only)
   (when signal-or-only
-    (let ((s-or-o-chk '(signal signal-only condition condition-only t)))
+    (let ((s-or-o-chk (list 'signal 'signal-only 'condition 'condition-only t)))
       (case (car (ensure-one-of signal-or-only s-or-o-chk))
-        ((signal signal-only) 'signal)
-        ((condition condition-only t) t)))))
+        ((signal signal-only)         'signal)
+        ((condition condition-only t)  t)))))
 
 (defun signal-error-or-condition (chk-signal-or-only condition-obj)
   (let ((chkd (ensure-signal-or-only chk-signal-or-only)))
     (funcall 
-     (or (and (null chkd)        #'error)
-         (and (eql chkd 'signal) #'signal)
-         (and chkd               #'identity)
-         (simple-error-mon :w-sym 'signal-error-or-condition 
-                           :w-type 'function 
-                           :w-spec "Shouldn't happen, something wrong with~
-                                    arg CHK-SIGNAL-OR-ONLY"))
-         condition-obj)))
+     (or 
+      (and (null chkd)
+           #'error)
+      (and (eql chkd 'signal)
+           #'signal)
+      (and chkd
+           #'identity)
+      (simple-error-mon :w-sym  'signal-error-or-condition 
+                        :w-type 'function 
+                        :w-spec "Shouldn't happen, something wrong with arg CHK-SIGNAL-OR-ONLY"))
+     condition-obj)))
 
 ;;; ==============================
 ;; :NOTE Either swank or SBCL seems to be doing something non-conformat wrt
@@ -408,301 +463,355 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
   (declare (special *error-table*)
 	   (stream stream)
 	   (condition condition))
-  (let ((esym  (error-sym  condition))
-	(espec (error-spec condition))
-	(earg  (error-args condition))
-        (etyp  (error-sym-type condition))
-        (egot  (ref-bind eg (error-got condition) 
-                 (format nil "~%got: ~S" eg)))
-        (etype-of  (ref-bind et (error-type-of condition)
-                     (format nil "~%type-of: ~S" et))))
-    (setf esym (format-error-symbol-type esym etyp))
-    (setf espec (or (and espec 
-                         (or (and (stringp espec) (concatenate 'string esym espec egot etype-of))
-                             (and (list-proper-p espec)
-                                  (mapconcat #'identity `(,esym ,@espec ,egot ,etype-of) (make-string 0)))
-                             ;; can't get here:
-                             ;; (proper-list-error :w-sym  'simple-error-mon
-                             ;;                    :w-type 'function
-                             ;;                    :proper-list-error-args `(error-spec ,espec)
-                             ;;                    :signal-or-only nil)
-                             ))
-                    (make-string 0 :initial-element #\nul)))
-    (apply #'format stream espec earg)))
+  (let ((semr-err-sym           (error-sym  condition))
+	(semr-err-spec          (error-spec condition))
+	(semr-err-arg           (error-args condition))
+        (semr-err-sym-type      (error-sym-type condition))
+        (semr-err-got           (ref-bind semr-eg (error-got condition) 
+                                  (format nil "~%got: ~S" semr-eg)))
+        (semr-err-sym-get-type  (ref-bind semr-eto (error-type-of condition)
+                                  (format nil "~%type-of: ~S" semr-eto))))
+    (setf semr-err-sym (format-error-symbol-type semr-err-sym semr-err-sym-type))
+    (setf semr-err-spec (or 
+                         (and semr-err-spec 
+                              (or 
+                               (and (stringp semr-err-spec)
+                                    (concatenate 'string semr-err-sym semr-err-spec semr-err-got semr-err-sym-get-type))
+                               (and (list-proper-p semr-err-spec)
+                                    (mapconcat #'identity 
+                                               `(,semr-err-sym ,@semr-err-spec ,semr-err-got ,semr-err-sym-get-type)
+                                               (make-string 0 :initial-element #\Nul)))))
+                         (make-string 0 :initial-element #\Nul)))
+    (apply #'format stream semr-err-spec semr-err-arg)))
 
 (defun format-error-symbol-type (&optional error-symbol symbol-type)
   (declare (special *error-table*))
-  (let  ((chk-typ (assoc symbol-type *error-table*)))
-    (setf chk-typ (or (and chk-typ (cdr chk-typ)) ":LOCUS"))
-    (setf chk-typ
+  (let  ((fest-type-check (assoc symbol-type *error-table*)))
+    (setf fest-type-check 
+          (or 
+           (and fest-type-check (cdr fest-type-check))
+           ":LOCUS"))
+    (setf fest-type-check
           (or 
            (and error-symbol 
-                (concatenate 'string  chk-typ " `" (upcase error-symbol) "' -- "))
-           (concatenate 'string chk-typ " -- ")))))
+                (concatenate 'string  fest-type-check " `" (upcase error-symbol) "' -- "))
+           (concatenate 'string fest-type-check " -- ")))))
 
 (defun simple-error-mon (&key 
                          (w-sym 'simple-error-mon)
                          (w-type 'condition)
                          w-spec w-args w-got w-type-of signal-or-only )
   (handler-case 
-      (let ((sem 
+      (let ((sem-cndtn 
              (make-condition 'simple-error-mon
                              :w-sym w-sym
                              :w-type w-type
-                             :w-got  (or (and w-got (not (eql w-got t)) w-got)
-                                         (and w-got 
-                                              (eql w-got t) 
-                                              (and (booleanp w-type-of) nil))
-                                         (and w-type-of (not (eql w-type-of t)) w-type-of))
+                             :w-got  (or 
+                                      (and w-got 
+                                           (not (eql w-got t))
+                                           w-got)
+                                      (and w-got 
+                                           (eql w-got t) 
+                                           (and (booleanp w-type-of)
+                                                nil))
+                                      (and w-type-of 
+                                           (not (eql w-type-of t))
+                                           w-type-of))
                              :w-type-of (and w-type-of
-                                             (or (and (eql w-type-of t)
-                                                      (and w-got)
-                                                      (type-of w-got))
-                                                 (type-of w-type-of)))
-                             :w-spec (or (and w-spec 
-                                              (or (and (stringp w-spec) w-spec)
-                                                  (and (list-proper-p w-spec) w-spec)
-                                                  (proper-list-error :w-sym 'simple-error-mon
-                                                                     :w-type 'function 
-                                                                     :error-args `(w-spec ,w-spec)
-                                                                     :signal-or-only 'signal)))
-                                         (and (or w-got w-type-of) (make-string 0 :initial-element #\nul))
-                                         (list "simple-error-mon w/out format-control argument"))
+                                             (or 
+                                              (and (eql w-type-of t)
+                                                   (and w-got)
+                                                   (type-of w-got))
+                                              (type-of w-type-of)))
+                             :w-spec (or
+                                      (and w-spec 
+                                           (or 
+                                            (and (stringp w-spec)       w-spec)
+                                            (and (list-proper-p w-spec) w-spec)
+                                                 
+                                            (proper-list-error :w-sym          'simple-error-mon
+                                                               :w-type         'function 
+                                                               :error-args     `(w-spec ,w-spec)
+                                                               :signal-or-only 'signal)))
+                                      (and (or w-got
+                                               w-type-of)
+                                           (make-string 0 :initial-element #\Nul))
+                                      (list "simple-error-mon w/out format-control argument"))
                              :w-args (and w-spec 
                                           (and w-args
-                                               (or (and (list-proper-p w-args) w-args)
-                                                   (and (atom w-args) (list w-args))))))))
-        (declare (type condition sem))
-        (signal-error-or-condition signal-or-only sem))
+                                               (or 
+                                                (and (list-proper-p w-args)
+                                                     w-args)
+                                                (and (atom w-args)
+                                                     (list w-args))))))))
+        (declare (type condition sem-cndtn))
+        (signal-error-or-condition signal-or-only sem-cndtn))
     (proper-list-error (cnd) (error cnd))))
 
 (defun circular-list-error (circular-list &key w-sym w-type signal-or-only) ;; 
-  (let ((cle (make-condition 'circular-list-error
-                             :w-sym  (or (and w-sym w-type w-sym) 'circular-list-error)
-                             :w-type (or (and w-sym w-type) 'condition)
-                             :datum  circular-list)))
-    (declare (type condition cle))
-    (signal-error-or-condition signal-or-only cle) ))
+  (let ((cle-cndtn
+         (make-condition 'circular-list-error
+                         :w-sym  (or 
+                                  (and w-sym w-type w-sym)
+                                  'circular-list-error)
+                         :w-type (or 
+                                  (and w-sym w-type)
+                                  'condition)
+                         :datum  circular-list)))
+    (declare (type condition cle-cndtn))
+    (signal-error-or-condition signal-or-only cle-cndtn)))
 
 (defun proper-list-error-report (condition stream)
   (declare (type condition condition)
            (type stream stream))
   (format stream "~A~@[ ~?~]"
           (format-error-symbol-type (error-sym condition) (error-sym-type condition))
-          (proper-spec condition)
+          (proper-spec   condition)
           (list (first   (proper-args condition))
                 (second  (proper-args condition))
                 (type-of (second (proper-args condition))))))
 
 (defun proper-list-error (&key w-sym w-type error-args signal-or-only)
   (handler-case
-      (let ((ple 
+      (let ((ple-cndtn
              (make-condition 
               'proper-list-error
-              :w-sym  (or (and w-sym w-type w-sym) 'proper-list-error)
-              :w-type (or (and w-sym w-type w-type) 'condition)
-              :proper-list-error-args
-              (or (and (list-length-n-p error-args 2)
-                       error-args)
-                  (simple-error-mon 
-                   :w-sym  'proper-list-error
-                   :w-type 'function
-                   :w-spec '("with pending un-signaled condtion of type ~"
-                             "PROPER-LIST-ERROR~%"
-                             "Arg ERROR-ARGS not a 2 element proper-list")
-                   :w-got     error-args
-                   :w-type-of error-args
-                   :signal-or-only 'signal)))))
-        (declare (type condition ple))
-        (signal-error-or-condition signal-or-only ple))
+              :w-sym  (or 
+                       (and w-sym w-type w-sym)
+                       'proper-list-error)
+              :w-type (or 
+                       (and w-sym w-type w-type)
+                       'condition)
+              :proper-list-error-args (or 
+                                       (and (list-length-n-p error-args 2)
+                                            error-args)
+                                       (simple-error-mon :w-sym    'proper-list-error
+                                                         :w-type   'function
+                                                         :w-spec   '("with pending un-signaled condtion of type ~"
+                                                                     "PROPER-LIST-ERROR~%"
+                                                                     "Arg ERROR-ARGS not a 2 element proper-list")
+                                                         :w-got     error-args
+                                                         :w-type-of error-args
+                                                         :signal-or-only 'signal)))))
+        (declare (type condition ple-cndtn))
+        (signal-error-or-condition signal-or-only ple-cndtn))
     (simple-error-mon (cnd) (error cnd))))
 
 (defun symbol-not-null-or-error (chk-symbol &key w-locus
                                  signal-or-only)
-  (or (typep chk-symbol 'symbol-not-null)
-      (simple-error-mon :w-sym  'symbol-not-null-or-error
-                        :w-type 'function
-                        :w-spec "Arg ~A not of type `mon:symbol-not-null'"
-                        :w-args (or (and w-locus 
-                                         (typecase w-locus
-                                           (symbol (string w-locus))
-                                           (string (string-upcase w-locus))
-                                           (t nil)))
-                                    "CHK-SYMBOL")
-                        :w-got (or (and (null chk-symbol) (quote (quote nil))) chk-symbol)
-                        :w-type-of (unless (null chk-symbol) t)
-                        :signal-or-only signal-or-only)))
+  (or 
+   (typep chk-symbol 'symbol-not-null)
+   (simple-error-mon :w-sym         'symbol-not-null-or-error
+                     :w-type        'function
+                     :w-spec        "Arg ~A not of type `mon:symbol-not-null'"
+                     :w-args         (or 
+                                      (and w-locus 
+                                           (typecase w-locus
+                                             (symbol (string w-locus))
+                                             (string (string-upcase w-locus))
+                                             (t nil)))
+                                      "CHK-SYMBOL")
+                     :w-got           (or 
+                                       (and (null chk-symbol) 
+                                            (quote (quote nil)))
+                                       chk-symbol)
+                     :w-type-of        (unless (null chk-symbol) t)
+                     :signal-or-only   signal-or-only)))
 
 (defun string-empty-error (&key w-sym w-type w-locus signal-or-only)
   (handler-case 
-      (let ((stree 
+      (let ((stree-cndtn 
              (make-condition 'simple-error-mon
                              :w-sym (or w-sym 'string-empty-error)
                              :w-type (if (and w-sym w-type) 
                                          w-type 
-                                         (if w-sym nil 'function))
+                                         (if w-sym 
+                                             nil 
+                                             'function))
                              :w-spec "arg~A was `string-empty-p'"
                              :w-args (list 
                                       (or 
                                        (and w-locus
                                             (concatenate 'string (make-string 1 :initial-element #\SPACE)
-                                                         (or (and (symbolp w-locus) 
-                                                                  (symbol-name w-locus))
-                                                             (and (stringp w-locus)
-                                                                  (string-upcase w-locus))
-                                                             (simple-error-mon 
-                                                              :w-sym 'string-empty-error 
-                                                              :w-type 'function
-                                                              :w-spec "Keyword :W-LOCUS neither `stringp' nor `symbolp'"
-                                                              :w-got w-locus
-                                                              :w-type-of t
-                                                              :signal-or-only 'signal))))
+                                                         (or 
+                                                          (and (symbolp w-locus)
+                                                               (symbol-name w-locus)) 
+                                                          (and (stringp w-locus)
+                                                               (string-upcase w-locus))
+                                                          (simple-error-mon  :w-sym         'string-empty-error 
+                                                                             :w-type        'function
+                                                                             :w-spec        "Keyword :W-LOCUS neither `stringp' nor `symbolp'"
+                                                                             :w-got          w-locus
+                                                                             :w-type-of      t
+                                                                             :signal-or-only 'signal))))
                                        (make-string 0 :initial-element #\nul))))))
-        (declare (type condition stree))
-        (signal-error-or-condition signal-or-only stree))
+        (declare (type condition stree-cndtn))
+        (signal-error-or-condition signal-or-only stree-cndtn))
     (simple-error-mon (cnd) (error cnd))))
 
 (defun package-error-not-report (condition stream)
   (declare (type stream stream)
            (type condition condition))
-  (let ((esym     (error-sym  condition))
-	(espec    (error-spec condition))
-	(earg     (error-args condition))
-        (etyp     (error-sym-type condition))
-        (e-xpct   (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
-        (egot     (format nil "~%got:~18T~S" (type-error-datum condition)))
-        (etype-of (format nil "~%type-of:~18T~S" (type-of (type-error-datum condition)))))
-    (setf esym (format-error-symbol-type esym etyp))
-    (setf espec (or (and espec 
-                         (or (and (stringp espec)
-                                  (concatenate 'string esym espec e-xpct egot etype-of))
-                             (and (listp espec)
-                                  (mapconcat #'identity `(,esym ,@espec ,e-xpct ,egot ,etype-of) (make-string 0)))))
-                    (mapconcat #'identity `(,esym ,e-xpct ,egot ,etype-of) (make-string 0))))
-    (apply #'format stream espec earg)))
+  (let ((penr-err-sym      (error-sym      condition))
+	(penr-err-spec     (error-spec     condition))
+	(penr-err-arg      (error-args     condition))
+        (penr-err-type     (error-sym-type condition))
+        (penr-type-expect  (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
+        (penr-err-got      (format nil "~%got:~18T~S"           (type-error-datum condition)))
+        (penr-err-get-type (format nil "~%type-of:~18T~S"       (type-of (type-error-datum condition)))))
+    (setf penr-err-sym  (format-error-symbol-type penr-err-sym penr-err-type))
+    (setf penr-err-spec (or 
+                         (and penr-err-spec 
+                              (or 
+                               (and (stringp penr-err-spec)
+                                    (concatenate 'string penr-err-sym penr-err-spec penr-type-expect penr-err-got penr-err-get-type))
+                               (and (listp penr-err-spec)
+                                    (mapconcat #'identity 
+                                               `(,penr-err-sym ,@penr-err-spec ,penr-type-expect ,penr-err-got ,penr-err-get-type) 
+                                               (make-string 0 :initial-element #\Nul)))))
+                         (mapconcat #'identity 
+                                    `(,penr-err-sym ,penr-type-expect ,penr-err-got ,penr-err-get-type) 
+                                    (make-string 0 :initial-element #\Nul))))
+    (apply #'format stream penr-err-spec penr-err-arg)))
 
 (defun package-error-not (not-a-package &key w-sym w-type w-spec w-args signal-or-only)
   (handler-case
-      (let ((pern (make-condition 'package-error-not
-                                  :w-sym  (or (and w-sym w-type w-sym) 'package-error-not)
-                                  :w-type (or (and w-sym w-type) 'condition)
-                                  :w-spec (and w-spec 
-                                               (or 
-                                                (and (stringp w-spec) w-spec)
-                                                (and (listp w-spec)
-                                                     (or (and (list-proper-p w-spec) w-spec)
-                                                         (proper-list-error :w-sym  'package-error-not
-                                                                            :w-type 'function
-                                                                            :error-args `(w-spec ,w-spec)
-                                                                            :signal-or-only 'signal)))))
-                                  :w-args w-args
-                                  :datum  not-a-package)))
-        (declare (type condition pern))
-        (signal-error-or-condition signal-or-only pern))
+      (let ((pern-cndtn 
+             (make-condition 'package-error-not
+                             :w-sym  (or (and w-sym w-type w-sym) 'package-error-not)
+                             :w-type (or (and w-sym w-type)       'condition)
+                             :w-spec (and w-spec 
+                                          (or 
+                                           (and (stringp w-spec)
+                                                w-spec)
+                                           (and (listp w-spec)
+                                                (or 
+                                                 (and (list-proper-p w-spec)
+                                                      w-spec)
+                                                 (proper-list-error :w-sym         'package-error-not
+                                                                    :w-type         'function
+                                                                    :error-args     `(w-spec ,w-spec)
+                                                                    :signal-or-only 'signal)))))
+                             :w-args w-args
+                             :datum  not-a-package)))
+        (declare (type condition pern-cndtn))
+        (signal-error-or-condition signal-or-only pern-cndtn))
     (proper-list-error (cnd) (error cnd))))
 
 (defun plist-error-report (condition stream)
   (declare (type stream stream)
            (type condition condition))
-  (let ((esym     (error-sym  condition))
-        (espec    (error-spec condition))
-        (earg     (error-args condition))
-        (etyp     (error-sym-type condition))
-        (edflt    (plist-error-locus condition))
-        (e-xpct   (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
-        (egot     (format nil "~%got:~18T~S" (type-error-datum condition)))
-        (etype-of (format nil "~%type-of:~18T~S" (type-of (type-error-datum condition)))))
-    (setf esym (format-error-symbol-type esym etyp))
-    (setf espec (or (and espec 
-                         (or (and (stringp espec)
-                                  (concatenate 'string esym espec edflt e-xpct egot etype-of))
-                             (and (list-proper-p espec)
-                                  (mapconcat #'identity `(,esym ,@espec ,edflt ,e-xpct ,egot ,etype-of) (make-string 0)))
-                             (proper-list-error :w-sym  'simple-error-mon
-                                                :w-type 'function
-                                                :error-args `(error-spec ,espec)
-                                                :signal-or-only nil)))
-                    (mapconcat #'identity `(,esym ,edflt ,e-xpct ,egot ,etype-of) (make-string 0))))
-    (apply #'format stream espec earg)))
+  (let ((per-err-sym         (error-sym         condition))
+        (per-err-spec        (error-spec        condition))
+        (per-err-arg         (error-args        condition))
+        (per-err-type        (error-sym-type    condition))
+        (per-err-default     (plist-error-locus condition))
+        (per-err-type-expect (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
+        (per-err-got         (format nil "~%got:~18T~S" (type-error-datum condition)))
+        (per-err-get-type    (format nil "~%type-of:~18T~S" (type-of (type-error-datum condition)))))
+    (setf per-err-sym (format-error-symbol-type per-err-sym per-err-type))
+    (setf per-err-spec (or 
+                        (and per-err-spec 
+                             (or
+                              (and (stringp per-err-spec)
+                                   (concatenate 'string per-err-sym per-err-spec per-err-default per-err-type-expect per-err-got per-err-get-type))
+                              (and (list-proper-p per-err-spec)
+                                   (mapconcat #'identity 
+                                              `(,per-err-sym ,@per-err-spec ,per-err-default ,per-err-type-expect ,per-err-got ,per-err-get-type) 
+                                              (make-string 0 :initial-element #\Nul)))
+                              (proper-list-error :w-sym         'simple-error-mon
+                                                 :w-type        'function
+                                                 :error-args    `(error-spec ,per-err-spec)
+                                                 :signal-or-only nil)))
+                        (mapconcat #'identity 
+                                   `(,per-err-sym ,per-err-default ,per-err-type-expect ,per-err-got ,per-err-get-type) 
+                                   (make-string 0 :initial-element #\Nul))))
+    (apply #'format stream per-err-spec per-err-arg)))
 
 (defun plist-not-null-error (&key w-sym w-type w-obj-locus w-spec w-args signal-or-only)
   (handler-case 
-      (let ((pl-err (make-condition 
+      (let ((pnne-cndtn (make-condition 
                      'plist-not-null-error
                      :w-sym  (or (and w-sym w-type w-sym) 'plist-not-null-error)
                      :w-type (or (and w-sym w-type) 'condition)
                      :plist-obj-locus 
-                     (if w-obj-locus
-                         (format nil "object ~A not `plist-proper-not-null-p'"
-                                 (typecase w-obj-locus
-                                   (string (string-upcase w-obj-locus))
-                                   (symbol (string w-obj-locus))
-                                   (t   (symbol-not-null-or-string-not-empty-error
-                                         w-obj-locus
-                                         :w-spec '("with pending un-signaled PLIST-NOT-NULL-ERROR condtion~%"
-                                                   "got invalid keyword argument~%")
-                                         :w-obj-locus 'w-obj-locus
-                                         :signal-or-only 'signal))))
-                         "arg not `plist-proper-not-null-p'")
+                             (if w-obj-locus
+                                 (format nil "object ~A not `plist-proper-not-null-p'"
+                                         (typecase w-obj-locus
+                                           (string (string-upcase w-obj-locus))
+                                           (symbol (string w-obj-locus))
+                                           (t      (symbol-not-null-or-string-not-empty-error
+                                                    w-obj-locus
+                                                    :w-spec        '("with pending un-signaled PLIST-NOT-NULL-ERROR condtion~%"
+                                                                     "got invalid keyword argument~%")
+                                                    :w-obj-locus    'w-obj-locus
+                                                    :signal-or-only 'signal))))
+                                 "arg not `plist-proper-not-null-p'")
                      :w-spec w-spec
                      :w-args w-args)))
-        (declare (type condition pl-err))
-        (signal-error-or-condition signal-or-only pl-err))
+        (declare (type condition pnne-cndtn))
+        (signal-error-or-condition signal-or-only pnne-cndtn))
     (symbol-not-null-or-string-not-empty-error (cnd) (error cnd))))
 
 (defun plist-error (not-a-plist &key w-sym w-type w-obj-locus w-spec w-args signal-or-only)
   (handler-case 
-      (let ((pl-err (make-condition 
-                     'plist-error
-                     :w-sym  (or (and w-sym w-type w-sym) 'plist-error)
-                     :w-type (or (and w-sym w-type) 'condition)
-                     :plist-obj-locus 
-                     (if w-obj-locus
-                         (format nil "object ~A not `plist-proper-p'" 
-                                 (typecase w-obj-locus
-                                   (string (string-upcase w-obj-locus))
-                                   (symbol (string w-obj-locus))
-                                   (t   (symbol-not-null-or-string-not-empty-error
-                                         w-obj-locus
-                                         :w-spec '("with pending un-signaled PLIST-ERROR condtion~%"
-                                                   "got invalid keyword argument~%")
-                                         :w-obj-locus 'w-obj-locus
-                                         :signal-or-only 'signal))))
-                         "arg not `plist-proper-p'")
-                     :w-spec w-spec
-                     :w-args w-args
-                     :datum  not-a-plist)))
-        (declare (type condition pl-err))
-        (signal-error-or-condition signal-or-only pl-err))
+      (let ((pe-cndtn 
+             (make-condition 'plist-error
+                             :w-sym           (or (and w-sym w-type w-sym) 'plist-error)
+                             :w-type          (or (and w-sym w-type) 'condition)
+                             :plist-obj-locus (if w-obj-locus
+                                                  (format nil "object ~A not `plist-proper-p'" 
+                                                          (typecase w-obj-locus
+                                                            (string  (string-upcase w-obj-locus))
+                                                            (symbol  (string w-obj-locus))
+                                                            (t       (symbol-not-null-or-string-not-empty-error
+                                                                      w-obj-locus
+                                                                      :w-spec '("with pending un-signaled PLIST-ERROR condtion~%"
+                                                                                "got invalid keyword argument~%")
+                                                                      :w-obj-locus 'w-obj-locus
+                                                                      :signal-or-only 'signal))))
+                                                  "arg not `plist-proper-p'")
+                             :w-spec           w-spec
+                             :w-args           w-args
+                             :datum            not-a-plist)))
+        (declare (type condition pe-cndtn))
+        (signal-error-or-condition signal-or-only pe-cndtn))
     (symbol-not-null-or-string-not-empty-error (cnd) (error cnd))))
 
 (defun symbol-not-null-or-string-not-empty-error-report (condition stream)
   (declare (type stream stream)
            (type condition condition))
-  (let ((esym     (error-sym  condition))
-        (espec    (error-spec condition))
-        (earg     (error-args condition))
-        (etyp     (error-sym-type condition))
-        (edflt    (ref-bind socopi (symbol-nor-string-error-locus condition)
-                    (format nil "object ~A not of type `mon:symbol-not-null-or-string-not-empty'" socopi)
-                    "arg not of type `mon:symbol-not-null-or-string-not-empty'"))
-        (e-xpct   (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
-        (egot     (format nil "~%got:~18T~S" (type-error-datum condition)))
-        (etype-of (format nil "~%type-of:~18T~S" (type-of (type-error-datum condition)))))
-    (setf esym (format-error-symbol-type esym etyp))
-    (setf espec (or (and espec 
-                         (or (and (stringp espec)
-                                  (concatenate 'string esym espec edflt e-xpct egot etype-of))
-                             (and (list-proper-p espec)
-                                  (mapconcat #'identity `(,esym ,@espec ,edflt ,e-xpct ,egot ,etype-of) (make-string 0)))))
-                    (mapconcat #'identity `(,esym ,edflt ,e-xpct ,egot ,etype-of) (make-string 0))))
-    (apply #'format stream espec earg)))
+  (let ((snn-err-sym         (error-sym      condition))
+        (snn-err-spec        (error-spec     condition))
+        (snn-err-arg         (error-args     condition))
+        (snn-err-type        (error-sym-type condition))
+        (snn-err-default     (ref-bind snn-ref-bind (symbol-nor-string-error-locus condition)
+                               (format nil "object ~A not of type `mon:symbol-not-null-or-string-not-empty'" snn-ref-bind)
+                               "arg not of type `mon:symbol-not-null-or-string-not-empty'"))
+        (snn-err-type-expect (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
+        (snn-err-got         (format nil "~%got:~18T~S"           (type-error-datum condition)))
+        (snn-err-get-type    (format nil "~%type-of:~18T~S"       (type-of (type-error-datum condition)))))
+    (setf snn-err-sym        
+          (format-error-symbol-type snn-err-sym snn-err-type))
+    (setf snn-err-spec 
+          (or 
+           (and snn-err-spec 
+                (or 
+                 (and (stringp snn-err-spec)
+                      (concatenate 'string snn-err-sym snn-err-spec snn-err-default snn-err-type-expect snn-err-got snn-err-get-type))
+                 (and (list-proper-p snn-err-spec)
+                      (mapconcat #'identity 
+                                 `(,snn-err-sym ,@snn-err-spec ,snn-err-default ,snn-err-type-expect ,snn-err-got ,snn-err-get-type)
+                                 (make-string 0 :initial-element #\Nul)))))
+           (mapconcat #'identity 
+                      `(,snn-err-sym ,snn-err-default ,snn-err-type-expect ,snn-err-got ,snn-err-get-type)
+                      (make-string 0 :initial-element #\Nul))))
+    (apply #'format stream snn-err-spec snn-err-arg)))
 
 (defun symbol-not-null-or-string-not-empty-error (non-symbol-or-string 
-                                                  &key w-sym w-type w-obj-locus
-                                                  w-spec w-args signal-or-only)
+                                                  &key w-sym w-type w-obj-locus w-spec w-args signal-or-only) 
   (handler-case 
-      (let ((snnosnee 
+      (let ((snnosnee-cndtn
              (make-condition 'symbol-not-null-or-string-not-empty-error
                              :w-sym  (or (and w-sym w-type w-sym) 
                                          'symbol-not-null-or-string-not-empty-error)
@@ -712,89 +821,134 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
                                   (typecase w-obj-locus
                                     (string (string-upcase w-obj-locus))
                                     (symbol (string w-obj-locus))
-                                    (t 
-                                     (symbol-not-null-or-string-not-empty-error
-                                      w-obj-locus
-                                      :w-sym 'symbol-not-null-or-string-not-empty-error
-                                      :w-type 'function
-                                      :w-spec '("with pending un-signaled condtion of type: ~
-                                                    SYMBOL-NOT-NULL-OR-STRING-NOT-EMPTY-ERROR~%"
-                                                "got invalid keyword argument~%")
-                                      :w-obj-locus 'w-obj-locus
-                                      :signal-or-only 'signal))))
+                                    (t      (symbol-not-null-or-string-not-empty-error
+                                             w-obj-locus
+                                             :w-sym        'symbol-not-null-or-string-not-empty-error
+                                             :w-type       'function
+                                             :w-spec       '("with pending un-signaled condtion of type: ~
+                                                              SYMBOL-NOT-NULL-OR-STRING-NOT-EMPTY-ERROR~%"
+                                                             "got invalid keyword argument~%")
+                                             :w-obj-locus    'w-obj-locus
+                                             :signal-or-only 'signal))))
                              :w-spec (and w-spec
                                           (typecase w-spec
                                             (string w-spec)
                                             (proper-list w-spec)
-                                            (t (proper-list-error :w-sym  'simple-error-mon
-                                                                  :w-type 'function
-                                                                  :error-args `(error-spec ,w-spec)
+                                            (t (proper-list-error :w-sym          'simple-error-mon
+                                                                  :w-type         'function
+                                                                  :error-args     `(error-spec ,w-spec)
                                                                   :signal-or-only 'signal))))
                              :w-args w-args
                              :datum  non-symbol-or-string)))
-        (declare (type condition snnosnee))
-        (signal-error-or-condition signal-or-only snnosnee))
+        (declare (type condition snnosnee-cndtn))
+        (signal-error-or-condition signal-or-only snnosnee-cndtn))
     (symbol-not-null-or-string-not-empty-error (cnd) (error cnd))
     (proper-list-error (cnd) (error cnd))))
 ;; 
 (defun open-stream-output-stream-error-report (condition stream)
   (declare (type stream stream)
            (type condition condition))
-  (let ((esym     (error-sym  condition))
-        (espec    (error-spec condition))
-        (earg     (error-args condition))
-        (etyp     (error-sym-type condition))
-        ;; (edflt    (stream-error-locus condition))
-        (e-xpct   (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
-        (egot     (format nil "~%got:~18T~S"           (type-error-datum condition)))
-        (etype-of (format nil "~%type-of:~18T~S"       (type-of (type-error-datum condition)))))
-    (setf esym (format-error-symbol-type esym etyp))
-    (setf espec (or (and espec 
-                         (or (and (stringp espec)
-                                  ;; (concatenate 'string esym espec edflt e-xpct egot etype-of))
-                                  (concatenate 'string esym espec e-xpct egot etype-of))
-                             (and (list-proper-p espec)
-                                  (mapconcat #'identity 
-                                             ;;`(,esym ,@espec ,edflt ,e-xpct ,egot ,etype-of) (make-string 0)))
-                                             `(,esym ,@espec  ,e-xpct ,egot ,etype-of) (make-string 0)))
-                             (proper-list-error :w-sym  'simple-error-mon
-                                                :w-type 'function
-                                                :error-args `(error-spec ,espec)
-                                                :signal-or-only nil)))
-                    (mapconcat #'identity ;;`(,esym ,edflt ,e-xpct ,egot ,etype-of) (make-string 0))))
-                               `(,esym ,e-xpct ,egot ,etype-of) (make-string 0))))
-    (apply #'format stream espec earg)))
+  (let ((ososer-err-sym         (error-sym      condition))
+        (ososer-err-spec        (error-spec     condition))
+        (ososer-err-arg         (error-args     condition))
+        (ososer-err-type        (error-sym-type condition))
+        (ososer-err-type-expect (format nil "~%type-expected:~18T~S" (type-error-expected-type condition)))
+        (ososer-err-got         (format nil "~%got:~18T~S"           (type-error-datum condition)))
+        (ososer-err-get-type    (format nil "~%type-of:~18T~S"       (type-of (type-error-datum condition)))))
+    (setf ososer-err-sym  (format-error-symbol-type ososer-err-sym ososer-err-type))
+    (setf ososer-err-spec (or 
+                           (and ososer-err-spec 
+                                (or 
+                                 (and (stringp ososer-err-spec)
+                                      (concatenate 'string ososer-err-sym ososer-err-spec ososer-err-type-expect ososer-err-got ososer-err-get-type))
+                                 (and (list-proper-p ososer-err-spec)
+                                      (mapconcat #'identity  
+                                                 `(,ososer-err-sym ,@ososer-err-spec  ,ososer-err-type-expect ,ososer-err-got ,ososer-err-get-type) 
+                                                 (make-string 0 :initial-element #\Nul)))
+                                 (proper-list-error :w-sym         'simple-error-mon
+                                                    :w-type        'function
+                                                    :error-args    `(error-spec ,ososer-err-spec)
+                                                    :signal-or-only nil)))
+                           (mapconcat #'identity 
+                                      `(,ososer-err-sym ,ososer-err-type-expect ,ososer-err-got ,ososer-err-get-type) 
+                                      (make-string 0 :initial-element #\Nul)))) 
+    (apply #'format stream ososer-err-spec ososer-err-arg)))
 
 (defun open-stream-output-stream-error (not-an-open-output-stream &rest expect
                                         &key w-sym w-type w-obj-locus w-spec
                                         w-args signal-or-only &allow-other-keys)
   (handler-case 
-      (let ((osose (make-condition 
-                    'open-stream-output-stream-error
-                    :w-sym  (or (and w-sym w-type w-sym) 'open-stream-output-stream-error)
-                    :w-type (or (and w-sym w-type) 'condition)
-                    :stream-obj-locus
-                    (if w-obj-locus
-                        (format nil "~%object ~S has unsatisfied constraint for either: ~
-                                      `streamp', `open-stream-p', or `output-stream-p'"
-                                (typecase w-obj-locus
-                                  (string (string-upcase w-obj-locus))
-                                  (symbol (string w-obj-locus))
-                                  (t   (symbol-not-null-or-string-not-empty-error
-                                        w-obj-locus
-                                        :w-spec 
-                                        '("with pending un-signaled OPEN-STREAM-OUTPUT-STREAM-ERROR "
-                                          "condtion~%got invalid keyword argument~%")
-                                        :w-obj-locus 'w-obj-locus
-                                        :signal-or-only 'signal))))
-                        "arg failed constraints for `streamp', `open-stream-p', or `output-stream-p'")
-                    :w-spec w-spec
-                    :w-args w-args
-                    :datum  not-an-open-output-stream
-                    :expected-type (or (and expect (getf expect :expected-type)) 'stream))))
-        (declare (type condition osose))
-        (signal-error-or-condition signal-or-only osose))
+      (let ((osose-cndtn 
+             (make-condition 'open-stream-output-stream-error
+                             :w-sym            (or (and w-sym w-type w-sym) 'open-stream-output-stream-error)
+                             :w-type           (or (and w-sym w-type) 'condition)
+                             :stream-obj-locus (if w-obj-locus
+                                                   (format nil "~%object ~S has unsatisfied constraint for either: ~
+                                                                 `streamp', `open-stream-p', or `output-stream-p'"
+                                                           (typecase w-obj-locus
+                                                             (string (string-upcase w-obj-locus))
+                                                             (symbol (string w-obj-locus))
+                                                             (t      (symbol-not-null-or-string-not-empty-error 
+                                                                      w-obj-locus
+                                                                      :w-spec        '("with pending un-signaled OPEN-STREAM-OUTPUT-STREAM-ERROR "
+                                                                                       "condtion~%got invalid keyword argument~%")
+                                                                      :w-obj-locus    'w-obj-locus
+                                                                      :signal-or-only 'signal))))
+                                                   "arg failed constraints for `streamp', `open-stream-p', or `output-stream-p'")
+                             :w-spec            w-spec
+                             :w-args            w-args
+                             :datum             not-an-open-output-stream
+                             :expected-type     (or (and expect (getf expect :expected-type)) 'stream))))
+        (declare (type condition osose-cndtn))
+        (signal-error-or-condition signal-or-only osose-cndtn))
     (symbol-not-null-or-string-not-empty-error (cnd) (error cnd))))
+
+(defun file-error-wild-pathname-report (condition stream)
+  (declare (stream    stream)
+           (condition condition)) 
+  (let ((fewpr-err-sym-and-type (format-error-symbol-type (error-sym  condition) (error-sym-type condition)))
+        (fewpr-err-got          (file-error-pathname condition))
+        (fewpr-err-get-type     (type-of (file-error-pathname condition)))
+        (fewpr-err-arg-locus    (pathname-wild-arg-error-locus condition)))
+    (setf fewpr-err-arg-locus
+          (or (and fewpr-err-arg-locus
+                   (or (stringp fewpr-err-arg-locus)
+                       (symbolp fewpr-err-arg-locus))
+                   (upcase fewpr-err-arg-locus))
+              ""))
+    (format stream 
+            (concatenate 'string fewpr-err-sym-and-type
+                         "Arg ~A was `cl:wild-pathname-p'~%~T~Tgot: ~S~%~T~Ttype-of: ~S~%")
+            fewpr-err-arg-locus fewpr-err-got fewpr-err-get-type)))
+
+(defun file-error-wild-pathname (&key w-sym w-type pathname path-arg-locus signal-or-only)
+  (handler-case
+      (let ((fewp-cndtn
+             (make-condition 'file-error-wild-pathname
+                             :w-sym  (or 
+                                      (and w-sym w-type w-sym)
+                                      'file-error-wild-pathname)
+                             :w-type (or 
+                                      (and w-sym w-type w-type)
+                                      'condition)
+                             :pathname (or 
+                                        (and pathname pathname)
+                                        (simple-error-mon :w-sym        'file-error-wild-pathname
+                                                          :w-type       'function
+                                                          :w-spec       '("with pending un-signaled condtion of type: ~"
+                                                                          "FILE-ERROR-WILD-PATHNAME~%"
+                                                                          "got: null value for keyword PATHNAME.~% ~"
+                                                                          "Expected `cl:wild-pathname-p' object of type `mon:pathname-or-namestring'")
+                                                          :w-got          pathname
+                                                          :signal-or-only 'signal))
+                             :pathname-wild-arg-locus path-arg-locus
+                             ;; :w-args                  path-arg-locus
+                             :w-got                   pathname
+                             :w-type-of               t
+                             :signal-or-only signal-or-only)))
+        (declare (type condition fewp-cndtn))
+        (signal-error-or-condition signal-or-only fewp-cndtn))
+    (simple-error-mon (cnd) (error cnd))))
 
 ;; :SOURCE stassats/lisp-config/configs/share.lisp
 (defun format-error (stream object &rest rest)
@@ -804,7 +958,7 @@ the `mon:error-got' and `mon:error-type-of' readers for `mon:simple-error-mon'.
 
 ;; :SOURCE stassats/lisp-config/configs/share.lisp
 (defun eval-code (code)
-  (let (result)
+  (let ((result '()))
     (values (with-output-to-string (*standard-output*)
               (setf result (multiple-value-list
                             (handler-case (eval (read-from-string code))
@@ -837,13 +991,13 @@ If an association is not found or SYMBOL-TYPE is null default to \":LOCUS\"~%~@
 `mon:ensure-one-of', `mon:ensure-signal-or-only'.~%▶▶▶")
 
 (fundoc 'ensure-one-of
-"Ensure ITEM is `cl:eql' an element of LIST.~%
+"ENSURE-ITEM is `cl:eql' an element IN-LIST.~%
 Signal a `cl:simple-type-error'.~%~@
 Keyword :SIGNAL-OR-ONLY when non-nil indicates to return a condition object as
 if by make-condition and an error is not signaled.~%~@
-Pass type-error initarg :datum as ITEM.~%~@
+Pass type-error initarg :datum as ENSURE-ITEM.~%~@
 Pass type-error initarg :expected-type as a list of the form:~%
- `\(member ,@LIST\)~%~@
+ `\(member ,@IN-LIST\)~%~@
 :EXAMPLE~%
  \(ensure-one-of 'bubba '\(a b c\)\)~%
  \(let* \(\(the-item 'bubba\)
@@ -864,6 +1018,7 @@ When SIGNAL-OR-ONLY is not null it should be and one of the following symbols:~%
 An error is signaled if SIGNAL-OR-ONLY if not.~%~@
 When SIGNAL-OR-ONLY is either signal or signal-only return the symbol signal.
 When SIGNAL-OR-ONLY is either condition, condition-only, or the symbol t return T.~%~@
+The latter option is useful when u
 :EXAMPLE~%
  \(ensure-signal-or-only 'signal\)~%
  \(ensure-signal-or-only 'signal-only\)~%
@@ -876,8 +1031,20 @@ When SIGNAL-OR-ONLY is either condition, condition-only, or the symbol t return 
 :SEE-ALSO `mon:format-error-symbol-type', `mon:signal-error-or-condition',
 `mon:ensure-one-of', `mon:ensure-signal-or-only'.~%▶▶▶")
 
+;; (chk-signal-or-only condition-obj)
+
 (fundoc 'signal-error-or-condition
-"Signal, error, or return condition according to value of CHK-SIGNAL-OR-ONLY.~%~@
+"Depending on value of CHK-SIGNAL-OR-ONLY do something with CONDITION-OBJ.~%~@
+CONDITION-OBJ is a condition objection as per the return value of `cl:make-condition'.~%~@
+invoke `cl:signal' or `cl:error', or return a condition object.~%~@
+When SIGNAL-ONLY is null, CONDITION-OBJ is passed as the argument to to `cl:error'.
+When SIGNAL-ONLY is either of the symbols:~%
+   signal signal-only~%
+CONDITION-OBJ is passed as the argument `cl:signal' and any associated handlers may
+respond accordingly.~%
+When SIGNAL-ONLY is any of the symbols:~%
+  condition condition-only T~%~@
+CONDITION-OBJ is returned without additional `cl:signal' or `cl:error' invocation.~%~@
 :EXAMPLE~%
  \(let* \(\(s-or-o 'signal\)
         \(list '\(a b c\)\)
@@ -909,12 +1076,14 @@ When SIGNAL-OR-ONLY is either condition, condition-only, or the symbol t return 
 Keyword W-SYM is a symbol or string designating the locus of the error.
 Default is the symbol simple-error-mon.~%~@
 Keyword W-TYPE is a symbol designating the locus type and should have an
-association in `mon:*error-table*'. If W-TYPE is explicilty provided as NIL 
-\(or the empty list\), the error's :format-control is presented with default
-prefix \":LOCUS\", else defaults to the symbol condition.~%~@
+association in `mon:*error-table*'.
+If W-TYPE is explicilty provided as NIL \(or the empty list\), the signalled
+condtion's :format-control is presented with default prefix \":LOCUS\"
+If no value is provided defaults to the symbol CONDITION.~%~@
 Keyword W-SPEC is a list of strings or a single string.
 When W-SPEC is a list of strings elements are coalesced to a single string as if
-by `mon:mapconcat'. In either format \(string or list of strings\), W-SPEC may
+by `mon:mapconcat'. 
+In either format \(string or list of strings\), W-SPEC may
 contain format control directives as per the :format-control initarg.~%~@
 Keyword W-ARGS is a list of arguments to W-SPEC. Only relevant when W-SPEC is a
 format control string. When W-SPEC is ommited, pass default :format-control
@@ -922,11 +1091,20 @@ string to `cl:error' indicating that no format control was provided thereby
 disregarding any arguments which may have been provided for :W-ARGS.~%~@
 Keyword W-GOT is a value to report.~%~@
 Keyword W-TYPE-OF says to report the `cl:type-of' for W-GOT's value.~%
-Keyword SIGNAL-OR-ONLY is a symbol as per the combined interaction of
-`mon:signal-error-or-condition' and `mon:ensure-signal-or-only', when non-nil
-indicates to return a condition object as if by make-condition and an error is
-not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
- \{signal signal-only condition condition-only t nil\}~%~@
+Keyword SIGNAL-OR-ONLY is a quoted symbol as per the combined interaction of
+`mon:signal-error-or-condition' and `mon:ensure-signal-or-only'.~%~@
+When SIGNAL-OR-ONLY is not provided or the symbol nil, a condition object is
+generated as if by `cl:make-condition' according to the value(s) of the
+arguments outlined above and the condition object passed to `cl:error'.~%
+If SIGNAL-OR-ONLY is provided it should be one of the following symbols:~%
+ \{ signal signal-only condition condition-only t\}~%~@
+When SIGNAL-OR-ONLY is non-nil and its value is one of the following symbols:~%
+ CONDITION CONDITION-ONLY T 
+the value is an indicatation to return a condition object as if by
+`cl:make-condition' and no further invocation of `cl:error' or `cl:signal' will
+occur.
+When SIGNAL-OR-ONLY is one of the the symbols:~%~@
+  SIGNAL SIGNAL-ONLY
 :NOTE It is often useful to explicitly provide this arg even when null e.g. as:~%
   :signal-or-only nil~%
 Doing so affords easier modification when the API of calling functions might
@@ -1012,7 +1190,7 @@ Keyword SIGNAL-OR-ONLY is a symbol as per the combined interaction of
 `mon:signal-error-or-condition' and `mon:ensure-signal-or-only', when non-nil
 indicates to return a condition object as if by make-condition and an error is
 not signaled. Valid arguments for SIGNAL-OR-ONLY are as follows:~%
- \{signal signal-only condition condition-only t nil\}~%~@
+ \{ signal signal-only condition condition-only t nil \}~%~@
 :EXAMPLE~%
  \(symbol-not-null-or-error nil\)~%
  \(symbol-not-null-or-error nil :w-locus 'bubba :signal-or-only nil\)~%~@
@@ -1109,7 +1287,7 @@ if not.~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'open-stream-output-stream-error
-"Singal an `open-stream-output-stream-error' condition.~%~@
+"Signal an `open-stream-output-stream-error' condition.~%~@
 The NOT-AN-OPEN-OUTPUT-STREAM object originating the error is not `streamp',
 `open-stream-p', or `output-stream-p'.~%~@
 When the keyword :expected-type is non-nil it is as per `type-error-expected-type'.
@@ -1124,6 +1302,67 @@ The default is 'stream.
   :w-obj-locus \"SOME-ARG\"
   :expected-type 'stream-or-boolean\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
+
+;;   Slot initarg/readers for simple-error-mon and subclasses are as follows:
+;; - :W-SYM     error-sym
+;; - :W-TYPE    error-sym-type  ;; key with an association in `mon:*error-table*'
+;; - :W-SPEC    error-spec      ;; a format-control string or list of strings to be concatenated into one 
+;; - :W-ARGS    error-args      ;; format-arguments in the form of a list
+;; - :W-GOT     error-got       ;; 
+;; - :W-TYPE-OF w-type-of       ;; a boolean
+;; 
+
+
+(fundoc 'file-error-wild-pathname-report
+"Report CONDITION of type `mon:file-error-wild-pathname' to STREAM.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'file-error-wild-pathname
+        "Signal a condition of type `mon:file-error-wild-pathname'.~%~@
+Keyword W-SYM is a string or symbol identifying the signaller. ~%
+Keyword W-TYPE is a symbol identifying signallers type it should be a member of `mon:*error-table*'.~%~@
+Keyword PATHNAME is the pathname-or-namestring object which is the locus of the condition.~%
+This is the initarg to the slot PATHNAME for the condition `cl:file-error'.
+Its value may be accessed with the reader `cl:file-error-pathname'.~%~@
+Keyword PATH-ARG-LOCUS is the argument \(if any\) to signaller originating the condition.
+When provided, it is a string or symbol.~%~@
+This is the initarg to the slot PATHNAME-WILD-ARG-LOCUS for the condition `mon:file-error-wild-pathname'.
+Its value may be accessed with the reader `mon:pathname-wild-arg-error-locus'.~%~@
+Keyword SIGNAL-ONLY is one of the following values:~%
+  \{ signal signal-only condition condition-only t nil \}~%~@
+When SIGNAL-ONLY is either of the symbols:~%
+  signal signal-only~%~@
+A condition object of type `mon:file-error-wild-pathname' is passed to
+`cl:signal' and associated handlers can respond accordingly.~%~@
+When SIGNAL-ONLY is any of the symbols:~%
+ condition condition-only T~%~@
+A condition object of type `mon:file-error-wild-pathname' is returned and no
+further direct invocation of `cl:error' or `cl:signal' occurs.~%~@
+:EXAMPLE~%
+ \(funcall #'\(lambda \(tt-pathname\)
+              \(when \(wild-pathname-p tt-pathname\)
+                \(file-error-wild-pathname :w-sym        \"pathname-as-directory\" 
+                                          :w-type        'function
+                                          :pathname       tt-pathname
+                                          :path-arg-locus \"tt-pathname\"
+                                          :signal-or-only nil\)\)\)
+          #P\"/some/wild/pathname/*.*\"\)~%
+ \(let \(\(condition-obj
+        \(funcall #'\(lambda \(tt-pathname\)
+                     \(when \(wild-pathname-p tt-pathname\)
+                       \(file-error-wild-pathname :w-sym        \"pathname-as-directory\" 
+                                                 :w-type        'function
+                                                 :pathname       tt-pathname
+                                                 :path-arg-locus \"tt-pathname\"
+                                                 :signal-or-only 'condition\)\)\)
+                 \"/some/wild/namestring*.*\"\)\)\)
+   \(list \(file-error-pathname           condition-obj\)
+         \(pathname-wild-arg-error-locus condition-obj\)\)\)~%~@
+:SEE-ALSO `file-error-wild-pathname-report'.~%▶▶▶")
+
 
 ;;; ==============================  
 

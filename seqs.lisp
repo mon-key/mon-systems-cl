@@ -471,8 +471,9 @@
 
 ;;; :SOURCE D. Mcdermott ytools/base.lisp :WAS `take'
 (defun list-take (take-n from-lst)
-  (declare ;(type fixnum take-n)
-	   (type list from-lst))
+  (declare 
+   ;;(type fixnum take-n)
+   (type list from-lst))
   (cond ((< take-n 0)
 	 (let ((g (length from-lst)))
 	   (subseq from-lst (+ g take-n) g)))
@@ -485,6 +486,39 @@
   (cond ((< drop-n 0) 
 	 (subseq from-lst 0 (+ (length from-lst) drop-n)))
 	(t (subseq from-lst drop-n (length from-lst)))))
+
+;;; ==============================
+;; :PASTE-NUMBER  123401
+;; :PASTE-BY      rswarbrick
+;; :PASTE-URL     (URL `http://paste.lisp.org/+2N7T')
+;; :PASTE-DATE    2011-07-21
+;; :PASTE-CHANNEL #lisp
+;; :WAS `each-n-tuple'
+(defun list-n-tuples (w-fun n-tuples in-list)
+  (declare
+   (index-from-1 n-tuples)
+   (list in-list)
+   (optimize (speed 3)))
+  (do ((rest in-list (nthcdr n-tuples rest)))
+      ((null rest) (values))
+    (funcall w-fun
+             (subseq (the list rest) 0 
+                     ;; (min n-tuples  (length (the list rest)))))))
+                     ;; NOTE list-length is likely to return wacko if rest is ever circular.
+                     (min n-tuples  (list-length rest))))))
+
+(defun list-slice (n-tuples in-list)
+  (declare 
+   (index-from-1 n-tuples)
+   (list in-list)
+   (optimize (speed 3)))
+  (let ((gthr '()))
+    (flet ((mk-slice (sublist)
+             (declare (list sublist gthr))
+             (push sublist gthr)))
+      (list-n-tuples #'mk-slice n-tuples in-list))
+    (setf gthr (nreverse gthr))))
+
 
 ;;; ==============================
 ;;; :SEQ-COLLECT
@@ -773,6 +807,20 @@ When OBJECT is of type `mon:circular-list' signal a `mon:circular-list-error'.~%
 :EXAMPLE~%
  \(drop 2 '\(a b c d e\)\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'list-slice
+"Partition IN-LIST into N-TUPLES ~%~@
+N-TUPLES is an integer  greater than 0. Its declared type is `mon:index-from-1'.~%~@
+:EXAMPLE~%~@
+ \(list-slice 3 '\(1 2 3 4 5 6 7\)\)~%~@
+:SEE-ALSO `mon:list-n-tuples'.~%▶▶▶")
+
+(fundoc 'list-n-tuples
+        "Invoke function W-FUN for each set of N-TUPLES IN-LIST.~%~@
+N-TUPLES must be an integer value 1 or greater.
+:EXAMPLE~%
+ \(list-n-tuples \(lambda \(x\) \(print x\)\) 3 '\(1 2 3 4 5 6 7\)\)~%~@
+:SEE-ALSO `mon:list-slice'.~%▶▶▶")
 
 (fundoc 'last-elt 
   "Return the car of the `last' elt in LST.~%~@

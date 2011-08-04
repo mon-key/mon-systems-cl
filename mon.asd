@@ -2,6 +2,14 @@
 ;;; :FILE mon-systems/mon.asd
 ;;; ==============================
 
+;; ,----
+;; | "I am sick to death of knee-jerk anti-LOOPism and I am beginning to
+;; |  irrationally regard it as a plot to disable me as a programmer by
+;; |  excommunicating my useful tools."
+;; |
+;; |     :SOURCE "Knee-jerk Anti-LOOPism and other E-mail Phenomena" p 17 
+;; `---- :SEE http://ccs.mit.edu/papers/CCSWP150.html
+
 ;;; ==============================
 ;;; :LOGICAL-PATHNAMES
 ;;; ==============================
@@ -61,10 +69,12 @@
 	       :cl-ppcre
 	       :flexi-streams
 	       :ironclad
-               :cl-fad
+               :cl-fad        ;; :NOTE This is likely to be deprecated in favor of osicat which provides most of same.
                :salza2
                :chipz
                :closer-mop
+               :cffi
+               :osicat
                ;; :local-time
 	       )
   :serial t    
@@ -92,9 +102,10 @@
    (:file "chronos"      ) 
    (:file "regexp"       ) 
    (:file "format"       ) 
+   (:FILE "image-rotate" )
    (:file "compose"      ) 
    (:file "conditions"   ) 
-   (:file "class-doc"    ) 
+   (:file "class-doc"    )
    ))
 
 ;; This used to work... is something funny with latest SBCL 1.0.47.1?
@@ -111,10 +122,9 @@
     (and chk-lb-file 
          ;; *load-print* *load-verbose* 
          (load chk-lb-file :verbose t :print t)))
-  (asdf:operate 'asdf:load-op 'mon-test)  
-  )
+  (asdf:operate 'asdf:load-op 'mon-test))
 
-;; asdf:load-op 
+
 ;;; ==============================
 
 

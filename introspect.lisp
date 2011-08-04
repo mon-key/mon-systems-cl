@@ -303,6 +303,25 @@
       (values lst 
               package))))
 
+#|
+
+ ;; :PASTE-NUMBER 123441
+ ;; :PASTE-TILE "function-names"
+ ;; :PASTE-BY    pjb
+ ;; :PASTE-DATE 2011-07-22
+ ;; :PASTE-URL (URL `http://paste.lisp.org/display/123441')
+
+ (defun function-names (f)
+   (delete-duplicates
+    (loop
+       :for p :in (list-all-packages) 
+       :nconc (let ((names '()))
+                (do-symbols (s p)
+                  (when (and (fboundp s) (eql f (symbol-function s)))
+                    (push s names))) 
+                names))))
+
+|#
 
 ;; :internal Means present and not exported.
 ;; :external Means present and exported.
@@ -709,20 +728,7 @@ The first two values are as per `cl:read-from-string'~%
      \(mapc #'\(lambda \(x\) \(unintern \(car x\)\)\) gthr\)\)\)~%~@
 :SEE-ALSO `mon:string-for-readtable-case', `mon:string-invert-case'.~%▶▶▶")
 
-#+sbcl
-(fundoc 'symbolicate
-	  "Concatenate together the names of some strings and symbols,
- producing a symbol in the current package.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate'.~%▶▶▶")
 
-#+sbcl
-(fundoc 'keywordicate
-	  "Like `symbolicate', but producing keywords.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate', `sb-int:sane-package'.~%▶▶▶")
 
 #+sbcl
 (setf (documentation 'sb-int:sane-package 'function)

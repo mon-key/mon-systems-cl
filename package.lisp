@@ -7,25 +7,18 @@
 
 
 (defpackage #:mon (:use #:common-lisp) ;; #+sbcl #:sb-int
-	    ;; (:nicknames #:mon-system)
-	    ;; (:import-from #:arnesi #:parse-float)  ;; #:sb-impl #:last-cons-of
             (:import-from #:alexandria 
-                #:once-only
-                #-sbcl #:symbolicate 
-                #-sbcl #:keywordicate
-                #-sbcl #:make-gensym-list
-                #-sbcl #:featurep  
-                ;; We used to do this but now it is defined by calling out to sb-impl::featurep instead
-                ;; #+sbcl #:sb-impl::featurep 
-                ;; #:compose 
-                ;; #:multiple-value-compose
-                )
+                          #:once-only
+                          #-sbcl #:symbolicate 
+                          #-sbcl #:keywordicate
+                          #-sbcl #:make-gensym-list
+                          #-sbcl #:featurep)
 
  ;; sbcl/src/code/early-extensions.lisp
   #+sbcl 
   (:import-from #:sb-int
                 ;;
-              ;; <MACROS>
+                ;; <MACROS>
 		;;
                 #:acond
                 #:make-gensym-list
@@ -36,11 +29,10 @@
 		#:dohash
                 ;; #:sb-int:once-only ;; No, use alexandria's instead.
 		;;
-              ;; <FUNCTIONS>
+               ;; <FUNCTIONS>
 		;;
                 #:symbolicate 
-                #:keywordicate
-                )
+                #:keywordicate)
   
   #+sbcl 
   (:import-from #:sb-introspect
@@ -55,7 +47,7 @@
 		;; delete-directory
                 ;; sb-ext:posix-environ
                 ;; sb-ext:posix-getenv
-		#:run-program
+		;; #:run-program
 		;; sb-ext:process-status
 		;; sb-ext:process-plist
 		;; sb-ext:process-pid
@@ -80,6 +72,8 @@
    ;; #:define-constant      ;; don't export
    ;;
    #:*search-path*
+   #:*default-pathname-directory-name-ignorables*
+   #:*default-pathname-filename-ignorables*
    #:*user-name*
    #:*default-class-documentation-table*
    #:*documentation-types*
@@ -179,8 +173,13 @@
    #:write-file
    #:read-file-to-string
    #:read-file-forms
+   ;; 
+   #:with-pipe-stream 
+   #:make-pipe-stream              ;; sb-sys:make-fd-stream, ccl::make-fd-stream, ccl::external-format-character-encoding
+   #:pipe-stream-close-read-side
+   #:pipe-stream-close-write-side
    ;;
-   ;; following three functions require:
+   ;; Following three functions require:
    ;; flex:with-output-to-sequence, chipz:decompress 
    ;; salza2:with-compressor salza2:compress-octet-vector salza2:make-stream-output-callback
    ;; [ sb-ext:octets-to-string | flex:octets-to-string ]
@@ -191,10 +190,15 @@
    #:gzip-files-and-delete-source
    ;;
  ;; environ.lisp
-   #:username-for-system-var-p      ;; sb-posix:getpwnam sb-posix:passwd-name
-   #:username-for-system-var-bind   
-   #:lisp-implementation-description
-   ;; #:
+   #:setenv                         ;; sb-posix:putenv 
+   #:getenv-path-pathnames
+   #:posix-working-directory        ;; sb-posix:getcwd, si:getcwd, ccl::current-directory-name, ext:cd
+   #:set-posix-working-directory    ;; sb-posix:chdir, si:chdir, ccl::%chdir, ext:cd, 
+   #+sbcl #:username-for-system-var-bind   
+   #+sbcl #:lisp-implementation-description
+   #+sbcl #:username-for-system-var-p      ;; sb-posix:getpwnam sb-posix:passwd-name
+   #+sbcl #:syslog-action                  ;; sb-posix:syslog, sb-posix:openlog, sb-posix:closelog
+   #+sbcl #:logical-hosts
    ;; 
  ;; introspect.lisp
    ;;
@@ -253,6 +257,7 @@
    #:dotted-list
    #:proper-sequence
    #:not-null
+   #:null-or-nil
    #:not-t
    #:not-boolean
    #:boolean-integer
@@ -311,8 +316,11 @@
    #:array-index
    #:array-length
    #:index
+   #:index-from-1
    #:index-plus-1
    #:index-or-minus-1
+   #:fixnum-bit-width
+   #:bignum-bit-width
    #:fixnum-0-or-over
    #:fixnum-exclusive 
    #:unsigned-byte-128
@@ -396,8 +404,11 @@
    #:simple-string-not-null-p
    #:simple-string-not-null-or-empty-p
    #:string-all-digit-char-0-or-1-p
-   #:bignump
    #:fixnump
+   #:bignump
+   #:fixnum-0-or-over-p
+   #:bignum-0-or-over-p
+   #:fixnum-bit-width-p
    #:base-char-p
    #:digit-char-0-or-1-p
    #:each-a-character-p
@@ -411,8 +422,10 @@
    #:type-specifier-p
    #:logical-pathname-p
    #:filename-designator-p
+   #:file-stream-designator-p
    #:pathname-designator-p
    #:pathname-or-namestring-p
+   #:pathname-empty-p
    #:standard-test-function-p
    #:declared-special-p             ;; sb-walker:var-globally-special-p
    #:featurep                       ;; sb-int:featurep      ;;#-sbcl alexandria:eswitch
@@ -427,38 +440,41 @@
  ;; conditions.lisp
    ;;
    #:error-mon
-   #:error-sym         ;; reader error-mon
-   #:error-sym-type    ;; reader error-mon
-   #:error-spec        ;; reader error-mon
-   #:error-args        ;; reader error-mon
+   #:error-sym         ;; reader-for error-mon
+   #:error-sym-type    ;; reader-for error-mon
+   #:error-spec        ;; reader-for error-mon
+   #:error-args        ;; reader-for error-mon
    ;;
    #:simple-error-mon
-   #:error-got         ;; reader simple-error-mon
-   #:error-type-of     ;; reader simple-error-mon
+   #:error-got         ;; reader-for simple-error-mon
+   #:error-type-of     ;; reader-for simple-error-mon
    ;;
    #:case-error   
-   #:case-spec         ;; reader case-error
-   #:case-args         ;; reader case-error
+   #:case-spec         ;; reader-for case-error
+   #:case-args         ;; reader-for case-error
    ;;
    #:proper-list-error
    #:circular-list-error
    #:package-error-not
-   #:proper-spec       ;; reader proper-list-error
-   #:proper-args       ;; reader proper-list-error
+   #:proper-spec       ;; reader-for proper-list-error
+   #:proper-args       ;; reader-for proper-list-error
    ;;
    #:slot-non-existent-error
-   #:w-object-locus          ;; reader slot-non-existent-error
-   #:value-for-not-slot      ;; reader slot-non-existent-error
+   #:w-object-locus          ;; reader-for slot-non-existent-error
+   #:value-for-not-slot      ;; reader-for slot-non-existent-error
    ;;
    #:plist-error
-   #:plist-error-locus    ;; reader plist-error
+   #:plist-error-locus    ;; reader-for plist-error
    #:plist-not-null-error
    ;;
    #:symbol-not-null-or-string-not-empty-error
-   #:symbol-nor-string-error-locus ;; reader symbol-not-null-or-string-not-empty-error
+   #:symbol-nor-string-error-locus ;; reader-for symbol-not-null-or-string-not-empty-error
    ;;
    #:open-stream-output-stream-error
-   #:stream-error-locus   ;; reader open-stream-output-stream-error
+   #:stream-error-locus   ;; reader-for open-stream-output-stream-error
+   ;;
+   #:file-error-wild-pathname
+   #:pathname-wild-arg-error-locus   ;; reader-for file-error-wild-pathname  
    ;;
    #:format-error-symbol-type
    #:ensure-one-of
@@ -472,6 +488,7 @@
    #:open-stream-output-stream-error-report
    #:symbol-not-null-or-error
    #:string-empty-error
+   #:file-error-wild-pathname-report
    #:format-error
    ;;
    ;; #:eval-code
@@ -569,6 +586,8 @@
    #:nsublist
    #:list-take
    #:list-drop
+   #:list-n-tuples
+   #:list-slice
    #:add-to-list
    #:add-to-nth-list
    #:setcar
@@ -606,6 +625,7 @@
    #:value-in-range-p
    #:random-number-pairs
    #:average-number-seq
+   #:average-number-seq-simple
    #:number-power-of-two-ceiling
    ;; 
  ;; char-numeric.lisp
@@ -639,6 +659,8 @@
    #:char-invert-case-maybe
    #:char-for-readtable-case
    #+sbcl #:char-length         ;; sb-impl::char-len-as-utf8
+   #:string-escape-as-unicode-octo-chars 
+   #:char-escape-as-unicode-octochar-string
    ;;
    ;; #+sbcl
    ;; +unicode-replacement-character+     ;; sb-impl::+unicode-replacement-character+
@@ -716,6 +738,7 @@
    #:file-directory-p
    #:file-name-directory
    #:directory-parent
+   #:directory-unfiltered-p
    #:to-directory  ;; delete once expand-file-name is finished.
    #:pathname-directory-append
    #:unix-dot-directory-p
@@ -724,10 +747,13 @@
    #:pathname-directory-merged
    #:file-newer-than-file-p
    #:find-file-search-path
+   #:pathname-not-wild-empty-or-dotted-p
+   #:pathname-or-namestring-empty-p
+   #:pathname-or-namestring-not-empty-dotted-or-wild-p
+   #+sbcl #:directory-pathname-ensure ;; sb-ext:parse-native-namestring sb-ext:native-namestring
    #+sbcl #:pathname-native-file-kind ;; sb-ext:native-namestring sb-impl::native-file-kind
    #+sbcl #:remove-directory  ;; sb-posix:rmdir
    #+sbcl #:probe-directory   ;; sb-impl::native-file-kind
-   #+sbcl #:logical-hosts
    #:rename-file*
    #:replace-file
    #:delete-file-if-exists
@@ -735,7 +761,9 @@
    #:pathname-file-if
    #:pathname-file-list-if
    #:make-pathname-user-homedir          ;; sb-ext:native-namestring
-   ;; These require cl-fad
+   #:pathname-as-directory               ;; If dependent packages fail, may need to shadow cl-fad:pathname-as-directory
+   #:pathname-as-file                    ;; If dependent packages fail, may need to shadow cl-fad:pathname-as-directory
+   ;; These require cl-fad/osicat
    #:directory-files
    #:pathname-directory-pathname         ;; cl-fad:pathname-as-directory
    #:make-pathname-directory-wildcard    ;; cl-fad::directory-wildcard
@@ -756,6 +784,8 @@
  ;;
    ;; bit-twiddle.lisp
    ;;
+   #:number-to-bit-list
+   #:number-to-bit-vector
    #:bit-from-boolean
    #:boolean-to-bit
    #:byte-swap
@@ -821,6 +851,7 @@
    #:string-whitespace-to-char       ;; cl-ppcre:create-scanner, regex-replace-all
    #:string-whitespace-to-dash
    #:string-whitespace-to-underscore
+   #:string-escape-for-regex
    ;;
    ;;
  ;; chronos.lisp
@@ -847,12 +878,16 @@
    #:format-emit-tab
    #:format-list-items-by-n
    ;;
+ ;; image-rotate.lisp
+   #:rotate-image-files-in-dir-list
+   ;;
  ;; deprecated.lisp
    ;;
    ;; #:bit-convertable-p
    ;; #:bit-convertable
    ;; #:bits-to-number
    ;; #:number-to-bits
+   ;;
    )) 
 
 

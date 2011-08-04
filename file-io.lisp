@@ -3,6 +3,14 @@
 ;;; ==============================
 
 ;;; ==============================
+;; :NOTE following functions/macros from:
+;; :SORUCE git://git.feelingofgreen.ru/executor :FILE executor/portable-spawn.lisp
+;; `make-pipe-stream', `with-pipe-stream'
+;; `close-pipe-read-side' :RENAMED-TO `pipe-stream-close-read-side'
+;; `close-pipe-write-side' :RENAMED-TO `pipe-stream-close-write-side'
+;;; ==============================
+
+;;; ==============================
 ;;
 ;; `alexandria:read-file-into-string',  `alexandria:write-string-into-file',
 ;; `alexandria:with-open-file*',  `alexandria:copy-stream',
@@ -13,6 +21,16 @@
 
 (in-package #:mon)
 ;; *package*
+
+;; :SORUCE git://git.feelingofgreen.ru/executor :FILE executor/portable-spawn.lisp
+(defmacro with-pipe-stream ((stream-var &rest make-pipe-stream-args) &body body)
+  `(let ((,stream-var (make-pipe-stream ,@make-pipe-stream-args)))
+     (unwind-protect (progn ,@body)
+       ;; :WAS
+       ;; (close (two-way-stream-input-stream ,stream-var))
+       ;; (close (two-way-stream-output-stream ,stream-var)))))
+       (pipe-stream-close-read-side ,stream-var)
+       (pipe-stream-close-write-side ,stream-var))))
 
 (defmacro with-opened-file ((stream filespec &rest options) &body body)
   (with-gensyms (abort-on-close?)
@@ -155,6 +173,34 @@
        :for form = (read in nil eof)
        :until (eq form eof)
        :collect form)))
+
+;; :SORUCE git://git.feelingofgreen.ru/executor :FILE executor/portable-spawn.lisp
+(defun make-pipe-stream (&key (element-type 'base-char) (external-format :default) (buffering :full))
+  #+sbcl
+  (multiple-value-bind (r w) (sb-posix:pipe)
+    (make-two-way-stream
+     (sb-sys:make-fd-stream r :input t :element-type element-type :external-format external-format :buffering buffering)
+     (sb-sys:make-fd-stream w :output t :element-type element-type :external-format external-format :buffering buffering)))
+  #+ecl
+  (si:make-pipe)
+  #+ccl
+  (multiple-value-bind (r w) (ccl::pipe)
+    (make-two-way-stream
+     (ccl::make-fd-stream r :direction :input  :element-type element-type :encoding (ccl::external-format-character-encoding external-format) :buffering buffering)
+     (ccl::make-fd-stream w :direction :output :element-type element-type :encoding (ccl::external-format-character-encoding external-format) :buffering buffering)))
+  #-(or sbcl ecl ccl)
+  (not-implemented 'make-pipe-stream))
+
+
+;; :SORUCE git://git.feelingofgreen.ru/executor :FILE executor/portable-spawn.lisp
+;; :WAS `close-pipe-read-side'
+(defun pipe-stream-close-read-side (pipe)
+  (close (two-way-stream-input-stream pipe)))
+
+;; :SORUCE git://git.feelingofgreen.ru/executor :FILE executor/portable-spawn.lisp
+;; :WAS `close-pipe-write-side'
+(defun pipe-stream-close-write-side (pipe)
+  (close (two-way-stream-output-stream pipe)))
 
 ;;; ==============================
 ;; :SOURCE restas-wiki/src/ storage.lisp :WAS `write-string-into-gzip-file'

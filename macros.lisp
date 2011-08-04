@@ -1239,22 +1239,29 @@ values have one of the following forms:~%
 ;;; :IMPORTED-MACROS-DOCUMENTATION
 ;;; ==============================
 
-#+sbcl
-(setf (documentation 'make-gensym-list 'function)
-      #.(format nil
+
+(fundoc 'make-gensym-list
 		"Return a list of N gensyms.~%~@
 Common idiom suboperation in macros and other code-manipulating code.~%~@
-:EXAMPLE~%~%\(sb-int:make-gensym-list 8\)~%~@
-\(macroexpand '\(sb-int:make-gensym-list 8\)\)~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶"))
+:EXAMPLE~%~%\(make-gensym-list 8\)~%~@
+\(macroexpand '\(make-gensym-list 8\)\)~%~@
+:SEE-ALSO `sb-int:make-gensym-list', `alexandria:sb-int:make-gensym-list'.~%▶▶▶")
 
-#+sbcl
-(setf (documentation 'symbolicate 'function)
-      #.(format nil
-		"Concatenate together the names of some strings and symbols,
+
+(fundoc 'symbolicate
+        #.(format nil
+                  "Concatenate together the names of some strings and symbols,
 producing a symbol in the current package.~%~@
-:EXAMPLE~%~% {<EXAMPLE>} ~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶"))
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate'.~%▶▶▶"))
+
+
+(fundoc 'keywordicate
+        "Like `symbolicate', but producing keywords.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `sb-int:symbolicate', `sb-int:keywordicate', `sb-int:sane-package'.~%▶▶▶")
 
 ;;; sbcl/src/code/early-extensions.lisp
 #+sbcl 
@@ -1283,7 +1290,7 @@ including macros and lambdas.~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶"))
 
 #+sbcl
-(setf (documentation 'dohash 'function)
+(setf (documentation 'sb-int:dohash 'function)
       #.(format nil
  "Iterate over the entries in a HASH-TABLE, first obtaining the lock
 if the table is a synchronized table.~%~@

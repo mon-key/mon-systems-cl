@@ -300,6 +300,14 @@
 ;;
 ;;
 ;;; ==============================
+;; regarding NATIVE-NAMESTRING's stolen from cffi/src
+;;
+;; cmucl's native-namestring (ext:unix-namestring pathname nil)
+;; openmcl (ccl::native-translated-namestring pathname)
+;; scieneer (ext:unix-namestring pathname nil)
+;; sbcl     (sb-ext:native-namestring 
+;; osicat-sys:native-namestring <-- cffi-sys:native-namestring <-- sb-ext:native-namestring
+;;; ==============================
 
 
 (in-package #:mon)
@@ -324,11 +332,136 @@
     (setf new-dir (reverse new-dir))
     (make-pathname :name as-fname :directory new-dir)))
 
+;;; ==============================                  
+;; :COURTESY Nikodemus Siivola
+;; :SEE (URL `git://github.com/nikodemus/fsdb.git')
+;; :FILE fsdb/src/sbcl.lisp
+;; :NOTE `ensure-directory-pathname' retuns a namestring _even if_ PATH names a file.
+;;       It is intended to be passed directly to `cl:ensure-directories-exist'
+;; #+sbcl
+;; (defun ensure-directory-pathname (path)
+;;   (sb-ext:parse-native-namestring  
+;;    (sb-ext:native-namestring (pathname path) :as-file nil) ;<THING>
+;;    nil  ; <HOST>
+;;    *default-pathname-defaults* ; <DEFAULTS> 
+;;    :as-directory t ;; :START 0 :END nil :JUNK-ALLOWED nil
+;;    ))
+;;; ==============================
+#+sbcl
+(defun directory-pathname-ensure (path)
+  (declare (pathname-or-namestring path))
+  (let* ((path-pathname (pathname path))
+         (name (if (wild-pathname-p path-pathname)
+                   (file-error-wild-pathname :w-sym         "directory-pathname-ensure" 
+                                             :w-type        'function
+                                             :pathname       path
+                                             :path-arg-locus "PATH"
+                                             :signal-or-only nil)
+                   ;; osicat-sys:native-namestring <-- cffi-sys:native-namestring <-- sb-ext:native-namestring <-- (funcall (host-unparse-native host) pathname as-file)
+                   (sb-ext:native-namestring  path-pathname :as-file nil)))
+         ;; osicat:file-kind
+         (kind (sb-impl::native-file-kind name)))
+    (unless kind 
+      (simple-error-mon :w-sym "directory-pathname-ensure"
+                        :w-spec "Arg PATH not regular-file, directory, symlink, or special-file"
+                        :w-got path
+                        :w-type-of t
+                        :signal-or-only  nil))
+    (ecase kind
+      (:DIRECTORY
+       (sb-ext:parse-native-namestring name nil *default-pathname-defaults* :as-directory t))
+      ;; :REGUALR-FILE
+      (:FILE (values path-pathname (length name))))))
+
+(defun pathname-or-namestring-empty-p (maybe-empty-pathname-or-namestring)
+  (declare (optimize (speed 3))
+           (inline pathname-or-namestring-p string-empty-p))
+  (unless (pathname-or-namestring-p maybe-empty-pathname-or-namestring)
+    (return-from pathname-or-namestring-empty-p nil))
+  (locally 
+      (declare (pathname-or-namestring maybe-empty-pathname-or-namestring))
+    (etypecase maybe-empty-pathname-or-namestring
+      (string   (string-empty-p maybe-empty-pathname-or-namestring))
+      (pathname (pathname-empty-p maybe-empty-pathname-or-namestring)))))
+
+;;; ==============================
+;; :NOTE Should we include the type FILE-STREAM?
+;; No, not right now. 
+;; Write a `pathname-designator-not-empty-relative-or-wild-p'
+;; if/when that is what is wanted. 
+;;
+;; (when (and (typep maybe-sane-pathname 'file-stream)
+;;            (open-stream-p maybe-sane-pathname))
+;;   (return-from pathname-or-namestring-not-empty-dotted-or-wild-p t))
+;;
+(defun pathname-or-namestring-not-empty-dotted-or-wild-p (maybe-sane-pathname &key (no-relatives nil))
+  (declare (boolean no-relatives)
+           (inline pathname-or-namestring-p)
+           (optimize (speed 3)))
+  (unless (pathname-or-namestring-p maybe-sane-pathname) ;; filename-designator-p
+    (return-from pathname-or-namestring-not-empty-dotted-or-wild-p nil))
+  (let ((non-path-string-things (list "" "." ".." " "))) ; the empty string is required for namestrings. 
+    (declare (pathname-or-namestring maybe-sane-pathname)
+             (list non-path-string-things))
+    (when no-relatives 
+      (setf non-path-string-things (nconc (list "../" "./") non-path-string-things)))
+    #-sbcl (and 
+            (not (pathname-or-namestring-empty-p maybe-sane-pathname))
+            (not (member maybe-sane-pathname non-path-string-things))
+            (not (wild-pathname-p (pathname maybe-sane-pathname)))
+            t)
+    (etypecase maybe-sane-pathname
+      (pathname 
+       (setf non-path-string-things (map 'list #'pathname non-path-string-things))
+       (and (not (pathname-empty-p maybe-sane-pathname))
+            (not (member maybe-sane-pathname non-path-string-things :test #'sb-impl::pathname=))
+            (not (wild-pathname-p  maybe-sane-pathname))
+            t))
+      (string 
+       (and 
+        (not (member maybe-sane-pathname non-path-string-things :test #'string=))
+        (not (wild-pathname-p (pathname maybe-sane-pathname)))
+        t)))))
+
+;; :NOTE This is basically a rewrite of `%probe-file-if-string-or-pathname' below.
+(defun pathname-not-wild-empty-or-dotted-p (maybe-valid-pathname)
+  (declare (inline pathname-or-namestring-p)
+           (optimize (speed 3)))
+  (unless (pathname-or-namestring-p maybe-valid-pathname)
+    (return-from pathname-not-wild-empty-or-dotted-p 
+      (values nil (list (type-of (pathname maybe-valid-pathname)) maybe-valid-pathname))))
+  (locally (declare (pathname-or-namestring maybe-valid-pathname)) 
+    (when (wild-pathname-p maybe-valid-pathname)
+      (return-from pathname-not-wild-empty-or-dotted-p 
+        (values nil (list :WILD (pathname maybe-valid-pathname)))))
+    (let ((dots (list ".." ".")))
+      (etypecase maybe-valid-pathname
+        (string 
+         (if (string-not-empty-or-all-whitespace-p (the string maybe-valid-pathname))
+             (if (member (the string maybe-valid-pathname) dots :test 'string=)
+                 (values nil (list :STRING-DOTTED    maybe-valid-pathname))
+                 (values t   (list :STRING           maybe-valid-pathname)))
+             (if (string-empty-p (the string maybe-valid-pathname))
+                 (values nil (list :PATHNAME-EMPTY   (make-pathname :defaults maybe-valid-pathname)))
+                 (values nil (list :STRING-WHITESPACE maybe-valid-pathname)))))
+        (pathname 
+         ;; Don't allow the empty pathname to qualify as a pathname.
+         ;; we can always recover it with:
+         ;; (apply 'make-pathname (%probe-file-if-string-or-pathname #P""))
+         (cond ((equal maybe-valid-pathname (make-pathname :defaults ""))
+                (values nil (list :PATHNAME-EMPTY      maybe-valid-pathname)))
+               ((member maybe-valid-pathname (map 'list #'pathname (the list dots)) :test 'equal)
+                (values nil (list :PATHNAME-DOTTED     maybe-valid-pathname)))
+               ((every #'whitespace-char-p (the string (namestring maybe-valid-pathname)))
+                (values nil (list :PATHNAME-WHITESPACE maybe-valid-pathname)))
+               (t (values t (list :PATHNAME            maybe-valid-pathname)))))))))
+
 (declaim (inline %probe-file-if-string-or-pathname))
 (defun %probe-file-if-string-or-pathname (putative-pathname) ;; &key (as-pathnames t)
   ;; Is putative-pathname `cl:stringp' or `cl:pathnamep' if so return its `cl:pathname'.
-  (unless (or (stringp putative-pathname) 
-              (pathnamep putative-pathname))
+  (unless ;; (or (stringp putative-pathname) (pathnamep putative-pathname)) 
+      ;;(pathname-or-namestring-p maybe-valid-pathname))
+      (filename-designator-p putative-pathname)
     (return-from %probe-file-if-string-or-pathname
       (values nil (type-of putative-pathname))))
   (locally 
@@ -337,40 +470,91 @@
     ;; (declare (pathname nrmlz-to-pathname))
     (etypecase putative-pathname
       (string (if (string-not-empty-or-all-whitespace-p putative-pathname)
-                  (values (pathname putative-pathname) :string)
-                  (values nil :string-empty)))
-      (pathname (values putative-pathname :pathname)))))
+                  (values (pathname putative-pathname) :STRING)
+                  (values nil                          :STRING-EMPTY)))
+      (pathname 
+       ;; Don't allow the empty pathname to qualify as a pathname.
+       ;; we can always recover it with:
+       ;; (apply 'make-pathname (%probe-file-if-string-or-pathname #P""))
+       (if  (equal putative-pathname (make-pathname))             
+            (values nil               :PATHNAME-EMPTY)
+            (values putative-pathname :PATHNAME))))))
 
 #+sbcl
-(defun pathname-native-file-kind (putative-pathname)  ;; &key (as-pathnames t)
+(defun pathname-native-file-kind (putative-pathname &key (error-on-wild nil)) ;; &key (as-pathnames t)
   (declare (inline %probe-file-if-string-or-pathname)
+           (boolean error-on-wild)
            (optimize (speed 3)))
   (let* ((pathname-chk 
           (multiple-value-bind (pnfk-chk pnfk-typ) (%probe-file-if-string-or-pathname putative-pathname)
             (if pnfk-chk 
-                (cons pnfk-chk pnfk-typ)
-                (return-from pathname-native-file-kind (values pnfk-chk pnfk-typ)))))
-         (pathname-namestring-if (sb-ext:native-namestring (the pathname (car pathname-chk)))))
+                (if (wild-pathname-p pnfk-chk)
+                    (if error-on-wild
+                        (file-error-wild-pathname :w-sym         "pathname-native-file-kind" 
+                                                  :w-type        'function
+                                                  :pathname       putative-pathname
+                                                  :path-arg-locus "PUTATIVE-PATHNAME"
+                                                  :signal-or-only nil)
+                        (return-from pathname-native-file-kind (values nil (list :WILD pnfk-chk))))
+                    (cons pnfk-chk pnfk-typ))
+                ;; If we've wound up here we return either:
+                ;;  (:STRING-EMTPY  "") | (:PATHNAME-EMPTY #P"")
+                ;; :NOTE There is no "kind" for an emtpy string or an emtpy path, e.g.:
+                ;;  (eq (sb-impl::native-file-kind "") (%probe-file-if-string-or-pathname ""))
+                ;;  (eq (sb-impl::native-file-kind "") (%probe-file-if-string-or-pathname #P""))
+                ;; In either case, we can recover the pathname with:
+                ;;  (multiple-value-bind (kind path) (pathname-native-file-kind "")
+                ;;    (if (null kind ) (make-pathname) path))
+                ;; (return-from pathname-native-file-kind (values pnfk-chk pnfk-typ))
+                (case pnfk-typ
+                  ((:PATHNAME-EMPTY :STRING-EMPTY) 
+                   (return-from pathname-native-file-kind (values pnfk-chk (list pnfk-typ putative-pathname))))
+                  (t (return-from pathname-native-file-kind (values pnfk-chk pnfk-typ)))))))
+         (pathname-namestring-if 
+          ;; osicat-sys:native-namestring <-- cffi-sys:native-namestring <-- sb-ext:native-namestring
+          (sb-ext:native-namestring (the pathname (car pathname-chk)))))
     (declare (cons pathname-chk)
              (string pathname-namestring-if))
     (values 
-     (sb-impl::native-file-kind pathname-namestring-if)
+     ;; osicat:file-kind
+     (sb-impl::native-file-kind pathname-namestring-if) 
      (ecase (cdr pathname-chk)
-       (:string pathname-namestring-if)
-       (:pathname (pathname pathname-namestring-if))))))
+       (:STRING   pathname-namestring-if)
+       (:PATHNAME (pathname pathname-namestring-if))))))
 
+;;; ==============================
+;;; :NOTE In the followings ecause clauses, the first value is as per return
+;;; value of `sb-impl::native-file-kind' -- Any remaining values are as per
+;;; return value of return value of `osicat:file-kind'. Hopefully this arangment
+;;; may allow us to switch which we rely on as needed...
 #+sbcl
 (defun probe-directory (putative-pathname-dir)
-  (let ((pathname-chk (multiple-value-list 
-                       (pathname-native-file-kind putative-pathname-dir))))
-    (ecase (car pathname-chk)
-      ((nil) (values nil (cadr pathname-chk) putative-pathname-dir))
-      (:file (values nil :file (cadr pathname-chk)))
-      (:special (values nil :special (cadr pathname-chk)))
-      (:symlink (let ((probed (probe-file  (cadr pathname-chk))))
-                  (values nil :symlink (cons (pathname (cadr pathname-chk)) probed))))
-      (:directory (values (truename (cadr pathname-chk)) :directory 
-                          (cons (cadr pathname-chk) putative-pathname-dir))))))
+  (let* ((pathname-chk 
+          (multiple-value-list (pathname-native-file-kind putative-pathname-dir)))
+         (pathtype-chk   (car pathname-chk)))
+    (ecase pathtype-chk
+      ;; :FIXME NIL is a corner case for :WILD, :PATHNAME-EMPTY, :STRING-EMPTY, etc.
+      ;; specialize with case around caadr of pathname-chk.
+      ;; Or, better yet m-v-b instead of let binding above and CL:CASE inspect
+      ;; the m-v-b'd 1 value instead.
+      ((nil)    (values pathtype-chk (cadr pathname-chk) putative-pathname-dir))
+      ((:FILE
+        :REGULAR-FILE)
+       (values nil pathtype-chk (cadr pathname-chk)))
+      ((:SPECIAL 
+        :SOCKET :BLOCK-DEVICE :CHARACTER-DEVICE) 
+       (values nil pathtype-chk (cadr pathname-chk)))
+       ((:SYMLINK 
+         :SYMBOLIC-LINK)
+        ;; :FIXME Once/if we're using osicat:file-kind we can rexamine whether the
+        ;;       link is borken or not by re-examining the file and checking for
+        ;;       symbolic-link-broken.
+        (let ((probed (probe-file  (cadr pathname-chk))))
+          (values nil pathtype-chk (cons (pathname (cadr pathname-chk)) probed))))
+       (:DIRECTORY 
+        (values (truename (cadr pathname-chk)) 
+                pathtype-chk 
+                (cons (cadr pathname-chk) putative-pathname-dir))))))
 
 (defun pathname-file-if (putative-pathname &key allow-directory) ;; (as-pathnames t)
   (declare (inline %probe-file-if-string-or-pathname)
@@ -394,9 +578,16 @@
     #+sbcl 
     (multiple-value-bind (path-type path-if) (pathname-native-file-kind pathname-if)
       (ecase path-type
-        ((nil :symlink) nil)
-        (:file (truename path-if))
-        (:directory (when allow-directory 
+        ;; NIL is a corner case for :WILD, :PATHNAME-EMPTY, :STRING-EMPTY, etc.
+        ;; we keep it separate from :symlink :special for clarity
+        ((nil) nil)
+        ((:SYMLINK :SPECIAL                                       ; sb-impl::native-file-kind
+          :SYMBOLIC-LINK :SOCKET :BLOCK-DEVICE :CHARACTER-DEVICE) ; osicat:file-kind
+         nil)
+        ((:FILE
+          :REGULAR-FILE)
+         (truename path-if))
+        (:DIRECTORY (when allow-directory 
                       (truename path-if)))))))
 
 (defun pathname-file-list-if (namestring-list &key allow-directory (as-pathnames t))
@@ -424,11 +615,30 @@
 
 ;;; :NOTE Delete once expand-file-name is finished.
 (defun to-directory (path)
-  (if (char= #\/ (schar path (1- (length path)))) path
+  ;; 
+  (if (char= #\/ (schar path (1- (length path))))
+      path
       (concatenate 'string path "/")))
 
 (defun expand-file-name (name &optional (default-dir *default-pathname-defaults*))
   (namestring (merge-pathnames (to-directory default-dir) name)))
+
+;;; ==============================
+;; (fundoc 'subfile
+;; "Return a file pathname with name SUB in DIRECTORY-PATHNAME.
+;; MAKE-PATHNAME-KEYWORDS are passed to MAKE-PATHNAME.  When DIRECTORY-PATHNAME is
+;; NIL, it is interpreted to be cl:*default-pathname-defaults*.
+;; :EXAMPLE~%~@
+;;  { ... <EXAMPLE> ... } ~%~@
+;; :SEE-ALSO `<XREF>'.~%▶▶▶")
+;;
+;; (defun subfile (directory-pathname sub &rest make-pathname-keywords)
+;;   (merge-pathnames (apply #'make-pathname 
+;;                           :directory `(:relative ,@(butlast sub)) 
+;;                           :name (alexandria:lastcar sub)
+;;                           make-pathname-keywords)
+;;                    (or directory-pathname *default-pathname-defaults*)))
+;;; ==============================
 
 ;;; :COURTESY freedius/lisp/lisp/lisp-io.lisp
 (defun unix-dot-directory-p (path)
@@ -464,6 +674,43 @@
   (when (probe-file to)
     (delete-file to))
   (rename-file from to))
+
+;;; ==============================
+;; :TODO This should be more careful about the empty string and `cl:wild-pathname-p'
+;;
+;; :TODO This should disallow linking directories (esp. when HARD is t) 
+;; The logic being, if we want to hardlink a directory we shoul do it that
+;; _hard_ way to ensure a higher level of awareness w/r/t the potential negative
+;; consequences!
+;;
+;; :TODO use osicat:make-link instead
+(defun make-symlink (&key target link-name (hard nil))
+  (declare (boolean hard)
+           (pathname-or-namestring target link-name))
+  ;;
+  ;; (osicat:make-link :target target link-name :hard hard)
+  ;;
+  #-(or (and sbcl (not win32))  ecl ccl) (error "`make-symlink' not-implemented") ;; (and clisp unix)
+  #+(and sbcl (not win32)) 
+  (if hard 
+      (sb-posix:link     target link-name)
+      (sb-posix:symlink  target link-name))
+  ;; 
+  ;; I don't find this on Clisp 2.49
+  ;; #+(and clisp unix) (linux:symlink link-name add-symlink-at)
+  ;;
+  ;; :NOTE We assume the GNU longopts are in play when ECL is.
+  #+ecl (ext:run-program "/bin/ln" (if hard 
+                                       (list (namestring target) (namestring link-name))
+                                       (list "--symbolic"  (namestring target) (namestring link-name)))
+                         :wait t :input nil :output nil :error nil)
+  ;;
+  ;; According to oGMo on #lisp as of 10.5.8 GNU longopts are not accepted.
+  #+ccl (ccl:run-program "/bin/ln" 
+                         (if hard 
+                             (list (namestring target) (namestring link-name))
+                             (list "-s"  (namestring target) (namestring link-name)))
+                         :wait t :input nil :output nil :error nil))
 
 ;;; :SOURCE quicklisp/quicklisp/utils.lisp
 ;;
@@ -503,18 +750,19 @@
         :direction :probe 
         :if-does-not-exist :create))
 
-;;: :TODO This should be more careful about deleting directories
-(defun delete-file-if-exists (pathname)
-  (declare (type pathname-designator pathname))
-  (when (or (streamp pathname) 
-            (wild-pathname-p pathname))
+;;: :TODO This should be more careful about deleting directories when
+;;pathname-to-delete is a symlink in file form.
+(defun delete-file-if-exists (pathname-to-delete)
+  (declare (type pathname-designator pathname-to-delete))
+  (when (or (streamp pathname-to-delete) 
+            (wild-pathname-p pathname-to-delete))
     ;; `cl:delete-file' won't delete a directory and signals an error. 
     ;; we should catch it before it has a chance.
     ;; (cl-fad:directory-pathname-p #P"./bubba/") *default-pathname-defaults*)
     (let ((wrn (format nil 
                        "~%~T:FUNCTION `delete-file-if-exists' --~%~12T~
                        declining to delete PATHNAME, got: ~S" 
-                       pathname
+                       pathname-to-delete
                        ;; (or (and (streamp pathname) 
                        ;;          (string 'cl:streamp) 
                        ;;          (string 'cl:wild-pathname-p))
@@ -522,12 +770,12 @@
                        )))
       (warn wrn)
       (return-from delete-file-if-exists (values nil wrn))))
-  (when (probe-file pathname)
-    (delete-file pathname)))
+  (when (probe-file pathname-to-delete) ;; (directory 
+    (delete-file pathname-to-delete)))
 
+;; link "/mnt/LV-NEF-DRV-B/217_New-Yorker-Covers_RNG_11410-11423/img-mgk-test/tt"
 ;; (open-stream-p  (ensure-file-exists #P"/tmp/pp-btree/"))
 ;; (probe-file (delete-file #P"/tmp/pp-btree/"))
-
 
 ;;; :SOURCE buildapp-1.1/utils.lisp
 ;;; :NOTE differs from `cl-fad:copy-file'
@@ -563,25 +811,48 @@
                                 (butlast (pathname-directory pathname)))))
 
 ;; :SOURCE cl-docutils-20101006-git/utilities.lisp :WAS `find-file'
-(defun find-file-search-path (pathname &key (search-path (or *search-path* (list *default-pathname-defaults*))))
+(defun find-file-search-path (search-file &key (search-path (or *search-path* (list *default-pathname-defaults*))))
   ;; (declare (type pathname-designator pathname))
-  (flet ((ff (directory)
-           (some #'probe-file (directory (merge-pathnames pathname directory)))))
-    (some #'(lambda (path)
-	      (etypecase path
-		(list (some #'ff path))
-		(string (some #'ff (string-split-on-chars path ":")))
-		(pathname (ff path))))
-	  search-path)))
-
-;;; :SOURCE de.setf.utility/pathnames.lisp
-#+sbcl
-(defun logical-hosts ()
-  ;; (where-is "*logical-hosts*")
-  (when (hash-table-p (and SB-IMPL::*LOGICAL-HOSTS*))
-    (loop
-       for host being each hash-key of SB-IMPL::*LOGICAL-HOSTS*
-       collect host)))
+  (let ((chk-search-file (if (pathname-not-wild-empty-or-dotted-p search-file)
+                             (pathname search-file)
+                             (file-error-wild-pathname :w-sym          "find-file-search-path"
+                                                       :w-type         'function
+                                                       :pathname        search-file
+                                                       :path-arg-locus "search-file"
+                                                       :signal-or-only  nil)))
+        ;; :NOTE (and (not (wild-pathname-p (sb-ext:posix-getenv "PATH"))) "$PATH is ok man")
+        ;; However, this one is likely to cause loads of _FUN_ later:
+        ;;  (pathname-directory (sb-ext:posix-getenv "PATH"))
+        (chk-search-path
+         (if (pathname-not-wild-empty-or-dotted-p search-path)
+             ;;
+             ;; We get a namestring to allow for wackiness like this:
+             ;;  (pathname (sb-ext:posix-getenv "PATH"))
+             ;; In which case we the pathname needs to be split into components.
+             ;;
+             
+             ;; (sb-ext:native-namestring  
+             ;;   (sb-ext:parse-native-namestring search-path nil nil :as-directory t) :as-file t)
+             ;; (osicat-sys:native-namestring 
+             ;; #-sbcl (namestring search-path)
+             ;; #+sbcl (sb-ext:native-namestring search-path)
+             (osicat-sys:native-namestring search-path)
+             (file-error-wild-pathname :w-sym          "find-file-search-path"
+                                       :w-type         'function
+                                       :pathname        search-path
+                                       :path-arg-locus "search-path"
+                                       :signal-or-only  nil))))
+    (flet ((find-fl (ffsp-dir)
+             (some #'probe-file 
+                   #-sbcl (directory (merge-pathnames chk-search-file ffsp-dir))
+                   #+sbcl (directory (merge-pathnames chk-search-file ffsp-dir) :resolve-symlinks nil))))
+      ;; (declare (pathname-or-namestring chk-search-path))
+      (some #'(lambda (w-path)
+                (etypecase w-path
+                  (list     (some #'find-fl w-path))
+                  (string   (some #'find-fl (string-split-on-chars w-path ":")))
+                  (pathname (find-fl w-path))))
+            chk-search-path))))
 
 
 ;;; ==============================
@@ -601,16 +872,215 @@
   ;; :EMACS-COMPAT
   ;; 
   ;; (declare (type pathname-designator directory))
+  ;; 
+  ;;;;;;;;;;;;
+  ;; (let* ((dir-chk (mon::pathname-as-directory directory))
+  ;;        (dir-p   (cl-fad:directory-exists-p dir-chk)))
+  ;;   (if dir-p
+  ;;       (cl-fad:list-directory directory)
+  ;;       (values directory (cl-fad:directory-exists-p directory))))
+  ;;;;;;;;;;;;
   (and (setf directory
-	     (or (cl-fad:directory-exists-p 
-		  (pathname-directory-pathname directory))
-		 (return-from directory-files 
+	     (or (cl-fad:directory-exists-p (mon::pathname-as-directory directory)) ;; :error-on-empty t))
+		 ;; :NOTE The idea behind returning values was to allow further
+		 ;; processing for the (non-existent) FULL MATCH args and or to allow restarts. 
+                 ;; If we aren't going to provide restarts around this it would
+		 ;; prob. be better to just signal an error.
+                 (return-from directory-files 
 		   (values directory (cl-fad:directory-exists-p directory)))))
        (cl-fad:list-directory directory)))
 
-(defun pathname-directory-pathname (pathname)
-  (declare (type pathname-designator pathname))
-  (cl-fad:pathname-as-directory pathname))
+(defun directory-unfiltered-p (directory-name &key (ignorables *default-pathname-directory-ignorables* supplied-p)
+                               (test 'string=))
+  (declare (pathname-or-namestring directory-name)
+           ((and cons list) ignorables)
+           (optimize (speed 3)))
+  ;; Lets just assume that the default value of *default-pathname-directory-ignorables* is sanely bound...
+  ;; Would it be better to make ignorables as class instance and run the
+  ;; follwoing in an after method on it?
+  (when supplied-p
+    (unless (every #'stringp ignorables)
+      (simple-error-mon :w-sym "directory-unfiltered-p" 
+                        :w-type 'function
+                        :w-spec "Element of IGNORABLES not `cl:stringp'~%IGORABLES: ~S"
+                        :w-args (list ignorables)
+                        :w-got  (find-if-not #'stringp ignorables)
+                        :w-type-of t)))
+  (labels ((member-frob (chk-member) 
+             (declare (string chk-member))
+             (not (member chk-member ignorables :test test)))
+           (psn-slash (maybe-slash)
+             (declare (string maybe-slash))
+             (position #\/ maybe-slash))
+           (token-component-p (maybe-component-only)
+             (when (and (stringp maybe-component-only)
+                        (not (wild-pathname-p (the string maybe-component-only))))
+               (when (or (string-empty-p (the string maybe-component-only))
+                         (member (the string maybe-component-only) (list ".." ".") :test 'string=))
+                 (multiple-value-bind (pnfk-0 pnfk-1) (pathname-native-file-kind maybe-component-only)
+                   (ecase pnfk-0
+                     ((nil) (return-from directory-unfiltered-p (values pnfk-0 pnfk-1)))
+                     (:DIRECTORY (return-from directory-unfiltered-p (values nil (list pnfk-0 pnfk-1)))))))
+               (not (psn-slash (the string maybe-component-only)))))
+           (full-frob (frob-component)
+             (when (token-component-p frob-component)
+               ;; We bail now, but we pack the list so that even if
+               ;; `member-frob' returns T the return values of
+               ;; `directory-unfiltered-p' will not be easily coercible to a
+               ;; real pathname e.g. callers will get either:
+               ;;  T,   (:STRING <DIRECTORY-NAME>)
+               ;;  NIL, (:STRING <DIRECTORY-NAME>)
+               (return-from full-frob (list frob-component (list :STRING frob-component))))
+             (multiple-value-bind (key-or-null path-string-or-type) (pathname-native-file-kind directory-name)
+               (case key-or-null
+                 ((:FILE :REGULAR-FILE)
+                  (return-from directory-unfiltered-p 
+                    (values t (list key-or-null (pathname path-string-or-type)))))
+                 (:DIRECTORY 
+                  ;; :FIXME This is not quite right yet b/c we don't want to traverse symlinks... 
+                  ;; If a dir is passed as a native filename then `pathname-native-file-kind' should identify it as a symlink.
+                  ;; To accommodate not following we need to requery with
+                  ;; (directory <DIR> :resolve-symlinks nil) and compare the
+                  ;; output if they are equal we have a real dir, else we have a
+                  ;; symlink to an existing directory and we should put
+                  ;; path-string-or-type in pathname form and return now with either:
+                  ;;  (NIL (:SYMLINK #P"/pathnae/of/symlink"))
+                  ;;  (NIL (:SYMLINK #P"/pathnae/of/symlink/"))
+                  ;;
+                  (let* ((dir-path (car (directory path-string-or-type)))
+                         (dir-compt (last-elt (pathname-directory dir-path))))
+                    (list dir-compt (list :DIRECTORY dir-path))))
+                 ((nil)
+                  (cond 
+                    ((listp path-string-or-type)
+                     (case (car path-string-or-type)
+                       ;; ""   -> NIL, (:STRING-EMPTY "")
+                       ;; #P"" -> NIL, (:PATHNAME-EMPTY #P"") 
+                       ((:STRING-EMPTY :PATHNAME-EMPTY)
+                        (return-from directory-unfiltered-p (values key-or-null path-string-or-type)))
+                       ;; "weird-and-wild/*"  -> NIL, (:WILD #P"weird-and-wild/*")
+                       (:WILD  (return-from directory-unfiltered-p (values key-or-null path-string-or-type)))))                    
+                    ;; "bogus-string-component/" -> NIL, (:STRING "bogus-string-component/")
+                    ((and (stringp path-string-or-type) (psn-slash path-string-or-type))
+                     (return-from directory-unfiltered-p  (values key-or-null (list :STRING path-string-or-type))))
+                    ;; #P"bogus-and-weird-path/" -> NIL, (:RELATIVE "bogus-and-weird-path")
+                    ((pathnamep path-string-or-type) 
+                     (return-from directory-unfiltered-p (values key-or-null (pathname-directory path-string-or-type))))                    
+                    ;; ??weird an unknown?? -> NIL, (NIL ??weird an unknown??)
+                    (t (return-from directory-unfiltered-p 
+                         (values key-or-null (list NIL path-string-or-type))))))
+                 ;; "/some/special" | #P"/some/special"  -> (NIL (:SPECIAL #P"/some/special"))
+                 ((:SYMLINK :SPECIAL    ; sb-impl::native-file-kind
+                            :SYMBOLIC-LINK :SOCKET :BLOCK-DEVICE :CHARACTER-DEVICE) ; osicat:file-kind                   
+                  (return-from directory-unfiltered-p 
+                    (values nil (list key-or-null (pathname path-string-or-type)))))
+                 ;; it may be a string component
+                 (t (if (stringp path-string-or-type)
+                        (if (not (token-component-p path-string-or-type))
+                            (return-from directory-unfiltered-p (values nil (list :STRING path-string-or-type)))
+                            (list path-string-or-type (list :STRING path-string-or-type)))
+                        ;; who fu**ing knows what it is...
+                        ;; (return-from directory-unfiltered-p (values nil (list :WTF key-or-null path-string-or-type)))
+                        (return-from directory-unfiltered-p (values nil (list key-or-null path-string-or-type )))))))))
+    ;; (full-frob directory-name)))
+    (let* ((dir-part-if (full-frob directory-name))
+           (chk-if (if (stringp (car dir-part-if))
+                       (car dir-part-if)
+                       (return-from directory-unfiltered-p (values nil (cdr dir-part-if))))))
+      (declare (string chk-if))
+      (values (member-frob chk-if) (cadr dir-part-if)))))
+
+;; WORKS!
+;; (ignorables *default-pathname-directory-ignorables* supplied-p) (test 'string=))
+;; (print
+(defun tt--gather-dir-list (dir) ;; (test 'string=) (ignorables *default-pathname-directory-ignorables* supplied-p)
+  ;; gather list of files and directories in dir filtering them with `mon:directory-unfiltered-p'.
+  ;; directories are included in the result we do not descend into any directory that satsifies #'directory-unfiltered-p
+  ;; 
+  ;; (tt--gather-dir-list *default-pathname-defaults*)
+  (let ((gthr-dir-and-files '()))
+    (flet ((partition-file-or-dir (dir-file-or-other)
+             (multiple-value-bind (n0-t-or-nil n1-dir-file-or-other-type) (directory-unfiltered-p  dir-file-or-other)
+               (case n1-dir-file-or-other-type
+                 ((:DIRECTORY :FILE :REGULAR-FILE)
+                  (push n1-dir-file-or-other-type gthr-dir-and-files)
+                  n0-t-or-nil)
+                 (t (print n1-dir-file-or-other-type) n0-t-or-nil)))))
+      (cl-fad:walk-directory dir
+                             #'constantly ; all work done with test fncn PARTITION-FILE-OR-DIR
+                             :test #'partition-file-or-dir
+                             :directories :breadth-first
+                             ;; :if-does-not-exist 
+                             )
+      gthr-dir-and-files)))
+
+;;; ==============================
+;; :PASTED (URL `http://paste.lisp.org/+2N64')
+;; :NOTE I don't find CL-FAD:PATHNAME-AS-FILE particularly sane w/r/t the empty string.
+;; It isn't portable and it doesn't fail in obvious ways.
+;; following is an attempt at fixing that.
+;; :NOTE osicat:pathname-as-file is nearly 1:1 identical with
+;; cl-fad:pathname-as-file for Osicat distributed with Quicklisp
+;; osicat-20110619-git/src/osicat.lisp and also accepts the empty string.
+(defun pathname-as-file (pathspec &key (error-on-empty nil))
+  (declare (pathname-or-namestring pathspec)
+           (optimize (speed 3)))
+  (let ((paf-name (pathname pathspec)))
+    (declare (pathname paf-name))
+    (when (wild-pathname-p paf-name)
+      (file-error-wild-pathname :w-sym         "pathname-as-file" 
+                                :w-type        'function
+                                :pathname       pathspec
+                                :path-arg-locus "PATHSPEC"
+                                :signal-or-only nil))
+    (when (zerop (length (the simple-string (namestring paf-name))))
+      (if error-on-empty 
+          (error "cl:namestring of PATHSPEC evaluates to the emtpy string")
+          (return-from pathname-as-file (make-pathname :defaults pathspec))))
+    ;;;;;;
+    ;; (cond ((cl-fad:directory-pathname-p pathspec)
+    ;;        (let* ((directory (pathname-directory pathname))
+    ;;               (name-and-type (pathname (first (last directory)))))
+    ;;          (make-pathname :directory (butlast directory)
+    ;;                         :name (pathname-name name-and-type)
+    ;;                         :type (pathname-type name-and-type)
+    ;;                         :defaults pathname)))
+    ;;       (t pathname))
+    ;;;;;
+    ;; (osicat:pathname-as-file paf-name)))
+    (cl-fad:pathname-as-file paf-name)))
+
+;; Like cl-fad:pathname-as-directory but more careful about the empty string.
+;; :NOTE osicat:pathname-as-directory is nearly 1:1 identical with
+;; cl-fad:pathname-as-directory for Osicat distributed with Quicklisp
+;; osicat-20110619-git/src/osicat.lisp and also accepts the empty string.
+(defun pathname-as-directory (pathspec &key (error-on-empty nil))
+  (declare (pathname-or-namestring pathspec)
+           (optimize (speed 3)))
+  (let ((pdp-name (pathname pathspec)))
+    (declare (pathname pdp-name))
+    (when (wild-pathname-p pdp-name)
+      ;;(error "PATHSPEC was `cl:wild-pathname-p' -- can not reliably convert wild pathnames"))
+      ;; (error 'file-error-wild-pathname :pathname pathname))
+      (file-error-wild-pathname :w-sym         "pathname-as-directory" 
+                                :w-type        'function
+                                :pathname       pathspec
+                                :path-arg-locus "PATHSPEC"
+                                :signal-or-only nil))
+    (when (zerop (length (the simple-string (namestring pdp-name))))
+      (if error-on-empty 
+          (error "cl:namestring of PATHSPEC evaluates to the emtpy string")
+          (return-from pathname-as-directory (make-pathname :name nil :type nil :defaults pathspec))))
+    ;; (osicat:pathname-as-directory pdp-name)    
+    (cl-fad:pathname-as-directory pdp-name)))
+
+;; 
+;; :FIXME Verify this is correct.
+(defun pathname-directory-pathname (pathspec) ;; &key (error-on-empty nil))
+  (let ((ensure-pathname (pathname pathspec)))
+    (make-pathname :name nil :type nil :defaults ensure-pathname)))
+
+;; (sb-ext:parse-native-namestring name nil *default-pathname-defaults* :as-directory t))
 
 (defun make-pathname-user-homedir (&key user path)
   (declare (string-or-null user)
@@ -622,6 +1092,7 @@
           #-sbcl(pathname 
                  (namestring
                   (make-pathname :directory `(,@(pathname-directory (directory-file-name (user-homedir-pathname))) ,@path))))
+          ;; osicat-sys:native-namestring <-- cffi-sys:native-namestring <-- sb-ext:native-namestring
           #+sbcl (pathname 
                   (sb-ext:native-namestring 
                    (make-pathname :directory `(:absolute :home ,user ,@path))))
@@ -634,6 +1105,7 @@
       #-sbcl (pathname 
               (namestring 
                (make-pathname :directory `(,@(pathname-directory (user-homedir-pathname)) ,@path))))
+      ;; osicat-sys:native-namestring <-- cffi-sys:native-namestring <-- sb-ext:native-namestring
       #+sbcl (pathname 
               (sb-ext:native-namestring 
                (make-pathname :directory `(,@(pathname-directory (user-homedir-pathname)) ,@path))))))
@@ -643,28 +1115,29 @@
   (declare (type filename-designator pathname))
   (cl-fad::directory-wildcard pathname))
 
-(defun make-pathname-directory-w-type-wild (pathname pathname-name)
+(defun make-pathname-directory-w-type-wild (base-pathname pathname-name)
   ;; Return value is as if by values.
-  ;; PATHNAME is a pathname or namestring
+  ;; PATHNAME is a pathname or namestring designating a directory.
   ;; PATHNAME-NAME is of type string-or-null
   ;; (make-pathname-directory-w-type-wild *default-pathname-defaults* "lisp")
-  (declare (type filename-designator pathname)
+  (declare (type filename-designator base-pathname)
            (type string-or-null pathname-name))
   (unless ;; 
-      (and (or (string-null-or-empty-p pathname)
+      (and (or (string-null-or-empty-p base-pathname)
 	       (string-null-or-empty-p pathname-name)
 	       (not 
-		(setf pathname    
-		      (and (setf pathname (pathname-directory-pathname pathname))
-			   (or (cl-fad:directory-exists-p pathname)
+		(setf base-pathname    
+		      (and (setf base-pathname (mon::pathname-as-directory base-pathname))
+			   (or (cl-fad:directory-exists-p base-pathname)
 			       (return-from make-pathname-directory-w-type-wild 
-				 (values pathname (wild-pathname-p pathname))))))))
-	   (values pathname (wild-pathname-p pathname)))
-    (setf pathname 
+				 (values base-pathname (wild-pathname-p base-pathname))))))))
+	   (values base-pathname (wild-pathname-p base-pathname)))
+    (setf base-pathname
 	  (merge-pathnames 
 	   (make-pathname :name pathname-name :type :wild )
-	   pathname))
-    (values pathname (wild-pathname-p pathname))))
+	   base-pathname))
+    (values base-pathname (wild-pathname-p base-pathname))))
+
 
 ;;; ==============================
 ;; :FINISH-ME
@@ -759,10 +1232,10 @@
 				   ;;(setq jnext (min i (the fixnum (1- n))))
 				   (setq jnext i)
 				   (return (subseq filename p i)))))
-		   ;;; :WAS (var-val (ev-getenv var-name)))
-		  ;; sb-ext:posix-getenv ;; sb-posix:getenv
-		  (var-val (sb-ext:posix-getenv var-name)))
-	     (cond (var-val
+		  ;; sb-ext:posix-getenv sb-posix:getenv osicat-posix:getenv
+                  ;; (var-val (sb-ext:posix-getenv var-name)))
+		  (var-val (osicat-posix:getenv var-name)))
+                  (cond (var-val
 		    (setq result (concatenate 'string result (subseq filename j (1- p)) var-val)))
 		   ((char= (aref filename (1- jnext)) #\})
 		    (error "SUBSTITUTE-IN-FILE-NAME: nonexistent environment variable: ~a" var-name))
@@ -852,10 +1325,18 @@
     (> (fwd file1) (fwd file2))))
 
 #+sbcl 
-(defun remove-directory (pathname)
-  (declare (optimize (speed 3)))
-  (sb-posix:rmdir pathname))
+(defun remove-directory (pathname-or-namestring)
+  (declare (pathname-or-namestring pathname-or-namestring)
+           (optimize (speed 3)))
+  (sb-posix:rmdir (pathname pathname-or-namestring)))
 
+;; #+osicat 
+(defun %remove-directory-osicat (pathname-or-namestring)
+  (declare (pathname-or-namestring pathname-or-namestring)
+           (optimize (speed 3)))
+  (osicat-posix:rmdir pathname-or-namestring))
+
+;; (with-temporary-file  
 ;;; ==============================
 ;;  As of asdf::*asdf-version* => 2.010
 ;;  `asdf::make-defined-systems-table' specifies :test 'equal 
@@ -1035,27 +1516,6 @@ In Unix-syntax, this function just removes the final slash.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
-#+sbcl
-(fundoc 'probe-directory
-        "Unlike `cl:probe-file', return false when PATH is a non-directory file.~%~@
-Should return non-nil when PATH is a symbolic link to a directory.~%~@
-Return as if by `cl:values' one of the following forms:~%
- #P<PUTATIVE-PATHNAME-DIR>, :DIRECTORY, 
- \( {\"<PUTATIVE-PATHNAME-DIR>\" | #P<PUTATIVE-PATHNAME-DIR> } . <PUTATIVE-PATHNAME-DIR>\)~%
- NIL, :SYMLINK, \(#P<PUTATIVE-PATHNAME-DIR> . \(probe-file <PUTATIVE-PATHNAME-DIR>\)\)~%
- NIL, :FILE, #P<PUTATIVE-PATHNAME-DIR>~%
- NIL, \(type-of <PUTATIVE-PATHNAME-DIR>\), <PUTATIVE-PATHNAME-DIR>~%
-:EXAMPLE~%
- \(probe-directory \(cl:user-homedir-pathname\)\)~%
- \(probe-directory #P\"~~/\"\)~%
- \(probe-directory \(namestring \(cl:user-homedir-pathname\)\)\)~%
- \(probe-directory \"~~/.sbclrc\"\)~%
- \(probe-directory \"\"\)~%
- \(probe-directory \"   \"\)~%
- \(probe-directory 42\)~%
-:SEE-ALSO `mon:pathname-native-file-kind', `file-directory-p', `cl:probe-file',
-`cl:ensure-directories-exist'.~%▶▶▶")
-
 (fundoc 'ensure-file-exists
         "Return PATHNAME as if by `cl:open' :direction :probe.~%~@
 :EXAMPLE~%
@@ -1070,6 +1530,8 @@ Return as if by `cl:values' one of the following forms:~%
           \(format nil \"existent-file: ~~S~~%with-name: ~~S\" \(cl-fad:file-exists-p strm\) mp\)\)
      \(delete-file mp\)\)\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
+
 
 (fundoc 'pathname-directory-merged
         "Return `cl:pathname-directory' merging DIRNAME with PATHNAME-DEFAULTS.~%~@
@@ -1135,18 +1597,30 @@ PATHNAME designates a pathname its type should be `mon:filename-designator'.
 :SEE-ALSO `make-pathname-directory-w-type-wild'.~%▶▶▶")
 
 (fundoc 'pathname-directory-pathname
-"Return PATHNAME's the pathname of PATHNAMES pathname-directory.~%~@
+        "Return the pathname of PATHNAME'S `cl:pathname-directory'.~%~@
+When PATHNAME is not in directory normal form, e.g. its a file and lacks a
+trailing #\\/ return value is the parent of PATHNAME.~%~@
 :EXAMPLE~%
- \(let \(\(ntv \(list \(sb-ext:native-namestring *default-pathname-defaults* :as-file t\)\)\)\)
-   \(adjoin \(pathname-directory-pathname \(car ntv\)\) ntv\)\)~%~@
-:NOTE A wrapper around `cl-fad:pathname-as-directory'.~%
- ,----
- | Return a pathname reperesenting the given pathname in `directory normal form',
- | i.e. with all the name elements in the directory component and NIL in the name
- | and type components. Can not be used on wild pathnames because there's not
- | portable way to convert wildcards in the name and type into a single directory
- | component. Returns its argument if name and type are both nil or :unspecific.
- `----~%~@
+ \(let \(\(ntv \(list \(pathname \(sb-ext:native-namestring *default-pathname-defaults* :as-file t\)\)\)\)\)
+   \(list :ORIGINAL *default-pathname-defaults*
+         :FROBBED \(adjoin \(pathname-directory-pathname \(car ntv\)\) ntv\)\)\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'pathname-as-file
+        "Like `cl-fad:pathname-as-directory' but more careful about the empty string.~%~@
+Converts the non-wild pathname designator PATHSPEC to file form.~%~@
+Keyword ERROR-ON-EMPTY when non-nil indicates that when the namestring of
+PATHSPEC is evaluates to an empty-string it should be returned as if by:
+ \(make-pathname :defaults pathspec\)
+When keyword ERROR-ON-EMPTY is T and PATHSPEC is evaluates to the empty-string
+an error is signaled.
+
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'pathname-as-directory
+ "Like `cl-fad:pathname-as-directory' but filtered through `mon:pathname-directory-pathname'.~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'substitute-in-file-name
@@ -1164,8 +1638,6 @@ If `//' appears, everything up to and including the first of those `/' is discar
 :SEE \(man \"environ\"\)~%~@
 :SEE \(man \"getenv\"\)~%~@
 :SEE-ALSO `sb-ext:posix-environ' `sb-ext:posix-getenv'.~%▶▶▶")
-
-
 
 (fundoc 'pathname-components
 "Return the components of PATHNAME.~%~@
@@ -1305,6 +1777,90 @@ Return nil if an existing file is not found.~%~@
 `fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
 `fad:walk-directory', `cl:probe-file'.~%▶▶▶")
 
+(fundoc 'directory-unfiltered-p
+        "Return a boolean indicating if DIRECTORY-NAME is a `cl:member' of IGNORABLES list.~%~@
+DIRECTORY-NAME should be of type `mon:pathname-or-namestring'.
+It is pre-processed with `mon:pathname-native-file-kind' to determine if it
+designates a regular-file, directory, symlink, special-file, wild-pathname,
+emtpy-pathname, or empty-string.
+Only regular-files and directories recieve further treatment all others immediately return NIL.
+If DIRECTORY-NAME  designates a file return T.
+If DIRECTORY-NAME designates a directory it is reduced to a single
+directory-component as if by:
+ (last-elt (pathname-directory <DIRECTORY-NAME>))
+IGNORABLES is a list of strings naming a directories which should be filtered/ignored.
+Default is `mon:*default-pathname-defaults*'.
+An error is signalled if IGNORABLES is null or is contained of any element
+which is not `cl:stringp'.~%~@
+Useful as a test function for `cl-fad:walk-directory'.~%~@
+:EXAMPLE~%
+ \(directory-unfiltered-p \".BZR\" :test 'string=\)~%
+ \(directory-unfiltered-p \".BZR\" :test 'string-equal\)~%
+ \(directory-unfiltered-p \"bobba\" :ignorables '\(\"bubba\" \"bobby\" \"not-bobby\"\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"mon-systems\"\)\) '\(T \(:STRING \"mon-systems\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"mon-systems/*\"\)\)  '\(NIL \(:WILD #P\"mon-systems/*\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p #P\"mon-systems/*\"\)\) '\(NIL \(:WILD #P\"mon-systems/*\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p #P\"mon-systems/\"\)\) '\(NIL \(:RELATIVE \"mon-systems\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"mon-systems/\"\)\) '\(NIL \(:STRING \"mon-systems/\"\)\)\)~%
+ \(equal \(multiple-value-list  \(directory-unfiltered-p #P\"*\"\)\) '\(NIL \(:WILD #P\"*\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p #P\"\"\)\) '\(NIL \(:PATHNAME-EMPTY #P\"\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"..\"\)\) '\(NIL \(:DIRECTORY \"..\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \".\"\)\) '\(NIL \(:DIRECTORY \".\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"\"\)\)  '\(NIL \(:STRING-EMPTY \"\"\)\)\)~%
+  hard to check:~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p \"/dev/dm-12\"\)\) '\(NIL \(:SPECIAL #P\"/dev/dm-12\"\)\)\)~%
+ \(equal \(multiple-value-list \(directory-unfiltered-p #P\"/dev/dm-12\"\)\) '\(NIL \(:SPECIAL #P\"/dev/dm-12\"\)\)\)~%~@
+;; Following signal an error:~%
+ \(directory-unfiltered-p #P\"bubba\" :ignorables '\(\"bubba\" \"bobby\" 8 \"a\"\)\)~%
+ \(directory-unfiltered-p \"bubba\" :ignorables nil\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+#+sbcl
+(fundoc 'probe-directory
+        "Unlike `cl:probe-file', return false when PATH is a non-directory file.~%~@
+Should return non-nil when PATH is a symbolic link to a directory.~%~@
+Return as if by `cl:values' one of the following forms:~%
+ #P<PUTATIVE-PATHNAME-DIR>, :DIRECTORY, 
+ \( {\"<PUTATIVE-PATHNAME-DIR>\" | #P<PUTATIVE-PATHNAME-DIR> } . <PUTATIVE-PATHNAME-DIR>\)~%
+ NIL, :SYMLINK, \(#P<PUTATIVE-PATHNAME-DIR> . \(probe-file <PUTATIVE-PATHNAME-DIR>\)\)~%
+ NIL, :FILE, #P<PUTATIVE-PATHNAME-DIR>~%
+ NIL, \(type-of <PUTATIVE-PATHNAME-DIR>\), <PUTATIVE-PATHNAME-DIR>~%
+:EXAMPLE~%
+ \(probe-directory \(cl:user-homedir-pathname\)\)~%
+ \(probe-directory #P\"~~/\"\)~%
+ \(probe-directory \(namestring \(cl:user-homedir-pathname\)\)\)~%
+ \(probe-directory \"~~/.sbclrc\"\)~%
+ \(probe-directory \"\"\)~%
+ \(probe-directory \"   \"\)~%
+ \(probe-directory 42\)~%
+:SEE-ALSO `mon:pathname-native-file-kind', `file-directory-p', `cl:probe-file',
+`cl:ensure-directories-exist'.~%▶▶▶")
+
+#+sbcl
+(fundoc 'directory-pathname-ensure
+"Return PATH ensuring that if it is a directory ends in a trailing slash.~%~@
+Return two values as if by cl:values:~%
+ - cl:nth-value 0 is the pathname of path. If it is a directory it will end in a #\\/~%
+ - cl:nth-value 1 is the length of the path as if by sb-ext:parse-native-namestring~%~@
+An error is signaled if PATH is not of type `mon:pathname-or-namestring'.~%~@
+An error is signaled if PATH is cl:wild-pathname-p.~%~@
+An error is signaled if PATH identifies a symbolic-link or special file.~%~@
+:EXAMPLE~%
+ \(directory-pathname-ensure *default-pathname-defaults*\)~%
+ \(directory-pathname-ensure \(string-right-trim  '\(#\\\\/\) \(namestring *default-pathname-defaults*\)\)\)~%
+ \(let \(\(tmp-file \(make-pathname :directory '\(:absolute \"tmp\"\) :name \"eg-file\"\)\)
+       \(got-values '\(\)\)\)
+   \(unwind-protect
+        \(progn
+          \(with-open-file \(s tmp-file :direction :output :if-exists :supersede\)
+            \(write \"bubba\" :stream s\)\)
+          \(push \(multiple-value-list \(directory-pathname-ensure tmp-file\)\) got-values\)
+          \(push \(multiple-value-list \(directory-pathname-ensure \(directory-namestring tmp-file\)\)\) got-values \)
+          \(push \(multiple-value-list \(directory-pathname-ensure \(string-right-trim  '\(#\\/\)\(directory-namestring tmp-file\)\)\)\) got-values\)\)
+     \(delete-file tmp-file\)\)
+   \(setf got-values \(nreverse got-values\)\)\)~%~@
+:SEE-ALSO `sb-ext:native-namestring', `sb-ext:parse-native-namestring'.~%▶▶▶")
+
 #+sbcl
 (fundoc 'pathname-native-file-kind
 "Return the file type of PUTATIVE-PATHNAME.~%~@
@@ -1318,12 +1874,19 @@ When PUTATIVE-PATHNAME is the empty-string return values have the form:~%
  nil, :string-empty~%~@
 When PUTATIVE-PATHNAME is some other type return values have the form:~%
  nil, \(type-of <PUTUTIVE-PATHNAME>\)~%~@
-:EXAMPLE~%~@
- \(pathname-native-file-kind \(user-homedir-pathname\)\)
- \(pathname-native-file-kind sb-ext:*CORE-PATHNAME*\)
- \(pathname-native-file-kind \"\"\)
- \(pathname-native-file-kind \"   \"\)
- \(pathname-native-file-kind 42\)~%~@
+Keyword ERROR-ON-WILD is a boolean when T indicates that 
+when PUTATIVE-PATHNAME is `cl:wild-pathname-p' an error is signaled.
+Default is to return:~%
+ nil, (:WILD <PUTATIVE-PATHNAME>)~%~@
+:EXAMPLE~%
+ \(pathname-native-file-kind \(user-homedir-pathname\)\)~%
+ \(pathname-native-file-kind sb-ext:*CORE-PATHNAME*\)~%
+ \(pathname-native-file-kind \"\"\)~%
+ \(pathname-native-file-kind \"   \"\)~%
+ \(pathname-native-file-kind 42\)~%
+ \(pathname-native-file-kind   #P\"/.*\"\)~%
+;; Following successfully signals an error:~%
+ \(pathname-native-file-kind   #P\"/.*\" :error-on-wild t \)~%
 :SEE-ALSO `sb-ext:native-namestring', `sb-unix:unix-lstat', `sb-unix:unix-stat',
 `sb-posix:lstat', `sb-posix:stat'.~%▶▶▶")
 
@@ -1340,6 +1903,34 @@ When PUTATIVE-PATHNAME is some other type return values have the form:~%
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `remove-directory', `delete-file-if-exists',
 `rename-file', `sb-posix:rmdir', `fad:delete-directory-and-files'.~%▶▶▶")
+
+;; (defun make-symlink (&key target link-name (hard nil))
+;; :NOTE osicat:make-link returns the created symlink on success, sb-posix:symlink returns 0
+;; When the link to be created already exists
+;; osicat:make-link returns a condition object: 
+;;   #<EEXIST OSICAT-POSIX:SYMLINK 17 :EEXIST ""> 
+;; SBCL sb-posix:symlink returns:
+;;  System call error 17 (File exists) SB-POSIX:SYSCALL-ERROR 
+(fundoc 'make-symlink
+        "Make a link from TARGET to LINK-NAME. ~%~@
+Return 0 on success, :WARNING do not rely on return value it is subject to change!
+Keyword TARGET and LINKNAME are of type `mon:pathname-or-namestring'.
+Keyword TARGET names an existing file which becomes the target of the
+symbolic link  created at the destination LINK-NAME.
+Keyword HARD is a boolean, when non-nil a hardlink is created as if by link\(2\).
+Default is nil in which case the link is a symbolic link created as if by symlink\(2\)
+equivalent to one of the following:~%
+ shell> ln -s <TARGET> <LINK-NAME>~%
+ shell> ln  <TARGET> <LINK-NAME>~%
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE \(man \"symlink\(2\)\"\)
+:SEE \(man \"symlink\(7\)\"\)
+:SEE \(man \"link\(2\)\"\)
+:SEE \(man \"link\(1\)\"\)
+:SEE \(man \"ln\"\)
+:SEE \(info \"\(coreutils\) ln invocation\"\)~%~@
+:SEE-ALSO `sb-posix:symlink', `sb-posix:link'.~%▶▶▶")
 
 (fundoc 'directory-parent
 "Return the parent directory PATHNAME~%~@
@@ -1412,6 +2003,81 @@ SYSTEM is found as if by `mon:pathname-directory-system'.~%~@
 :EXAMPLE~%
  \(namestring-system :mon\)~%~@
 :SEE-ALSO `mon:pathname-system', `mon:pathname-directory-system-ensure'.~%▶▶▶")
+
+(fundoc 'pathname-or-namestring-empty-p
+"Return boolaen indicating wheether MAYBE-EMPTY-PATHNAME-OR-NAMESTRING is or is not.~%~@
+Return T if it is `mon:string-empty-p' or `mon:pathname-empty-p'.~%
+:EXAMPLE~%
+ \(pathname-or-namestring-empty-p \(make-pathname\)\)~%
+ \(pathname-or-namestring-empty-p #P\"\"\)~%
+ \(pathname-or-namestring-empty-p \"\"\)~%
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'pathname-or-namestring-not-empty-dotted-or-wild-p
+        "Whether MAYBE-SANE-PATHNAME is of a sane value.~%~@
+Return a boolean value. When return value is T the following properties are true
+of MAYBE-SANE-PATHNAME:~%~@
+ - is of type `mon:pathname-or-namestring'~%
+ - is not `cl:wild-pathname-p'~%
+ - is not equal any of the following:
+    \"\" \".\" \"..\" \" \" #P\"\" #P\".\" #P\"..\" #P\" \"~%~@
+Keyword NO-RELATIVES is a boolean, when non-nil also return NIL if
+MAYBE-SANE-PATHNAME is any of the following pathnames or namestrings:~%
+ #P\".\" #P\"..\" #P\" \"~%
+:EXAMPLE~%
+ \(let \(\(possibilities '\(\"\" \".\" \"..\" \" \"  #P\"\" #P\".\" #P\"..\" #P\" \" 
+                        \"*\" \"*.\" \"*.*\" #P\"*\" #P\"*.\" #P\"*.*\"
+                        \"./\" \"../\" #P\"./\" #P\"../\"\)\)\)
+   \(list 
+    \(map 'list #'pathname-or-namestring-not-empty-dotted-or-wild-p possibilities\)
+    \(map 'list #'\(lambda \(x\) 
+                   \(pathname-or-namestring-not-empty-dotted-or-wild-p x :no-relatives t\)\)
+         possibilities\)\)\)~%~@
+:NOTE Has regression test in :FILE mon-systems/test/testing.lisp~%
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'pathname-not-wild-empty-or-dotted-p
+"Return as if by `cl:values' whether MAYBE-VALID-PATHNAME is a reasonable namestring or pathname.~%~@
+ - nth-value 0 is a boolean, T if MAYBE-VALID-PATHNAME is a namestring or pathname.~%~@
+ - nth-value 1 is a list of the form:~%
+   \( :<KEYED-TYPE> <VALUE>\)~%
+  :KEYED-TYPE is one of:~%
+    :WILD               :PATHNAME-EMPTY
+    :STRING             :PATHNAME 
+    :STRING-DOTTED      :PATHNAME-DOTTED
+    :STRING-WHITESPACE  :PATHNAME-WHITESPACE~%~@
+:EXAMPLE~%
+ \(pathname-not-wild-empty-or-dotted-p \"/some/valid-path/designator\"\)
+ ; => T, \(:STRING \"/some/valid-path/designator\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p #P\"/some/valid-path/designator\"\)
+ ; => T, \(:PATHNAME #P\"/some/valid-path/designator\"\)~%   
+ \(pathname-not-wild-empty-or-dotted-p #P\"\"\)
+ ; => NIL, \(:PATHNAME-EMPTY #P\"\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p #P\"*\"\)
+ ; => NIL, \(:WILD #P\"*\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p \"*.*\"\)
+ ; => NIL, \(:WILD #P\"*.*\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p \".\"\)
+ ; => NIL, \(:STRING-DOTTED \".\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p \"..\"\)
+ ; => NIL, \(:STRING-DOTTED \"..\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p #P\".\"\)
+ ; => NIL, \(:PATHNAME-DOTTED #P\".\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p #P\"..\"\)
+ ; => NIL, \(:PATHNAME-DOTTED #P\"..\"\)~%
+ \(pathname-not-wild-empty-or-dotted-p \(pathname \(concatenate 'string *whitespace-chars*\)\)\)
+ ; => NIL, \(:PATHNAME-WHITESPACE #P\"  ... whitespace-chars-here ... \"\)~%
+ \(pathname-not-wild-empty-or-dotted-p \(concatenate 'string *whitespace-chars*\)\)
+ ; => NIL, \(:STRING-WHITESPACE #P\" ... whitespace-chars-here ... \"\)~%
+:SEE `mon-test:pathname-not-wild-empty-or-dotted-p-TEST' :FILE mon-systems/test/testing.lisp~%
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'delete-file-if-exists
+        "Delete PATHNAME-TO-DELETE if it exists.~%~@
+If PATHNAME-TO-DELETE is `cl:wild-pathname-p' or `cl:streamp' and error is signaled.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

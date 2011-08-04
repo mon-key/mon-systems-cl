@@ -322,6 +322,12 @@
                           avg
                           (/ sum-avg (max sum-weight 1))))))
 
+(defun average-number-seq-simple (seq)
+  (declare (sequence seq))
+  (or (every #'numberp seq)
+      (error "element of arg SEQ not `cl:numberp', got: ~S" seq))
+  (/ (reduce #'+ seq) (length seq)))
+
 ;;; ==============================
 ;; :NOTE CL's `=' won't/doesn't handle character types.
 ;; (cl:defun = (a b)
@@ -337,6 +343,24 @@
 ;; 					       b
 ;; 					     a)))))
 
+;;; ==============================
+;; :SOURCE https://github.com/astine/subship.git :FILE new.lisp
+;; (defun greater (x y &optional (test #'>))
+;;   "Returns the greater of two alternatives as defined by test."
+;;   (if (funcall test x y) x y))
+;;
+;; (defun greatest (list &optional (test #'>))
+;;   "Returns the greatest of a list of alternatives as defined by test."
+;;   (reduce (lambda (x y)
+;; (greater x y test))
+;; list))
+;;; ==============================
+
+;; (list-length 
+;; (typep (make-array '(2) 'sequence
+;; (length (make-array '(2 2)))
+
+;; (typep (make-array '(2 2)) 'sequence)
 
 ;;; ==============================
 ;;; :NUMBERS-DOCUMENTATION
@@ -457,8 +481,23 @@ since it will perform a multiplication on the average on every step.~%~@
    \(abs \(- \(average-number-seq seq :large-sum-p t\)
 	   \(average-number-seq seq :large-sum-p nil\)\)\)\)
  ;=> 2.1362305e-4~%~@
-:SEE-ALSO `cl:most-positive-double-float', `cl:most-positive-long-float',
-`cl:most-positive-short-float', `cl:most-positive-single-float'.~%▶▶▶")
+:SEE-ALSO `mon:average-number-seq-simple', `cl:most-positive-double-float',
+`cl:most-positive-long-float', `cl:most-positive-short-float',
+`cl:most-positive-single-float'.~%▶▶▶")
+
+(fundoc 'average-number-seq-simple
+        " Return the average of all elts of SEQ.~%~@
+SEQ is must be of tyep `cl:sequence' with every elt satisfying `cl:numberp'.~%~@
+:EXAMPLE~%
+ \(average-number-seq-simple '\(1 2 3 4\)\)
+ \(average-number-seq-simple #\(17/18 2.33\)\)
+ \(average-number-seq-simple \(make-array 4 :element-type 'bit :initial-contents '\(1 1 0 1\)\)\)
+ \(average-number-seq-simple '\( #c\(1.3 -1.2\) #c\(1.1 -1.4\)\)\)
+ (average-number-seq-simple #*01011101000000101)
+;; Following fail succesfully:~%
+ \(average-number-seq-simple '\( 8 \"8\"\)\)~%
+ \(average-number-seq-simple #\(1 2 3\) \(make-array '\(2 2\) :initial-contents '\(\(1 1\) \(2 2\)\)\)\)~%~@
+:SEE-ALSO `mon:average-number-seq'.~%▶▶▶")
 
 (fundoc 'number-power-of-two-ceiling
         "The smallest power of two that is equal to or greater than UNSIGNED-INT.~%~@

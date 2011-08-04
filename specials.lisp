@@ -78,6 +78,14 @@
 
 (defvar *default-class-documentation-table* (make-hash-table))
 
+(defconst* *default-pathname-directory-ignorables* list
+  '(".git" ".bzr" ".hg" ".svn" "_darcs" "RCS" "CVS" "rcs" "cvs" "lost+found"))
+
+(defconst* *default-pathname-filename-ignorables* list
+  ;; other possible values
+  ;; "README" "CHANGELOG" "ChangeLog" "TAGS" "COPYING"
+  '(".gitignore" ".hgignore" ".bzrignore"))
+
 (defconst* *standard-test-functions* list
   (list 'eq     #'eq
         'eql    #'eql
@@ -421,6 +429,30 @@ Called by `mon:find-file-search-path'.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(vardoc '*default-pathname-directory-ignorables*
+"List of directory names which should not be searched.~%~@
+When the return value of: 
+ (file-namestring (cl-fad:pathname-as-file <PATHNAME>))
+is a member of this list it will not \"satisfy the test\" for functions which
+rely on the value of this variable to filter.~%~@
+:EXAMPLE~%
+ \(member \".bzr\" *default-pathname-directory-ignorables* :test 'string=\)~%
+ \(member \".BZR\" *default-pathname-directory-ignorables* :test 'string=\)~%
+ \(member \"cvs\" *default-pathname-directory-ignorables* :test 'string=\)~%
+ \(member \"CVS\" *default-pathname-directory-ignorables* :test 'string=\)~%
+:SEE-ALSO `mon:*default-pathname-filename-ignorables*', `file-namestring',
+`cl-fad:pathname-as-file''.~%▶▶▶")
+
+(vardoc '*default-pathname-filename-ignorables*
+        "List of strings designating filenames which should be ignored with file/directory traversals.~%~@
+:EXAMPLE~%
+ \(member \".gitignore\" *default-pathname-filename-ignorables* :test 'string=\)~%
+ \(member \".GITIGNORE\" *default-pathname-filename-ignorables* :test 'string=\)~%
+ \(member \(file-namestring \(make-pathname :directory '\(:absolute \"some\" \"path\" \"to\" \"repo\"\) :name \".gitignore\"\)\)
+        *default-pathname-filename-ignorables* :test 'string=\)~%~@
+:SEE-ALSO `mon:*default-pathname-directory-ignorables*'.~%▶▶▶")
+
+;; (file-namestring (make-pathname :directory '(:absolute "some" "path" "to" "repo") :name ".gitignore"))
 (vardoc '*default-class-documentation-table*
 "Hash-table of mapping class-names to documentation strings.~%~@
 :EXAMPLE~%

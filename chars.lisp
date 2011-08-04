@@ -463,6 +463,20 @@
 ;; (length "abcÿ")
 ;; #xc3
 
+;; :SOURCE mccme-helpers/packages:file mccme-helpers/parsetype 
+;; :WAS `escape-char-unicode-octochar'
+(defun char-escape-as-unicode-octochar-string (char-to-escape)
+  (declare (character char-to-escape))
+  (format nil "\\U~8,'0x" (char-code char-to-escape)))
+
+;; :SOURCE mccme-helpers/packages:file mccme-helpers/parsetype 
+;; :WAS `escape-unicode-long'
+(defun string-escape-as-unicode-octo-chars (string-to-escape)
+  (declare (type string string-to-escape))
+  (apply 'concatenate 'string 
+         (map 'list 'char-escape-as-unicode-octochar-string string-to-escape)))
+
+
 
 ;;; ==============================
 ;;; :CHARS-DOCUMENTATION
@@ -800,6 +814,23 @@ defaults to :preserve.~%~@
 `graphic-char-p', `alpha-char-p',`digit-char-p', `alphanumericp',
 `upper-case-p', `lower-case-p', `both-case-p', `char=', `char/=', `char<',
 `char>', `char<=', `char>=', `char-equal', `char-not-equal+'.~%▶▶▶"))
+
+(fundoc 'char-escape-as-unicode-octochar-string
+        "Convert CHAR-TO-ESCAPE to a string in Unicode octal rerpesentation.~%~@
+:EXAMPLE~%
+\(char-escape-as-unicode-octochar-string #\\▶\)
+ => \"\\\\U000025B6\" ~%~@
+:SEE-ALSO `mon:string-escape-as-unicode-octo-chars'.~%▶▶▶")
+
+(fundoc 'string-escape-as-unicode-octo-chars
+      "Convert STRING-TO-ESCAPE to a string in Unicode octal rerpesentation.~%~@
+:EXAMPLE~%~@
+\(string-escape-as-unicode-octo-chars \"∀∃≣∧∨¬\"\)
+ => \"\\\\U00002200\\\\U00002203\\\\U00002263\\\\U00002227\\\\U00002228\\\\U000000AC\"~%
+\(string-escape-as-unicode-octo-chars \"\"\)
+ => \"\"~%~@
+:SEE-ALSO `mon:char-escape-as-unicode-octochar-string'.~%▶▶▶")
+
 
 ;;; ==============================
 
