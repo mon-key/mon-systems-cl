@@ -878,7 +878,14 @@
    #:format-emit-tab
    #:format-list-items-by-n
    ;;
- ;; image-rotate.lisp
+ ;; image-rotate.lisp ;; :NOTE consider moving all of this to clime
+   #:*valid-image-types* 
+   #:*image-output-default-thumb-type*
+   #:verify-image-file-output-type
+   #:verify-image-file-file-kind
+   #:read-image-file-list-from-file
+   #:unset-special-param-read-image-file-list
+   ;;
    #:rotate-image-files-in-dir-list
    ;;
  ;; deprecated.lisp
