@@ -172,6 +172,7 @@
    #:with-file-overwritten ;; flexi-streams make-flexi-stream'
    #:write-file
    #:read-file-to-string
+   #:read-file-list-from-fprint0-file
    #:read-file-forms
    ;; 
    #:with-pipe-stream 
@@ -883,6 +884,7 @@
    #:*image-output-default-thumb-type*
    #:verify-image-file-output-type
    #:verify-image-file-file-kind
+   #:read-image-file-list-from-fprint0-file
    #:read-image-file-list-from-file
    #:unset-special-param-read-image-file-list
    ;;

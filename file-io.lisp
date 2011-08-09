@@ -104,7 +104,10 @@
 ;; :SOURCE (URL `git://github.com/ivan4th/i4-diet-utils.git') 
 ;; :FILE i4-diet-utils.lisp :WAS `with-input-file'
 ;; :NOTE Requires flexi-streams `make-flexi-stream'
-(defmacro with-input-file ((file-var file &key (external-format :utf-8)) &body body)
+;; (defmacro with-input-file ((file-var file &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default))
+(defmacro with-input-file ((file-var file 
+                                     &key (external-format :utf-8) ;; (element-type '(unsigned-byte 8))
+                                     ) &body body) 
   (alexandria:once-only (file external-format) ; keep order of evaluation
     (let ((in (gensym)))
       `(with-open-file (,in ,file 
@@ -115,30 +118,41 @@
 						 :external-format ,external-format)))
            ,@body)))))
 
+;; (sb-impl::default-external-format)
 ;; quickproject/quickproject.lisp
-(defmacro with-new-file ((stream file) &body body)
+;; (defmacro with-new-file ((stream file &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default)) &body body)
+(defmacro with-new-file ((stream file &key (external-format :utf-8)) &body body)
   `(with-open-file (,stream ,file
                             :direction :output
                             :if-exists :error
+                            :external-format ,external-format
                             ;; :ADDED
                             :if-does-not-exist :create)
      ;;(let ((*print-case* :downcase))
      ,@body))
 
 
-(defmacro with-new-file-renaming-old ((stream file) &body body)
+;; (defmacro with-new-file-renaming-old ((stream file &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default)) &body body)
+(defmacro with-new-file-renaming-old ((stream file &key (external-format :utf-8)) &body body)
   `(with-open-file (,stream ,file
                             :direction :output
                             :if-exists :rename
+                            :external-format ,external-format
                             :if-does-not-exist :create)
      ;;(let ((*print-case* :downcase))
      ,@body))
 
 ;;
 ;; :SOURCE (URL `git://github.com/ivan4th/i4-diet-utils.git') 
+;; :SEE (URL `https://github.com/ivan4th/i4-diet-utils')
 ;; :FILE i4-diet-utils.lisp :WAS `with-overwrite'
 ;; :NOTE Requires flexi-streams `make-flexi-stream'
-(defmacro with-file-overwritten ((file-var file &key (external-format :utf-8)) &body body)
+;; (defmacro with-file-overwritten ((file-var file &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default)) &body body) 
+(defmacro with-file-overwritten ((file-var file
+                                           ;; (element-type '(unsigned-byte 8))
+                                           
+                                           &key (external-format :utf-8))
+                                 &body body)
   (alexandria:once-only (file external-format) ; keep order of evaluation
     (let ((out (gensym)))
       `(with-open-file (,out ,file :direction :output
@@ -150,12 +164,14 @@
 ;;
 ;; :SOURCE (URL `git://github.com/ivan4th/i4-diet-utils.git') 
 ;; :FILE i4-diet-utils.lisp :WAS `write-file'
+;; (defun write-file (string file &key  #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default))
 (defun write-file (string file &key (external-format :utf-8))
   (with-file-overwritten (out file :external-format external-format)
     (write-string string out)))
 ;;
 ;; :SOURCE (URL `git://github.com/ivan4th/i4-diet-utils.git') 
 ;; :FILE i4-diet-utils.lisp :WAS `snarf-file'
+;; (defun read-file-to-string (file &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default))
 (defun read-file-to-string (file &key (external-format :utf-8))
   (with-output-to-string (out)
     (with-input-file (in file :external-format external-format)
@@ -164,6 +180,44 @@
 	 :while read
 	 :do (princ read out)
 	 :do (terpri out)))))
+
+;; (defun read-file-list-from-fprint0-file (pathname-or-namestring &key #+sbcl (external-format #.(sb-impl::default-external-format)) #-sbcl (external-format :default))
+(defun read-file-list-from-fprint0-file (pathname-or-namestring &key (external-format :default)) ;;(element-type 'character))                                         
+  (declare (pathname-or-namestring pathname-or-namestring))
+  (with-open-file (fprint0-img-file  pathname-or-namestring 
+                                     :direction         :input 
+                                     :if-does-not-exist :error
+                                     :external-format   external-format
+                                     :element-type      'character)
+    (loop for gthr = (loop 
+                        named loop-reading-stream
+                        with string-vec = (if (open-stream-p fprint0-img-file) 
+                                              (make-array 0 :element-type 'character :fill-pointer 0)
+                                              (return-from loop-reading-stream))
+                        for char-read = (read-char fprint0-img-file nil 'EOF)
+                        until (or (eql char-read 'EOF) 
+                                  (char= char-read #\Nul))
+                        do (case (peek-char  nil fprint0-img-file nil 'EOF)
+                             (EOF  
+                              (close fprint0-img-file)
+                              (loop-finish))
+                             ;; :NOTE not currently trying to detect #\nul character that don't occur at end of line:
+                             ;; (#\Nul
+                             ;;  (loop 
+                             ;;     for maybe-null = (peek-char  nil fprint0-img-file nil); 'EOF)
+                             ;;     while (if eql (and (characterp maybe-null) 
+                             ;;                (char= maybe-null #\Nul))
+                             ;;     do (read-char fprint0-img-file nil))); 'EOF)))
+                             ((#\Newline #\Return)
+                              (when (eql (read-char fprint0-img-file nil 'EOF) 'EOF)
+                                (close fprint0-img-file)
+                                (loop-finish)))
+                             (otherwise (vector-push-extend char-read string-vec)))
+                        finally (return-from loop-reading-stream
+                                  (if (zerop (length string-vec))
+                                      nil
+                                      string-vec)))
+       while gthr collect gthr)))
 
 ;; :SOURCE asdf.lisp :WAS `read-file-forms'
 (defun read-file-forms (file)
@@ -404,6 +458,23 @@ Default is :utf-8.~%~@
 `mon:with-temp-file', `alexandria:write-string-into-file',
 `alexandria:read-file-into-string', `alexandria:with-input-from-file',
 `alexandria:with-output-to-file'.~%▶▶▶")
+
+(fundoc 'read-file-list-from-fprint0-file
+        "Read the #\\Nul character terminated pathnames contained of PATHNAME-OR-NAMESTRING.~%~@
+Return a list of strings with each null terminated pathname split on the
+terminating #\\Nul character with #\\Nul char removed.~%~@
+Occurences of #\\Newline and #\\Return are elided from results.~%~@
+:NOTE A #\\Nul character terminated pathname is the default output for the unix
+command `find` when it used invoked the -frint0 arg.~%~@
+:EXAMPLE~%
+ \(let* \(\(arg-path  \(namestring \(user-homedir-pathname\)\)\)
+        \(find-out  \(namestring \(make-pathname :directory '\(:absolute \"tmp\"\) :name \"find-eg\"\)\)\)\)
+   \(sb-ext:run-program \"/usr/bin/find\" 
+                       \(list arg-path \"-maxdepth\" \"1\" \"-type\" \"f\" \"-fprint0\" find-out\)\)
+   \(prog1
+       \(read-file-list-from-fprint0-file find-out\)
+     \(delete-file find-out\)\)\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'write-file
 "Write STRING to FILE as if by `cl:write-string'.~%~@

@@ -14,7 +14,6 @@
 
 (defparameter *image-output-default-thumb-type* "jpg")
 
-
 
 (defun verify-image-file-output-type (maybe-valid-output-extension)
   (declare (string maybe-valid-output-extension))
@@ -40,7 +39,7 @@
                                :signal-or-only nil)
         (return-from verify-image-file-file-kind nil)))
   (case (osicat:file-kind maybe-image-file-file)
-    (:regualr-file (pathname maybe-image-file-file))
+    (:regular-file (pathname maybe-image-file-file))
     (t nil)))
 
 (defun unset-special-param-read-image-file-list (special-param) 
@@ -51,15 +50,29 @@
     (set special-param nil)))
 
 ;; :TODO add a per line variant of this that checks for null-byte at EOL as delimiter.
-(defun read-image-file-list-from-file (pathname-or-namestring &optional (special-param '*read-image-file-list*))
+(defun read-image-file-list-from-file (pathname-or-namestring &key (special-param '*read-image-file-list*)
+                                       ;;(element-type 'character))
+                                       (external-format :default))
+
   (declare (mon:pathname-or-namestring pathname-or-namestring)
            (special special-param))
   (with-open-file (img-files  pathname-or-namestring 
-                              :direction :input 
-                              :if-does-not-exist :error)
+                              :direction         :input 
+                              :if-does-not-exist :error
+                              :external-format   external-format
+                              :element-type      'character)
     ;; Make sure that :if-does-not-exist has a chance to run
     (unset-special-param-read-image-file-list special-param)
     (set special-param (read  img-files))))
+
+(defun read-image-file-list-from-fprint0-file (pathname-or-namestring &key (special-param 'mon::*read-image-file-list*)
+                                               ;;(element-type 'character))
+                                               (external-format :default))
+  (declare (mon:pathname-or-namestring pathname-or-namestring)
+           (special special-param))
+  (mon::unset-special-param-read-image-file-list special-param)
+  (set special-param
+       (read-file-list-from-fprint0-file pathname-or-namestring :external-format external-format)))
 
 ;; :NOTE This should really be installed to Clime...
 (defun rotate-image-files-in-dir-list (dir-list &key image-type degrees positive-or-negative 
@@ -167,8 +180,21 @@ If so, return its `cl:string-downcase'd representation else signal an error.~%~@
 
 (read-image-file-list-from-file
 "Read the list of pathnames stored in PATHNAME-OR-NAMESTRING set the list read as value of SPECIAL-PARAM.~%~@
-SPECIAL-PARAM is a special parameter to use when holding a list of
-image file pathnames. Default is `mon:*read-image-file-list*'
+Keyword SPECIAL-PARAM is a special parameter to use when holding a list of
+image file pathnames. Default is `mon:*read-image-file-list*'.~%~@
+Keyword EXTERNAL-FORMAT is as if by `cl:open'. Default value is :default.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'read-image-file-list-from-fprint0-file
+        "Read the #\\Nul character terminated pathnames contained of PATHNAME-OR-NAMESTRING.~%~@
+Return a list of strings with each null terminated pathname split on the
+terminating #\\Nul character with #\\Nul char removed.~%~@
+Occurences of #\\Newline and #\\Return are elided from results.
+:NOTE A #\\Nul character terminated pathname is the default output for the unix
+command `find` when it used invoked the -frint0 arg.
+Keyword SPECIAL-PARAM is a special variable to bind results to. Default is `mon::*read-image-file-list*'.
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
