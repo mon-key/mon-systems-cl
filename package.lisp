@@ -884,10 +884,13 @@
    #:*image-output-default-thumb-type*
    #:verify-image-file-output-type
    #:verify-image-file-file-kind
+   #:make-target-pathname-for-image-resize
+   #:make-pathname-source-destination-resize-pairs
    #:read-image-file-list-from-fprint0-file
+   #:resize-image-files-in-fprint0-file
+   ;;
    #:read-image-file-list-from-file
    #:unset-special-param-read-image-file-list
-   ;;
    #:rotate-image-files-in-dir-list
    ;;
  ;; deprecated.lisp

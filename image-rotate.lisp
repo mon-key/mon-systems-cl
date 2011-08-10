@@ -49,7 +49,6 @@
            (symbol-value special-param))
     (set special-param nil)))
 
-;; :TODO add a per line variant of this that checks for null-byte at EOL as delimiter.
 (defun read-image-file-list-from-file (pathname-or-namestring &key (special-param '*read-image-file-list*)
                                        ;;(element-type 'character))
                                        (external-format :default))
@@ -73,6 +72,77 @@
   (mon::unset-special-param-read-image-file-list special-param)
   (set special-param
        (read-file-list-from-fprint0-file pathname-or-namestring :external-format external-format)))
+
+(defun make-target-pathname-for-image-resize (source-pathname &key target-directory target-type
+                                                               (prefix-name-with "") 
+                                                               (suffix-name-with ""))
+  (declare (mon:pathname-or-namestring target-directory target-type)
+           (string prefix-name-with suffix-name-with))
+  (let ((dest-dir  (pathname-directory target-directory))
+        (dest-name (concatenate 'string prefix-name-with (pathname-name source-pathname) suffix-name-with))
+        (dest-type (mon::verify-image-file-output-type target-type)))
+    (cons  source-pathname
+           (make-pathname :directory dest-dir
+                          :name      dest-name
+                          :type      dest-type))))
+
+(defun make-pathname-source-destination-resize-pairs (read-source-files-from &key target-directory 
+                                                                                  target-type
+                                                                                  (prefix-name-with "")
+                                                                                  (suffix-name-with ""))
+  (declare (pathname-or-namestring read-source-files-from target-directory)
+           (string  target-type prefix-name-with suffix-name-with))
+  (flet ((mk-rsz-path (source-image)
+           (declare (pathname-or-namestring source-image))
+           (make-target-pathname-for-image-resize
+            source-image
+            :target-directory target-directory 
+            :prefix-name-with prefix-name-with
+            :suffix-name-with suffix-name-with
+            :target-type      target-type)))
+    (loop 
+       for file in (read-image-file-list-from-fprint0-file read-source-files-from)
+       collecting (mk-rsz-path (pathname file)))))
+
+;; 
+
+
+(defun resize-image-files-in-fprint0-file (fprint0-file &key target-directory 
+                                                             target-type
+                                                             (prefix-name-with "")
+                                                             (suffix-name-with "" suffix-supplied)
+                                                             resize-x)
+  (declare (pathname-or-namestring  fprint0-file target-directory target-type)
+           (string prefix-name-with suffix-name-with)
+           ((unsigned-byte 32) resize-x))
+  (let* ((resize-arg            (format nil "~D" resize-x))
+         (suffix-with           (or (and suffix-supplied suffix-name-with)
+                                    (concatenate 'string '(#\-) (the string resize-arg))))
+         (base-resize-arg-list (list "-resize" resize-arg))
+         (resize-pairs         (make-pathname-source-destination-resize-pairs fprint0-file 
+                                                                              :target-directory target-directory
+                                                                              :target-type      target-type
+                                                                              :prefix-name-with prefix-name-with
+                                                                              :suffix-name-with suffix-with))
+         (convert-path   "/usr/bin/convert")
+         (proc-stack (make-array (length resize-pairs) :fill-pointer 0)))
+    (declare (string convert-path))
+    (labels ((convert-resize (pathname-pairs)
+               (declare (cons pathname-pairs))
+               (let* ((source-dest (list (namestring (car pathname-pairs))
+                                         (namestring (cdr pathname-pairs))))
+                      (arglist (append base-resize-arg-list source-dest))
+                      (proc-stat '()))
+                 (setf proc-stat
+                       `(,(sb-ext:process-exit-code (sb-ext:run-program convert-path arglist))
+                          ,@source-dest))))
+             (all-resized ()
+               (dolist (rsz resize-pairs
+                        (setf proc-stack (coerce proc-stack 'list)))
+                 (vector-push (convert-resize rsz) proc-stack)))
+             (all-resized-in-thread ()
+               (sb-thread:make-thread #'all-resized :name "resize-image-files-in-fprint0-file")))
+    (all-resized-in-thread))))
 
 ;; :NOTE This should really be installed to Clime...
 (defun rotate-image-files-in-dir-list (dir-list &key image-type degrees positive-or-negative 
@@ -187,16 +257,75 @@ Keyword EXTERNAL-FORMAT is as if by `cl:open'. Default value is :default.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(fundoc 'make-target-pathname-for-image-resize
+        "Return a pathname for use in image resizing operations~%~@
+Return value is a cons of the form:~%
+ \( <SOURCE-PATHAME> . <GENERATED-DESTINATION-PATHNAME>\)~%~@
+SOURCE-PATHNAME is an object of type `mon:pathname-or-namestring' designating an
+existing image file. Its `cl:pathname-name' is used as the template when
+generating the returned pathname.~%~@
+TARGET-DIRECTORY is an object of type `mon:pathname-or-namestring' designating a
+directory in which the resized image will be located.~%
+TARGET-TYPE is a string designating a `cl:pathname-type' image file extension.
+It should satisfy `mon:verify-image-file-output-type'.~%~@
+Keyword PREFIX-NAME-WITH is a string to prepend to SOURCE-PATHNAME's `cl:pathname-name'.~%~@
+Keyword SUFFIX-NAME-WITH is a string to append to SOURCE-PATHNAME's `cl:pathname-name'.~%~@
+:EXAMPLE~%
+ \(make-target-pathname-for-image-resize
+  #P\"/some/source/path/to/existing/image-of-type-bitmpap.bmp\" 
+  :target-directory #P\"/some/destination/path/for/resized/image/\" 
+  :target-type \"jpg\"
+  :prefix-name-with \"prepended-\" 
+  :suffix-name-with \"-appended\"\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'make-pathname-source-destination-resize-pairs
+"Return a list of consed source/target image pairs.~%~@
+READ-SOURCE-FILES-FROM is an object of type `mon:pathname-or-namestring' its
+contents are processed with `mon:read-image-file-list-from-fprint0-file'.
+Keywords TARGET-DIRECTORY TARGET-TYPE PREFIX-NAME-WITH SUFFIX-NAME-WITH are as
+per `mon:make-target-pathname-for-image-resize'
+:EXAMPLE~%~@                          
+ \(make-pathname-source-destination-resize-pairs
+  #P\"/some/file/with/null-byte/delimited/image-file-names\"
+  #P\"/some/source/path/to/existing/image-of-type-bitmpap.bmp\" 
+  :target-directory #P\"/some/destination/path/for/resized/image/\" 
+  :target-type \"jpg\"
+  :prefix-name-with \"prepended-\" 
+  :suffix-name-with \"-appended\"\)
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
 (fundoc 'read-image-file-list-from-fprint0-file
         "Read the #\\Nul character terminated pathnames contained of PATHNAME-OR-NAMESTRING.~%~@
 Return a list of strings with each null terminated pathname split on the
 terminating #\\Nul character with #\\Nul char removed.~%~@
-Occurences of #\\Newline and #\\Return are elided from results.
+Occurences of #\\Newline and #\\Return are elided from results.~%~@
 :NOTE A #\\Nul character terminated pathname is the default output for the unix
-command `find` when it used invoked the -frint0 arg.
-Keyword SPECIAL-PARAM is a special variable to bind results to. Default is `mon::*read-image-file-list*'.
+command `find` when it used invoked the -frint0 arg.~%~@
+Keyword SPECIAL-PARAM is a special variable to bind results to. Default is `mon::*read-image-file-list*'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
+(fundoc 'resize-image-files-in-fprint0-file
+"Resize each null-terminated pathname in FPRINT0-FILE.~%~@
+Keyword resize-x is an unsigned integer value.
+Keywords TARGET-DIRECTORY, TARGET-TYPE, PREFIX-NAME-WITH, and SUFFIX-NAME-WITH are as per 
+`mon:make-pathname-source-destination-resize-pairs'.
+When SUFFIX-NAME-WITH is not explicitly provided the value of RESIZE-X is
+appended to the resized imaged saved to TARGET-DIRECTORY.~%~@
+:EXAMPLE~%
+ \(let* \(\(null-list-directory #P\"/some/directory/with/bitmaps/\" \)
+       \(null-list-pathname  \(merge-pathnames 
+                             \(make-pathname :name \"null-terminated-file-list\"\)
+                             null-terminated-file-list\)\)
+       \(sb-ext:run-program \"/usr/bin/find\" \(list \(namestring null-list-directory\)
+                                                 \"-type\" \"f\" \"-name\" \"*.bmp\" \"-fprint0\"
+                                                 \(namestring null-list-pathname\)\)\)
+       \(mon::resize-image-files-in-fprint0-file null-list-pathname 
+                                                :target-directory null-list-directory 
+                                                :target-type \"jpg\" 
+                                                :resize-x 1000\)\)\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'rotate-image-files-in-dir-list
@@ -222,6 +351,7 @@ thread object this function exececutes in. Default is mon::*rotate-images-thread
         #P\"/mnt/some/path/to/goofy/1535/\"\)
  :image-type \"jpeg\" :degrees 90 :positive-or-negative :counter-clockwise\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
 
 
 ;;; ==============================
