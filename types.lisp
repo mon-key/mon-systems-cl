@@ -459,7 +459,10 @@
 (deftype bignum-bit-width ()
   #-sbcl '(integer #.(integer-length most-positive-fixnum) *)
   ;; :NOTE x86-32 only
-  #+sbcl '(integer #.sb-vm:n-positive-fixnum-bits #.(- (expt 2 24) 2)))
+  ;; #+sbcl '(integer #.sb-vm:n-positive-fixnum-bits #.(- (expt 2 24) 2))
+  ;; not following range is 1 under sb-bignum::maximum-bignum-length for congruency with the x86-32 above.
+  ;; I'm assuming this is correct for other procs/architectures... :SEE :FILE sbcl/src/code/bignum.lisp
+  #+sbcl '(integer #.sb-vm:n-positive-fixnum-bits #.(1- sb-bignum::maximum-bignum-length)))
 
 ;; clisp-2.49/src/array.d for LISPFUN make_array around this comment 
 ;; /* table for assignment  ATYPE-byte -> vector type info */ 
@@ -600,6 +603,36 @@
   ;; 15
   ;; #b1111  
   '(unsigned-byte 4))
+
+(deftype unsigned-byte-128-integer-length ()
+  '(mod 129))
+
+(deftype unsigned-byte-96-integer-length ()
+  '(mod 97))
+
+(deftype unsigned-byte-64-integer-length ()
+  '(mod 65))
+
+(deftype unsigned-byte-56-integer-length ()
+  '(mod 57))
+
+(deftype unsigned-byte-48-integer-length ()
+  '(mod 49))
+
+(deftype unsigned-byte-32-integer-length ()
+  '(mod 33))
+
+(deftype unsigned-byte-29-integer-length ()
+  '(mod 30))
+
+(deftype unsigned-byte-24-integer-length ()
+  '(mod 24))
+
+(deftype unsigned-byte-16-integer-length ()
+  '(mod 17))
+
+(deftype unsigned-byte-8-integer-length ()
+  '(mod 9))
 
 ;; :SOURCE flexi-streams-1.0.7/mapping.lisp
 (deftype code-point ()
@@ -2416,6 +2449,96 @@ Equivalent to \(mod 16\)~%
 :SEE-ALSO `octet', `unsigned-byte-128', `unsigned-byte-64', `unsigned-byte-48',
 `unsigned-byte-32', `unsigned-byte-29', `unsigned-byte-16',
 `unsigned-byte-8'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-128-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-128'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-96-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-96'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-64-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-64'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-56-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-56'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-48-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-48'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-32-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-32'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-29-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-29'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-24-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-24'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-16-integer-length
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-16'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
+
+(typedoc 'unsigned-byte-8-integer-length  
+"The `cl:integer-length' of an object of type `mon:unsigned-byte-8'.~%~@
+:SEE-ALSO `bignum-bit-width', `fixnum-bit-width',
+`unsigned-byte-128-integer-length', `unsigned-byte-96-integer-length',
+`unsigned-byte-64-integer-length', `unsigned-byte-56-integer-length',
+`unsigned-byte-48-integer-length', `unsigned-byte-32-integer-length',
+`unsigned-byte-29-integer-length', `unsigned-byte-24-integer-length',
+`unsigned-byte-16-integer-length', `unsigned-byte-8-integer-length'.~%▶▶▶")
 
 (typedoc 'code-point
  "The subtype of integers just big enough to hold all Unicode codepoints.~%~@

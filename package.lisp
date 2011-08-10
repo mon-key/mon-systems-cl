@@ -336,6 +336,16 @@
    #:unsigned-byte-8
    #:octet
    #:nibble
+   #:unsigned-byte-128-integer-length
+   #:unsigned-byte-96-integer-length
+   #:unsigned-byte-64-integer-length
+   #:unsigned-byte-56-integer-length
+   #:unsigned-byte-48-integer-length
+   #:unsigned-byte-32-integer-length
+   #:unsigned-byte-29-integer-length
+   #:unsigned-byte-24-integer-length
+   #:unsigned-byte-16-integer-length
+   #:unsigned-byte-8-integer-length 
    #:each-a-character
    #:whitespace-char
    #:char-not-whitespace-char
