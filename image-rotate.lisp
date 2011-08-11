@@ -53,7 +53,7 @@
                                        ;;(element-type 'character))
                                        (external-format :default))
 
-  (declare (mon:pathname-or-namestring pathname-or-namestring)
+  (declare (pathname-or-namestring pathname-or-namestring)
            (special special-param))
   (with-open-file (img-files  pathname-or-namestring 
                               :direction         :input 
@@ -67,20 +67,20 @@
 (defun read-image-file-list-from-fprint0-file (pathname-or-namestring &key (special-param 'mon::*read-image-file-list*)
                                                ;;(element-type 'character))
                                                (external-format :default))
-  (declare (mon:pathname-or-namestring pathname-or-namestring)
+  (declare (pathname-or-namestring pathname-or-namestring)
            (special special-param))
-  (mon::unset-special-param-read-image-file-list special-param)
+  (unset-special-param-read-image-file-list special-param)
   (set special-param
        (read-file-list-from-fprint0-file pathname-or-namestring :external-format external-format)))
 
 (defun make-target-pathname-for-image-resize (source-pathname &key target-directory target-type
                                                                (prefix-name-with "") 
                                                                (suffix-name-with ""))
-  (declare (mon:pathname-or-namestring target-directory target-type)
+  (declare (pathname-or-namestring target-directory target-type)
            (string prefix-name-with suffix-name-with))
   (let ((dest-dir  (pathname-directory target-directory))
         (dest-name (concatenate 'string prefix-name-with (pathname-name source-pathname) suffix-name-with))
-        (dest-type (mon::verify-image-file-output-type target-type)))
+        (dest-type (verify-image-file-output-type target-type)))
     (cons  source-pathname
            (make-pathname :directory dest-dir
                           :name      dest-name
@@ -240,16 +240,17 @@ If so, return its `cl:string-downcase'd representation else signal an error.~%~@
  \(verify-image-file-output-type \"bubba\"\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
-(fundoc 'unset-special-param-read-file-list
+(fundoc 'unset-special-param-read-image-file-list
 "Unset the value of SPECIAL-PARAM.~%~@
 :EXAMPLE~%
  \(progn
    \(setf *read-image-file-list* \(list \"bubba\" \"BUBBA\" \"Bubba\"\)\)
-   \(unset-special-param-read-file-list '*read-image-file-list*\)\) 
-:SEE-ALSO `<XREF>'.~%▶▶▶"))
+   \(unset-special-param-read-image-file-list '*read-image-file-list*\)\) 
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
-(read-image-file-list-from-file
-"Read the list of pathnames stored in PATHNAME-OR-NAMESTRING set the list read as value of SPECIAL-PARAM.~%~@
+(fundoc 'read-image-file-list-from-file
+"Read the list of pathnames stored in PATHNAME-OR-NAMESTRING set the list read
+as value of SPECIAL-PARAM.~%~@
 Keyword SPECIAL-PARAM is a special parameter to use when holding a list of
 image file pathnames. Default is `mon:*read-image-file-list*'.~%~@
 Keyword EXTERNAL-FORMAT is as if by `cl:open'. Default value is :default.~%~@
@@ -280,18 +281,18 @@ Keyword SUFFIX-NAME-WITH is a string to append to SOURCE-PATHNAME's `cl:pathname
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'make-pathname-source-destination-resize-pairs
-"Return a list of consed source/target image pairs.~%~@
+        "Return a list of consed source/target image pairs.~%~@
 READ-SOURCE-FILES-FROM is an object of type `mon:pathname-or-namestring' its
 contents are processed with `mon:read-image-file-list-from-fprint0-file'.
 Keywords TARGET-DIRECTORY TARGET-TYPE PREFIX-NAME-WITH SUFFIX-NAME-WITH are as
-per `mon:make-target-pathname-for-image-resize'
-:EXAMPLE~%~@                          
+per `mon:make-target-pathname-for-image-resize'.~%~@
+:EXAMPLE~%
  \(make-pathname-source-destination-resize-pairs
   #P\"/some/file/with/null-byte/delimited/image-file-names\"
-  #P\"/some/source/path/to/existing/image-of-type-bitmpap.bmp\" 
-  :target-directory #P\"/some/destination/path/for/resized/image/\" 
+  #P\"/some/source/path/to/existing/image-of-type-bitmpap.bmp\"
+  :target-directory #P\"/some/destination/path/for/resized/image/\"
   :target-type \"jpg\"
-  :prefix-name-with \"prepended-\" 
+  :prefix-name-with \"prepended-\"
   :suffix-name-with \"-appended\"\)
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
@@ -343,7 +344,7 @@ positive or negative. Valid values are:~%
  :POSITIVE :NEGATIVE :CLOCKWISE :COUNTER-CLOCKWISE~%~@
 SPECIAL-THREAD-PARAM is a symbol naming a special variable which holds the
 thread object this function exececutes in. Default is mon::*rotate-images-thread*.~%
-:USAGE~%~@
+:USAGE~%
  \(rotate-image-files-in-dir-list
  \(list #P\"/mnt/some/path/to/goofy/1351/\"
         #P\"/mnt/some/path/to/goofy/1353/\"

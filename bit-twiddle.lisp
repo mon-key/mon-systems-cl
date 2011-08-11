@@ -31,6 +31,14 @@
 ;; #b1111111111111111111111111111111111111111111111111111111111111111
 ;;           8       7      6       5        4       3      2       1
 ;;
+;;  Following strikes me as a more lucid explanation than is given in the spec:
+;; ,----
+;; | The first thing we need when manipulating a field of bits (called a byte in
+;; | Common Lisp) is a way of specifying its bounds. The BYTE function constructs a
+;; | byte specifier from a size (number of bits) and a position (the number of the
+;; | rightmost bit of the byte within the containing integer, where the LSB is bit 0).
+;; `---- ;; :SOURCE (URL `http://www.psg.com/~dlamkins/sl/chapter18.html')
+;;
 ;;; ==============================
 
 
@@ -98,6 +106,68 @@
       (bignum-0-or-over  (the simple-bit-vector
                            (number-to-bit-vector-bignum
                             (the bignum-0-or-over unsigned-integer)))))))
+
+;; :SOURCE (URL `http://www.lispforum.com/viewtopic.php?f=2&t=1205#p6269')
+;; with modifications
+(defun %bit-vector-to-integer.mon (bit-vector)
+  "Return BIT-VECTOR's representation as a positive integer.
+MON version using `cl:flet' and `cl:reduce'."
+   ;; (= (bit-vector-to-integer #*01011100000100010011100100110101001111001100000001011110100000001010010001011110001001100011000101010010111000101101101101011010)
+   ;; 122378404974049034400182615604361091930)
+  (declare (bit-vector bit-vector)
+           (optimize (speed 3)))
+  ;; :NOTE We ought to be able to optimize around the size of expected return
+  ;; value by taking the length of the bv which should not exceed the
+  ;; integer-length of final return value.
+  (flet ((bit-adder (first-bit second-bit)
+           (+ (ash first-bit 1) second-bit)))
+    (etypecase bit-vector
+      (simple-bit-vector 
+       (locally (declare (simple-bit-vector bit-vector))
+         (reduce #'bit-adder bit-vector)))    
+      (bit-vector
+       (reduce #'bit-adder bit-vector)))))
+
+;; :PASTE-DATE 2011-08-10
+;; :PASTE-TITLE "Annotation number 2: a faster version"
+;; :PASTED-BY stassats
+;; :PASTE-URL (URL `http://paste.lisp.org/+2NN1/2')
+(defun %bit-vector-to-integer.stassats (bit-vector)
+  "Return BIT-VECTOR's representation as a positive integer.
+Stas version using `cl:flet' and `cl:loop'."
+  (let* ((word-size 64)
+         (length (length bit-vector))
+         (result 0)
+         (index -1))
+    (flet ((build-word ()
+             (loop 
+                repeat word-size
+                for j = 0
+                then (logior (bit bit-vector (incf index))
+                             (ash j 1))
+                finally (return j))))
+      (loop 
+         repeat (floor length word-size)
+         do (setf result (logior (build-word)
+                                 (ash result (1- word-size)))))
+      (loop while (< index (1- length))
+         do (setf result
+                  (logior (bit bit-vector (incf index))
+                          (ash result 1)))))
+    result))
+;;
+;; :PASTE-DATE 2011-08-10
+;; :PASTE-TITLE "Annotation number 1: another version"
+;; :PASTED-BY Xach
+;; :PASTE-URL (URL `http://paste.lisp.org/+2NN1/1')
+(defun bit-vector-to-integer (bit-vector)
+  "Return BIT-VECTOR's representation as a positive integer.
+Xach version using `cl:dotimes'."
+  (declare (bit-vector bit-vector)
+           (optimize (speed 3)))
+  (let ((j 0))
+    (dotimes (i (length bit-vector) j)
+      (setf j (logior (bit bit-vector i) (ash j 1))))))
 
 (defun boolean-to-bit (boolean &optional no-error)
   (declare (optimize (speed 3)))
@@ -213,8 +283,7 @@
                             :initial-element 0)))
     (loop for bit across bv
        for i from 0 below (length bv)
-       do (multiple-value-bind (j k)
-              (floor i 8)
+       do (multiple-value-bind (j k) (floor i 8)
             (setf (aref octets j)
                   (logior (ash bit k) (aref octets j)))))
     (values octets

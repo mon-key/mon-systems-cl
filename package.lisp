@@ -797,6 +797,7 @@
    ;;
    #:number-to-bit-list
    #:number-to-bit-vector
+   #:bit-vector-to-integer
    #:bit-from-boolean
    #:boolean-to-bit
    #:byte-swap
