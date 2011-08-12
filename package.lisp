@@ -743,42 +743,41 @@
    #:pathname-strip-filespec
    #:copy-file 
    #:directorize-namestring
-   #:expand-file-name
    #:directory-file-name
    #:file-truename
    #:file-directory-p
    #:file-name-directory
    #:directory-parent
    #:directory-unfiltered-p
-   #:to-directory  ;; delete once expand-file-name is finished.
    #:pathname-directory-append
    #:unix-dot-directory-p
    #:pathname-components
    #:pathname-components-funcallable-pairs
    #:pathname-directory-merged
    #:file-newer-than-file-p
-   #:find-file-search-path
+   #:find-file-search-path            ;; osicat-sys:native-namestring
    #:pathname-not-wild-empty-or-dotted-p
    #:pathname-or-namestring-empty-p
    #:pathname-or-namestring-not-empty-dotted-or-wild-p
+   #:pathname-native-file-kind        ;; sb-ext:native-namestring/osicat-sys:native-namestring  sb-impl::native-file-kind/osicat:file-kind
+   #:remove-directory                 ;; sb-posix:rmdir/osicat-posix:rmdir
+   #:probe-directory                  ;; sb-impl::native-file-kind/osicat:file-kind
    #+sbcl #:directory-pathname-ensure ;; sb-ext:parse-native-namestring sb-ext:native-namestring
-   #+sbcl #:pathname-native-file-kind ;; sb-ext:native-namestring sb-impl::native-file-kind
-   #+sbcl #:remove-directory  ;; sb-posix:rmdir
-   #+sbcl #:probe-directory   ;; sb-impl::native-file-kind
    #:rename-file*
    #:replace-file
    #:delete-file-if-exists
    #:ensure-file-exists
    #:pathname-file-if
    #:pathname-file-list-if
-   #:make-pathname-user-homedir          ;; sb-ext:native-namestring
-   #:pathname-as-directory               ;; If dependent packages fail, may need to shadow cl-fad:pathname-as-directory
-   #:pathname-as-file                    ;; If dependent packages fail, may need to shadow cl-fad:pathname-as-directory
+   #:make-pathname-user-homedir          ;; sb-ext:native-namestring/osicat-sys:native-namestring
+   #:pathname-as-directory               ;; osicat:pathname-as-directory/cl-fad:pathname-as-directory
+   #:pathname-as-file                    ;; osicat:pathname-as-file/cl-fad:pathname-as-file
    ;; These require cl-fad/osicat
-   #:directory-files
+   #:directory-files                     ;; osicat:list-directory osicat:file-exists-p/cl-fad:directory-exists-p 
+   #:make-pathname-directory-w-type-wild ;; osicat:file-exists-p/cl-fad:directory-exists-p
    #:pathname-directory-pathname         ;; cl-fad:pathname-as-directory
-   #:make-pathname-directory-wildcard    ;; cl-fad::directory-wildcard
-   #:make-pathname-directory-w-type-wild ;; cl-fad:directory-exists-p
+   #:make-pathname-directory-wildcard
+
    ;; :FINISH-ME
    ;; #:make-pathname-directory-w-name-wild ;; cl-fad::directory-wildcard 
    ;;
@@ -897,6 +896,7 @@
    #:verify-image-file-file-kind
    #:make-target-pathname-for-image-resize
    #:make-pathname-source-destination-resize-pairs
+   #:write-fprint0-file-for-image-files-in-pathname
    #:read-image-file-list-from-fprint0-file
    #:resize-image-files-in-fprint0-file
    ;;

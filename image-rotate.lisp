@@ -104,9 +104,54 @@
        for file in (read-image-file-list-from-fprint0-file read-source-files-from)
        collecting (mk-rsz-path (pathname file)))))
 
-;; 
+(defun write-fprint0-file-for-image-files-in-pathname (&key search-directory search-type append-suffix dest-pathname) 
+  (declare (filename-designator search-directory)
+           (string search-type)
+           (string-or-null append-suffix)
+           ((or null filename-designator) dest-pathname))
+  (let* ((directory
+          (multiple-value-bind (type maybe-dir) (pathname-native-file-kind search-directory)
+            (if (eql type :directory)
+                (pathname-as-directory maybe-dir)
+                (simple-error-mon :w-sym "write-fprint0-file-for-image-files-in-pathname"
+                                  :w-type 'function
+                                  :w-spec "Arg SEARCH-DIRECTORY non-existent or not a directory"
+                                  :w-got   maybe-dir
+                                  :w-type-of t
+                                  :signal-or-only nil))))
+         (dir-wild-type   
+          (cons (make-pathname :directory `(,@(pathname-directory directory))
+                               :name :wild :type (verify-image-file-output-type search-type))
+                directory))
+         (suffix (or (and (string-empty-p append-suffix) "")
+                     (and append-suffix 
+                          (let ((chk-empty (string-left-trim (list #\- #\.) append-suffix)))
+                            (and (string-not-empty-or-all-whitespace-p chk-empty) chk-empty)))
+                     (time-string-yyyy-mm-dd)))
+         (dest 
+          (if dest-pathname
+              (if (pathname-or-namestring-not-empty-dotted-or-wild-p dest-pathname)
+                  dest-pathname
+                  (simple-error-mon :w-sym "write-fprint0-file-for-image-files-in-pathname"
+                                    :w-type 'function
+                                    :w-spec "Arg DEST-PATHNAME did not satisfy ~
+                                                `mon:pathname-or-namestring-not-empty-dotted-or-wild-p'"
+                                    :w-got dest-pathname
+                                    :w-type-of t
+                                    :signal-or-only nil))
+              (format nil "~Aprocess-files-~A-~A"  (namestring (cdr dir-wild-type)) search-type suffix))))
+    ;; (list dest dir-wild-type)))
+    (with-open-file (nulls dest
+                           :direction :output
+                           :if-exists :supersede
+                           :if-does-not-exist :create
+                           :external-format :UTF-8)
+      (loop 
+         for file in (directory (car dir-wild-type))
+         do (format nulls "~A~C" (namestring file) #\NUL)
+         finally (return dest)))))
 
-
+;; :TODO Add additional key resize-y and adapt body accordingly.
 (defun resize-image-files-in-fprint0-file (fprint0-file &key target-directory 
                                                              target-type
                                                              (prefix-name-with "")
@@ -296,6 +341,31 @@ per `mon:make-target-pathname-for-image-resize'.~%~@
   :suffix-name-with \"-appended\"\)
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(fundoc 'write-fprint0-file-for-image-files-in-pathname
+        "Write a #\Nul terminated list of files for files contained of SEARCH-DIRECTORY matching SEARCH-TYPE.~%~@
+Return the pathname of file so written.~%~@
+SEARCH-DIRECTORY names an existing directory containing image files of type SEARCH-TYPE
+SEARCH-TYPE is a string naming a pathname-type image extension satisfying `verify-image-file-output-type'.
+APPEND-SUFFIX is a string to append to the file written. Defaul is as per `time-string-yyyy-mm-dd'.~%~@
+DEST-PATHNAME is a pathname-or-namestring specifying the destination to write to 
+if provided it must not be `pathname-or-namestring-not-empty-dotted-or-wild-p'.
+When DEST-PATHNAME is not provided a pathname is generated and written to
+SEARCH-DIRECTORY its namestring has the following form:
+ <SEARCH-DIRECTORY>/process-files-<SEARCH-TYPE>-<APPEND-SUFFIX>
+:EXAMPLE~%
+ \(write-fprint0-file-for-image-files-in-pathname 
+  :search-directory \"/some/path/full/of/tif/files/\"
+  :search-type \"tif\"\)~%
+ \(write-fprint0-file-for-image-files-in-pathname 
+  :search-directory \"/some/path/full/of/tif/files/\"
+  :search-type \"tif\"
+  :append-suffix \"bubba\"\)~%
+ \(write-fprint0-file-for-image-files-in-pathname 
+  :search-directory \"/some/path/full/of/tif/files/\"
+  :search-type \"tif\"
+  :dest-pathname \"/some/path/full/of/tif/files/dump-file\"\)~%
+:SEE-ALSO `read-image-file-list-from-fprint0-file', `resize-image-files-in-fprint0-file'.~%▶▶▶")
+
 (fundoc 'read-image-file-list-from-fprint0-file
         "Read the #\\Nul character terminated pathnames contained of PATHNAME-OR-NAMESTRING.~%~@
 Return a list of strings with each null terminated pathname split on the
@@ -306,7 +376,7 @@ command `find` when it used invoked the -frint0 arg.~%~@
 Keyword SPECIAL-PARAM is a special variable to bind results to. Default is `mon::*read-image-file-list*'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
+:SEE-ALSO `write-fprint0-file-for-image-files-in-pathname', `resize-image-files-in-fprint0-file'.~%▶▶▶")
 
 (fundoc 'resize-image-files-in-fprint0-file
 "Resize each null-terminated pathname in FPRINT0-FILE.~%~@
@@ -326,8 +396,15 @@ appended to the resized imaged saved to TARGET-DIRECTORY.~%~@
        \(mon::resize-image-files-in-fprint0-file null-list-pathname 
                                                 :target-directory null-list-directory 
                                                 :target-type \"jpg\" 
-                                                :resize-x 1000\)\)\)~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
+                                                :resize-x 1000\)\)\)~%
+\(resize-image-files-in-fprint0-file 
+ \(write-fprint0-file-for-image-files-in-pathname 
+  :search-directory \"/some/path/full/of/tif/files/\"
+  :search-type \"tif\"\)
+ :target-directory \"/some/path/soon/full/of/jpg/files/\"
+ :target-type \"jpg\" 
+ :resize-x 1000\)~%~@
+:SEE-ALSO `read-image-file-list-from-fprint0-file', `write-fprint0-file-for-image-files-in-pathname'.~%▶▶▶")
 
 (fundoc 'rotate-image-files-in-dir-list
 "Rotate each image found in the directories of DIR-LIST by DEGREES POSITIVE-OR-NEGATIVE.~%~@
@@ -353,7 +430,14 @@ thread object this function exececutes in. Default is mon::*rotate-images-thread
  :image-type \"jpeg\" :degrees 90 :positive-or-negative :counter-clockwise\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+;;; ==============================
 
+
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; show-trailing-whitespace: t
+;; mode: lisp-interaction
+;; End:
 
 ;;; ==============================
 ;;; EOF

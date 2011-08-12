@@ -142,18 +142,16 @@ Stas version using `cl:flet' and `cl:loop'."
     (flet ((build-word ()
              (loop 
                 repeat word-size
-                for j = 0
-                then (logior (bit bit-vector (incf index))
-                             (ash j 1))
+                for j = 0 then (logior (bit bit-vector (incf index))
+                                       (ash j 1))
                 finally (return j))))
       (loop 
          repeat (floor length word-size)
          do (setf result (logior (build-word)
                                  (ash result (1- word-size)))))
       (loop while (< index (1- length))
-         do (setf result
-                  (logior (bit bit-vector (incf index))
-                          (ash result 1)))))
+         do (setf result (logior (bit bit-vector (incf index))
+                                 (ash result 1)))))
     result))
 ;;
 ;; :PASTE-DATE 2011-08-10
