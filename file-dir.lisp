@@ -540,7 +540,7 @@
     (declare (pathname of-path))
     (make-pathname :host   (pathname-host of-path)
                    :device (pathname-device of-path)
-                   ;; :NOTE consider using `cl-fad:component-present-p'
+                   ;; :NOTE consider using `osicat::component-present-p'
                    :directory (if (and (pathname-name of-path)
                                        (not (eq :unspecific (pathname-name of-path))))
                                   (pathname-directory of-path)
@@ -1481,10 +1481,7 @@ providing the return value of this function as the argument to a pathname
 function which accepts the CASE keyword take care to ensure that the case of the
 argument is appropriate for the intended caller!~%~@
 :SEE-ALSO `pathname-host', `pathname-directory', `pathname-name', `pathname-type',
-`pathname-version', `fad:copy-file', `fad:copy-stream', `fad:delete-directory-and-files',
-`fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
-`fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
+`pathname-version'.~%▶▶▶")
 
 (fundoc 'file-newer-than-file-p
 "Return T if file FILE1 is newer than file FILE2.~%~@
@@ -1493,11 +1490,7 @@ If FILE1 does not exist, return nil; otherwise, if FILE2 does not exist, return 
   { ... <EXAMPLE> ... } ~%~@
 :NOTE Non-existent files are assumed to be VERY old.~%~@
 :EMACS-LISP-COMPAT A built-in function in :FILE src/fileio.c ~%~@
-:SEE-ALSO `file-write-date',`fad:copy-file', `fad:copy-stream',
-`fad:delete-directory-and-files', `fad:directory-exists-p',
-`fad:directory-pathname-p', `fad:file-exists-p', `fad:list-directory',
-`fad:pathname-as-directory', `fad:pathname-as-file', `fad:walk-directory',
-`fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
+:SEE-ALSO `file-write-date'.~%▶▶▶")
 
 (fundoc 'find-file-search-path
  "Return first complete pathname of an existing file.~%~@
@@ -1510,9 +1503,7 @@ Return nil if an existing file is not found.~%~@
  \(find-file-search-path \(make-pathname :name \"types\"  :type \"lisp\"\)\)~%
  \(find-file-search-path \(make-pathname :name \"types\"  :type \"lisp\"\) 
    :search-path \(list \(pathname-system :mon\)\)\)~%~@
-:SEE-ALSO `mon:pathname-directory-system', `mon:pathname-system',
-`fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `cl:probe-file'.~%▶▶▶")
+:SEE-ALSO `mon:pathname-directory-system', `mon:pathname-system', `cl:probe-file'.~%▶▶▶")
 
 (fundoc 'directory-unfiltered-p
         "Return a boolean indicating if DIRECTORY-NAME is a `cl:member' of IGNORABLES list.~%~@
@@ -1672,10 +1663,7 @@ equivalent to one of the following:~%
 "Return the parent directory PATHNAME~%~@
 :EXAMPLE~%
  \(directory-parent *default-pathname-defaults*\)~%~@
-:SEE-ALSO `fad:copy-file', `fad:copy-stream', `fad:delete-directory-and-files',
-`fad:directory-exists-p', `fad:directory-pathname-p', `fad:file-exists-p',
-`fad:list-directory', `fad:pathname-as-directory', `fad:pathname-as-file',
-`fad:walk-directory', `fad::component-present-p', `fad::directory-wildcard'.~%▶▶▶")
+:SEE-ALSO .~%▶▶▶")
 
 (fundoc 'make-pathname-user-homedir
         "Return a directory pathname for USER with directory components of PATH.~%~@
@@ -1863,12 +1851,49 @@ merged with DIRECTORY.~%~@
 ;; sb-int:sbcl-homedir-pathname
 ;; sb-impl::user-homedir-namestring
 ;; sb-impl::physicalize-pathname
-;; sb-unix:unix-rename
 ;; sb-impl::pathname=
 ;; sb-impl::*logical-hosts*
 ;; sb-impl::*physical-host*
 ;; sb-impl::*win32-host*
 ;; sb-impl::*unix-host*
+;; sb-int:*load-source-default-type*
+;; sb-impl::*short-site-name* sb-impl::short-site-name
+;; sb-impl::*long-site-name*  sb-impl::long-site-name
+;; sb-impl::*fasl-file-type*
+;; sb-impl::*features*
+;; sb-impl::unix-host-unparse-directory-separator sb-impl::*unix-host*
+;; sb-impl::unix-host-customary-case sb-impl::*unix-host*
+;;
+;;; ==============================
+
+
+;;; ==============================
+;; `mon:logical-hosts'
+;; lisp-implementation-type
+;; lisp-implementation-version
+;;
+;; asdf:*default-source-registries*
+;; asdf:*central-registry*
+;; 
+;; sb-ext::machine-type
+;; sb-ext::machine-version
+;; sb-ext::machine-instance
+
+;; sb-sys::software-type
+;; sb-sys::software-version
+;; sb-ext:*posix-argv*
+;; sb-sys::get-machine-version
+;;
+;; (sb-unix:unix-getrusage sb-unix:rusage_self)
+;;
+;;
+;;; ==============================
+;; (osicat-posix:getpagesize)
+;; (osicat-posix:getdomainname)
+;; (osicat-posix:gethostname)
+;; (osicat-posix:getenv <STRING>) ;; string should be simple
+;; (osicat:environment-variable <NAME>)
+;; (osicat:environment)
 ;;
 ;;; ==============================
 
@@ -1879,6 +1904,7 @@ merged with DIRECTORY.~%~@
 ;; 
 ;; :SEE info node (info "(libc)Temporary Files")
 ;;
+;; sb-unix:unix-rename
 ;; sb-posix:mkdtemp  ;; create a directory with a unique name
 ;; sb-posix:mktemp   ;;  generates a unique file name
 ;; sb-posix:mkstemp  ;; sb-posix:mktemp does, but it also opens the file as with `cl:open'

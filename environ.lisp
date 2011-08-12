@@ -2,33 +2,6 @@
 ;;; :FILE environ.lisp
 ;;; ==============================
 
-;;; ==============================
-;; `mon:logical-hosts'
-;; lisp-implementation-type
-;; lisp-implementation-version
-;;
-;; asdf:*default-source-registries*
-;; asdf:*central-registry*
-;; 
-;; sb-ext::machine-type
-;; sb-ext::machine-version
-;; sb-ext::machine-instance
-;; sb-int:*load-source-default-type*
-;; sb-impl::*short-site-name* sb-impl::short-site-name
-;; sb-impl::*long-site-name*  sb-impl::long-site-name
-;; sb-impl::*fasl-file-type*
-;; sb-impl::*features*
-;; sb-impl::unix-host-unparse-directory-separator sb-impl::*unix-host*
-;; sb-impl::unix-host-customary-case sb-impl::*unix-host*
-;; sb-sys::software-type
-;; sb-sys::software-version
-;; sb-ext:*posix-argv*
-;; sb-sys::get-machine-version
-;;
-;; (sb-unix:unix-getrusage sb-unix:rusage_self)
-;;
-;;; ==============================
-
 
 (in-package #:mon)
 ;; *package*
@@ -63,6 +36,43 @@
                                (wild-pathname-p maybe-null-or-wild))) env-split))
       (when env-split
         (map 'list #'mon:pathname-as-directory env-split)))))
+
+#+sbcl
+(defun executable-find (command &key (skip-alias     t)
+                                     (skip-functions t)
+                                     (skip-dot       t)
+                                     (skip-tilde     t))
+  (declare (string command)
+           (boolean skip-alias skip-functions skip-dot skip-tilde))
+  (unless (and (sb-posix:getenv "HOME") ; (osicat-posix:getenv "HOME")
+               (not (string= "" command)))
+    (return-from executable-find 
+      (values nil (cons :exit-status "ENOHOME"))))
+  (let ((which-args (delete-if #'null (list (and skip-tilde     "--skip-tilde")
+                                            (and skip-functions "--skip-functions")
+                                            (and skip-dot       "--skip-dot")
+                                            (and skip-alias     "--skip-alias")
+                                            command)))
+        (out-string (make-string-output-stream))
+        (got-path   nil)
+        (status     nil))
+    (unwind-protect
+         (progn 
+           (setf status (sb-ext:process-exit-code (sb-ext:run-program "which" which-args :output out-string :search t)))
+           (unless (zerop status)
+             (close out-string)
+             (return-from executable-find (values nil (cons :exit-status status))))
+           (setf got-path (get-output-stream-string out-string)))
+      (close out-string))
+    (when got-path 
+      (setf got-path (string-right-trim *whitespace-chars* got-path))
+      (let ((length-got      (length got-path))
+            (length-exec     (length command))
+            (ensure-got-path (search command got-path :from-end t)))
+        (and ensure-got-path 
+             (= (- length-got ensure-got-path) length-exec)
+             (values (namestring (truename got-path))
+                     (cons command got-path)))))))
 
 ;;; ==============================
 ;; :TODO verify if ccl:native-translated-namestring is the way to go here.
@@ -407,6 +417,46 @@ When LOG-IDENT is the default message is logged with the current processes pid.~
 :EXAMPLE~%
  \(getenv-path-pathnames\)~%~@
 :SEE-ALSO `sb-posix:getenv'.~%▶▶▶")
+
+(fundoc 'executable-find
+"Search for COMMAND as if by `which`.~%~@
+Keywords SKIP-ALIAS, SKIP-FUNCTIONS, SKIP-DOT, and SKIP-TILDE are booleans.
+They each default to T.~%~@
+When T the effect is to pass the following flags to `which`:~%
+ skip-alias     \"--skip-alias\"
+ skip-functions \"--skip-functions\"
+ skip-dot       \"--skip-dot\"
+ skip-tilde     \"--skip-tilde\"~%~@
+When NIL the respective flag denoted by the keyword is not passed to `which`.~%~@
+Return value is as if by `cl:values'.~%~@
+If command is found returned values have the following format:~%
+ nth-value 0 is the cl:namestring of the cl:truename of the pathname for COMMAND
+ nth-value 1 is a cons of the form: 
+  ( <COMMAND> . <PATH-TO-COMMAND> )
+ Where <PATH-TO-COMMAND> is a pathname returend by which prior to cl:truename
+ expansion (if any).~%~@
+If the value of $HOME in current environment is null returned values have the format:~%
+ nth-value 0 is NIL
+ nth-value 1 is a cons of the form:
+  ( :EXIT-STATUS . \"ENOHOME\" )~%~@
+If COMMAND is not found anywhere in `exec-path' or an error occurs in the
+external evaluation of `which` returned values have the following format:~%
+ nth-value 0 is NIL
+ nth-value 1 is a cons of the form:~%
+  ( :exit-status . <EXIT-STATUS> )~%~@
+ Where <EXIT-STATUS> is as per the return value of `sb-ext:process-exit-code'.~%~@
+:EXAMPLE~%
+ \(executable-find \"sbcl\"\)~%
+ \(executable-find \"likely-bogus-command-name\"\)~%~@
+:NOTE A null value for a keyword will does not invert its meaning and is
+not the same as for examle passing the flags:
+ \"--read-alias\", \"--read-functions\", \"--show-dot\", \"--show-tilde\"
+and no support is provisioned for doing so.~%~@
+:NOTE `which` is not POSIX. However, `command -v` is a POSIX specified command
+which accomplishes similiarly.
+:SEE (URL `http://pubs.opengroup.org/onlinepubs/009695399/')~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
+
 
 ;;; ==============================
 

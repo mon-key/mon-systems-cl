@@ -191,6 +191,7 @@
    #:gzip-files-and-delete-source
    ;;
  ;; environ.lisp
+   #:executable-find                ;; sb-ext:run-program
    #:setenv                         ;; sb-posix:putenv 
    #:getenv-path-pathnames
    #:posix-working-directory        ;; sb-posix:getcwd, si:getcwd, ccl::current-directory-name, ext:cd
@@ -892,6 +893,8 @@
  ;; image-rotate.lisp ;; :NOTE consider moving all of this to clime
    #:*valid-image-types* 
    #:*image-output-default-thumb-type*
+   #:*image-magick-convert-path*
+   #:verify-image-magic-convert-path
    #:verify-image-file-output-type
    #:verify-image-file-file-kind
    #:make-target-pathname-for-image-resize

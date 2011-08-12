@@ -14,7 +14,34 @@
 
 (defparameter *image-output-default-thumb-type* "jpg")
 
+(defparameter *image-magick-convert-path*
+  ;; :NOTE MS-windows has a convert that is _not_ equivalent to ImageMagick's:
+  #+(or win32 windows) nil 
+  ;;
+  #-sbcl (and (probe-file #P"/usr/bin/convert") "/usr/bin/convert")
+  ;;
+  ;; We assume that any of the following have convert in /user/bin/ if
+  ;; `mon:executable-find' doesn't return T:
+  ;; #+(or linux darwin netbsd openbsd freebsd)
+  #+sbcl (or (executable-find "convert") 
+             (and (probe-file #P"/usr/bin/convert")
+                  "/usr/bin/convert")))
+
 
+(defun verify-image-magic-convert-path ()
+  ;; 
+  (declare (inline string-not-empty-p)
+           (optimize (speed 3)))
+  (unless (and (boundp '*image-magick-convert-path*) 
+               *image-magick-convert-path* 
+               (string-not-empty-p *image-magick-convert-path*))
+    (error "Variable `mon:*image-magick-convert-path*' not bound.~%~
+            A path to ImageMagick's `convert` command must be provided.~%~
+            If this is a Windows machine it must be done so explicitly.~%~
+            If this is not a Windows machine then both `mon:executable-find' and ~
+            cl:probe-file of #P\"/usr/bin/convert\" have failed~%"))
+  t)
+
 (defun verify-image-file-output-type (maybe-valid-output-extension)
   (declare (string maybe-valid-output-extension))
   (unless (member maybe-valid-output-extension mon::*valid-image-types* :test #'string-equal)
@@ -160,6 +187,7 @@
   (declare (pathname-or-namestring  fprint0-file target-directory target-type)
            (string prefix-name-with suffix-name-with)
            ((unsigned-byte 32) resize-x))
+  (verify-image-magic-convert-path)
   (let* ((resize-arg            (format nil "~D" resize-x))
          (suffix-with           (or (and suffix-supplied suffix-name-with)
                                     (concatenate 'string '(#\-) (the string resize-arg))))
@@ -169,7 +197,7 @@
                                                                               :target-type      target-type
                                                                               :prefix-name-with prefix-name-with
                                                                               :suffix-name-with suffix-with))
-         (convert-path   "/usr/bin/convert")
+         ;(convert-path   "/usr/bin/convert")
          (proc-stack (make-array (length resize-pairs) :fill-pointer 0)))
     (declare (string convert-path))
     (labels ((convert-resize (pathname-pairs)
@@ -179,7 +207,7 @@
                       (arglist (append base-resize-arg-list source-dest))
                       (proc-stat '()))
                  (setf proc-stat
-                       `(,(sb-ext:process-exit-code (sb-ext:run-program convert-path arglist))
+                       `(,(sb-ext:process-exit-code (sb-ext:run-program *image-magick-convert-path* arglist))
                           ,@source-dest))))
              (all-resized ()
                (dolist (rsz resize-pairs
@@ -196,6 +224,7 @@
   (declare ((integer 1 359) degrees)
            (string image-type)
            ((or symbol keyword) positive-or-negative))
+  (verify-image-magic-convert-path)
   (unless (member positive-or-negative (list :positive :negative :clockwise :counter-clockwise))
     (error "keyword POSITIVE-OR-NEGATIVE not one of:~%~T~
                       :positive :negative :clockwise :counter-clockwise~%"))
@@ -220,8 +249,8 @@
              (process-rotation (pathname-native)
                (let ((proc-stat 
                       (sb-ext:process-exit-code 
-                       (sb-ext:run-program "/usr/bin/convert" (list "-rotate" rotation-string pathname-native pathname-native) ))))
-                 ;; not following could prob. be accomplished with an :if-error-exists arg.
+                       (sb-ext:run-program *image-magick-convert-path* (list "-rotate" rotation-string pathname-native pathname-native) ))))
+                 ;; :NOTE Following could prob. be accomplished with an :if-error-exists arg.
                  (if (zerop proc-stat)
                      (format report-stream "~&~%successful rotation ~A of image at pathname: ~A" rotation-string pathname-native)
                      (format report-stream "~&~%failed to rotate image at pathname: ~A~&~%process exited with code ~D"
@@ -264,9 +293,24 @@ It is unset with `unset-special-param-read-image-file-list'.
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(vardoc '*image-magick-convert-path*
+"Path to an ImageMagick exectuable.~%~@
+Its value is used by procedures which exectue `sb-ext:run-program'.~%~@
+:SEE-ALSO `mon::verify-image-magic-convert-path'.~%▶▶▶")
+
+
 ;;; ==============================
 ;;; :FUNCTIONS-DOCUMENTATION
 ;;; ==============================
+
+(fundoc 'verify-image-magic-convert-path
+"Return T if variable `*image-magick-convert-path*' is `boundp' and its value is `string-not-empty-p.~%~@
+An error is signaled if not.~%~@
+Procedures which execute `sb-ext:run-program' with *image-magick-convert-path*
+as the COMMAND arg should invoke this function first.~%~@
+:EXAMPLE~%
+ \(verify-image-magic-convert-path\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'verify-image-file-file-kind
 " Whether MAYBE-IMAGE-FILE-FILE satisfies `mon:pathname-or-namestring-not-empty-dotted-or-wild-p'.~%~@
@@ -429,6 +473,7 @@ thread object this function exececutes in. Default is mon::*rotate-images-thread
         #P\"/mnt/some/path/to/goofy/1535/\"\)
  :image-type \"jpeg\" :degrees 90 :positive-or-negative :counter-clockwise\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
 
 ;;; ==============================
 
