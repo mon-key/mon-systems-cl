@@ -58,7 +58,8 @@
         (status     nil))
     (unwind-protect
          (progn 
-           (setf status (sb-ext:process-exit-code (sb-ext:run-program "which" which-args :output out-string :search t)))
+           (setf status (sb-ext:process-exit-code 
+                         (sb-ext:run-program "which" which-args :output out-string :search t)))
            (unless (zerop status)
              (close out-string)
              (return-from executable-find (values nil (cons :exit-status status))))

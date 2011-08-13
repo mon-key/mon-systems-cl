@@ -374,8 +374,8 @@
 ;;
 ;;; :COURTESY buildapp-1.1/utils.lisp :WAS `directorize'
 (defun directorize-namestring (namestring)
-  (declare (filename-designator path))
-  (concatenate 'string (string-right-trim "/" (namestring namestring) "/")))
+  (declare (filename-designator namestring))
+  (concatenate 'string (string-right-trim "/" (namestring namestring))))
 
 ;;; :COURTESY freedius/lisp/lisp/lisp-io.lisp
 (defun rename-file* (file new-name)
@@ -536,7 +536,7 @@
 
 (defun directory-parent (of-pathname)
   (declare (filename-designator of-pathname))
-  (let ((of-pathath (pathname of-pathname)))
+  (let ((of-path (pathname of-pathname)))
     (declare (pathname of-path))
     (make-pathname :host   (pathname-host of-path)
                    :device (pathname-device of-path)
@@ -548,7 +548,7 @@
 
 ;; :SOURCE cl-docutils-20101006-git/utilities.lisp :WAS `find-file'
 (defun find-file-search-path (search-file &key (search-path (or *search-path* (list *default-pathname-defaults*))))
-  (declare (filename-designator pathname))
+  (declare (filename-designator search-file))
   (let ((chk-search-file (if (pathname-not-wild-empty-or-dotted-p search-file)
                              (pathname search-file)
                              (file-error-wild-pathname :w-sym          "find-file-search-path"
@@ -596,7 +596,7 @@
   (declare (filename-designator directory)
            (boolean bare-pathnames))
   (let ((dir-pathname 
-         (if wild-pathname-p
+         (if (wild-pathname-p directory)
              (file-error-wild-pathname :w-sym         "replace-file" 
                                        :w-type        'function
                                        :pathname       directory
