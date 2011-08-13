@@ -18,6 +18,12 @@
 #
 # ./deprecated.lisp
 # ./emacs-compat.lisp
+#
+# I've always wondered why authors of CL DSLs often name write their macros
+# def-<FOO> (as opposed to some less lispy prefix or no prefix at all). 
+# TIL that apparently etags --language=lisp finds pretty much anything "def-" or
+# "(pkg:def*" at BOL. This Includes stuff like "(sb-rt:deftest".
+#
 ###  ==============================
 etags ./alist.lisp \
 ./arrays.lisp \
@@ -37,6 +43,7 @@ etags ./alist.lisp \
 ./file-io.lisp \
 ./format.lisp \
 ./hash.lisp \
+./image-rotate.lisp \
 ./introspect.lisp \
 ./io.lisp \
 ./loadtime-bind.lisp \

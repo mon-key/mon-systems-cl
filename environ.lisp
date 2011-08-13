@@ -98,7 +98,7 @@
   (when (or (null to-directory) 
             (string-empty-p to-directory)
             (wild-pathname-p to-directory))
-    (error ":FUNCTION `set-posix-working-directory' -- arg TO-DIRECTORY not valid~%~Tgot: ~S~%~Ttype-of"
+    (error ":FUNCTION `set-posix-working-directory' -- arg TO-DIRECTORY not valid~%~Tgot: ~S~%~Ttype-of: ~S~%"
            to-directory (type-of to-directory)))
   (values
    (zerop

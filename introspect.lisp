@@ -13,7 +13,8 @@
                       :w-spec "Arg SYMBOL not of type symbol-not-a-constant"
                       :w-got  symbol
                       :w-type-of t))
-  (let ((clusr (find-package (find-package "COMMON-LISP-USER")))
+  (let ( ;;(clusr (find-package (find-package "COMMON-LISP-USER")))
+        (clusr (find-package "COMMON-LISP-USER"))
         (cl    (find-package "COMMON-LISP")))
     (and (member *package* (list clusr cl))
          (simple-error-mon :w-sym 'fset
@@ -23,13 +24,13 @@
                            :w-args (list symbol def))))
   (if (null def)
       (and (fboundp symbol) (fmakunbound symbol))
-      (setf (fdefinition symbol)
-            (if (functionp def) 
-                def 
-                (and (fboundp def) 
-                     (not (special-operator-p def))
-                     ;; (symbol-function def)
-                     (fdefinition def))))))
+      (if (functionp def) 
+          (setf (fdefinition symbol) def)
+          (and (fboundp def)
+               (not (special-operator-p def))
+               ;; (symbol-not-a-constant def)
+               (fdefinition def)
+               (setf (fdefinition symbol) (fdefinition def))))))
 
 (defun keyword-prune (arg-list &rest keys)
   (declare (type list arg-list)) ;; (inline memq)

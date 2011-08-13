@@ -72,9 +72,9 @@
 ;;; :VARIABLES-CONSTANTS
 ;;; ==============================
 
-(defvar *user-name* nil)
+(defvar *user-name*  ())
 
-(defvar *search-path* nil)
+(defvar *search-path* ())
 
 (defvar *default-class-documentation-table* (make-hash-table))
 

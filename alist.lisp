@@ -31,7 +31,7 @@
                `(dolist (pair ,a t)
                   (let ((other (assoc (car pair) ,b :test test)))
                     (unless (and other (funcall test (cdr pair) (cdr other)))
-                      (return nil))))))
+                      (return () ))))))
     (and (a= a1 a2) (a= a2 a1))))
 
 ;;; :SOURCE fare-utils/base/lists.lisp :`WAS `sort-keys'

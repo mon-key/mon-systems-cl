@@ -69,12 +69,12 @@
 	       :cl-ppcre
 	       :flexi-streams
 	       :ironclad
-               :cl-fad        ;; :NOTE This is likely to be deprecated in favor of osicat which provides most of same.
                :salza2
                :chipz
                :closer-mop
                :cffi
                :osicat
+               :cl-fad        ;; :NOTE This is likely to be deprecated in favor of osicat which provides most of same.
                ;; :local-time
 	       )
   :serial t    
