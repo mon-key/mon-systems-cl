@@ -18,8 +18,28 @@
     (:capitalize 
      (warn ":FUNCTION `toggle-print-case' -- case is :capitalize, won't toggle"))))
 
+
+
+;;: :NOTE This is likely really wrong for binary streams!
+;; (let ((s-e-t (stream-element-type stream)))
+;;     (cond ((member s-e-t (list 'character 'base-char 'standard-char))
+;;            (null (peek-char nil stream nil nil)))
+;;           ((equal s-e-t '(UNSIGNED-BYTE 8))
+;;            (let ((psn (file-position stream)))
+;;              (if (null (read-byte stream nil nil))
+;;                  t
+;;                  (file-position stream (1- psn)))))
+;;           (t (error ":FUNCTION `EOF-P' -- Arg STREAM has `cl:stream-element-type' ~
+;;                      not a subtype of `cl:character' nor of type `mon:unsigned-byte-8', type-got: ~S" s-e-t))))
 (defun eof-p (stream)
+  (unless (and (typep stream 'file-stream)
+               (open-stream-p stream)
+               (input-stream-p stream)
+               (equal (multiple-value-list (subtypep (stream-element-type stream) 'character)) 
+                    (list T T)))
+    (error ":FUNCTION `EOF-P' -- Arg STREAM not valid as an open character input-stream"))
   (null (peek-char nil stream nil nil)))
+
 
 ;; :SOURCE xit/cl-utilities/cl-utilities.lisp
 (defun query-string (query-string &key special default (test nil) 
@@ -274,6 +294,40 @@
 ;;                 ,(and allow-fill-pointer-strings 'string-with-fill-pointer)))
 
 
+;; :WAS skip-bytes :SOURCE imago-20101006/src/utilities.lisp
+;; :TODO verify the `stream-element-type' 
+;; :TODO verify `mon:open-stream-output-stream-p'
+;; :TODO Add EOF handling
+(defun read-skip-bytes (stream count)
+  (loop 
+     repeat count
+     do (read-byte stream)))
+
+;; :WAS `skip-line' :SOURCE imago-20101006/src/utilities.lisp
+;; :TODO verify the `stream-element-type' 
+;; :TODO verify `mon:open-stream-output-stream-p'
+;; :TODO Add EOF handling
+(defun read-skip-line (stream)
+  (loop 
+     while (char/= (read-char stream) #\newline)))
+
+;; :SOURCE imago-20101006/src/utilities.lisp
+;; :TODO verify `mon:open-stream-output-stream-p'
+;; :TODO verify the `stream-element-type'
+(defun read-integer-as-text (stream &key (base 10))
+  (loop with number = 0
+        as byte = (read-byte stream nil 0)
+        as digit = (cond ((null byte) nil)
+                         ((<= (char-code #\0) byte (char-code #\9))
+                          (- byte (char-code #\0)))
+                         ((<= (char-code #\A)
+                              byte
+                              (+ (char-code #\A) (- base 11)))
+                          (+ (- byte (char-code #\A)) 10))
+                         (t nil))
+        until (null digit)
+        do (setf number (+ (* number base) digit))
+        finally (return number)))
 
 
 
@@ -331,8 +385,18 @@ Following table maps the corresponding conversions:~%
 
 (fundoc 'eof-p
 "Return non-nil if STREAM has no more data left in it to be read.~%~@
+STREAM must be an open input-stream of type file-stream with a
+`cl:stream-element-type' which is `cl:subtypep' of `cl:character'.~%~@
 :EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+ \(unwind-protect
+      \(with-open-file \(s #P\"/tmp/delete-me\"
+                         :direction :io
+                         :if-does-not-exist :create
+                         :if-exists :supersede
+                         :element-type 'base-char\)
+        \(mon:eof-p s\)\)
+   \(when \(probe-file #P\"/tmp/delete-me\"\)
+     \(delete-file #P\"/tmp/delete-me\"\)\)\)
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'read-next-term-char
@@ -383,6 +447,12 @@ type `mon:open-stream-output-stream-error'.~%~@
 :SEE-ALSO `mon:stream-or-boolean', `cl:streamp', `cl:open-stream-p',
 `cl:output-stream-p' `mon:open-stream-output-stream-error-report'.~%▶▶▶")
 
+(fundoc 'read-integer-as-text
+  "Reads the text representation of a number from a binary output STREAM.~%~@
+Keyword BASE is as per `cl:parse-integer's keyword RADIX.~%~@
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

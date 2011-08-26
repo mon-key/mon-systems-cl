@@ -15,6 +15,11 @@
 (in-package #:mon)
 ;; *package*
 
+;; :SOURCE sclf/directory.lisp :COURTESY Walter C. Pelissero
+(defun bits-set-p (x bits)
+  (= (logand x bits)
+     bits))
+
 (defun coerce-int-float (num)
   (typecase  num
     (integer num)

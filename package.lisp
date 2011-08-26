@@ -501,8 +501,8 @@
    #:symbol-not-null-or-error
    #:string-empty-error
    #:file-error-wild-pathname-report
-   #:format-error
    ;;
+   ;; #:format-error
    ;; #:eval-code
    ;;
  ;; alist.lisp
@@ -639,6 +639,7 @@
    #:average-number-seq
    #:average-number-seq-simple
    #:number-power-of-two-ceiling
+   #:bits-set-p
    ;; 
  ;; char-numeric.lisp
    ;;
@@ -748,6 +749,8 @@
    #:file-truename
    #:file-directory-p
    #:file-name-directory
+   #:namestring-directory
+   #:namestring-file
    #:directory-parent
    #:directory-unfiltered-p
    #:pathname-directory-append
@@ -855,6 +858,9 @@
    #:read-new-random-state-seed
    #:stream-file-descriptor
    #:open-stream-output-stream-p
+   #:read-skip-line
+   #:read-skip-bytes
+   #:read-integer-as-text
    ;;
  ;; regexp.lisp 
    ;; 
@@ -890,22 +896,6 @@
    #:format-emit-tab
    #:format-list-items-by-n
    ;;
- ;; image-rotate.lisp ;; :NOTE consider moving all of this to clime
-   #:*valid-image-types* 
-   #:*image-output-default-thumb-type*
-   #:*image-magick-convert-path*
-   #:verify-image-magic-convert-path
-   #:verify-image-file-output-type
-   #:verify-image-file-file-kind
-   #:make-target-pathname-for-image-resize
-   #:make-pathname-source-destination-resize-pairs
-   #:write-fprint0-file-for-image-files-in-pathname
-   #:read-image-file-list-from-fprint0-file
-   #:resize-image-files-in-fprint0-file
-   ;;
-   #:read-image-file-list-from-file
-   #:unset-special-param-read-image-file-list
-   #:rotate-image-files-in-dir-list
    ;;
  ;; deprecated.lisp
    ;;

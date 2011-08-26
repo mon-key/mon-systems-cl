@@ -44,6 +44,13 @@
 (defun file-name-directory (filename)
   (directory-namestring  filename))
 
+;; `namestring-directory' and `namestring-file' are convenience functions for slime completion
+(defun namestring-directory (pathname)
+  (directory-namestring  pathname))
+;; 
+(defun namestring-file (pathname)
+  (file-namestring  pathname))
+
 (defun file-truename (filename)
   (truename filename))
 

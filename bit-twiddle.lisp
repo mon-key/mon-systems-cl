@@ -45,7 +45,6 @@
 (in-package #:mon)
 ;; *package*
 
-
 ;; 
 (defun number-to-bit-list (unsigned-integer) 
   (declare (type (integer 0 *) unsigned-integer)
@@ -460,6 +459,14 @@ Xach version using `cl:dotimes'."
   (reduce (lambda (x y) (logior (ash x 8) y)) bytes :start start :end end))
 
 ;;
+;;; ==============================
+;; (defun tt--number-byte-array (num)
+;;   (let* ((octet-count (nth-value 0 (truncate (+ (integer-length num) 7) 8)))
+;;          (bit-count (ash octet-count 3))
+;;          (ba-out (make-array octet-count :element-type 'uuid-ub8)))
+;;     (dotimes (cnt octet-count)
+;;       (setf (aref ba-out cnt) (ldb (byte 8 (- bit-count (ash (1+ cnt) 3))) num)))
+;;     ba-out))
 (defun number-to-byte-array (num)
   ;; (number-to-byte-array 825973027016)
   ;; (logand 825973027016 255)          ;=> 200
