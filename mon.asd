@@ -102,7 +102,6 @@
    (:file "chronos"      ) 
    (:file "regexp"       ) 
    (:file "format"       ) 
-   (:FILE "image-rotate" )
    (:file "compose"      ) 
    (:file "conditions"   ) 
    (:file "class-doc"    )
