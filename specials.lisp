@@ -21,23 +21,38 @@
 ;;; :NOTE the `fundoc-*' stuff should come early. All other files evaluate it.
 ;; :SOURCE SICL/Code/Docstrings/docstrings-en.lisp :WAS `fmt'
 
-(defun doc-set (name object-type string args);&rest args)
-  (declare (type symbol name) 
-           ((member variable type function) object-type)
+(defun doc-set (name object-type string args) ;&rest args)
+  (declare (type (or standard-method standard-generic-function (and symbol (not-null)))  name) 
+           (type (member variable type function generic method) object-type)
            ((or null string) string))
   (let ((doc-or-null 
          (if (null string)
              string
              (apply #'format nil `(,string ,@args)))))
-        (ecase object-type
-          (function
-           (setf (documentation (fdefinition name) object-type) 
-                 (setf (documentation name object-type) doc-or-null)))
+    (ecase object-type
+      (function
+       (setf (documentation (fdefinition name) object-type) 
+             (setf (documentation name object-type) doc-or-null)))
       (variable 
        (locally (declare (special name))
          (setf (documentation name object-type) doc-or-null)))
       (type 
-       (setf (documentation name object-type) doc-or-null)))))
+       (setf (documentation name object-type) doc-or-null))
+      (method
+       (setf (documentation name t) doc-or-null))
+      (generic
+       (setf (documentation name t) doc-or-null)))))
+
+(defun generic-doc (function-designator &optional doc-string &rest args)
+  (when (and doc-string
+             (typep function-designator 'standard-generic-function))
+    (doc-set function-designator 'generic doc-string args)))
+
+(defun method-doc (generic-function-designator qualifiers specializers &optional doc-string &rest args)
+  (when doc-string
+    (let ((found-method (find-method generic-function-designator qualifiers specializers nil)))
+      (when (and found-method (typep found-method 'standard-method))
+        (doc-set found-method 'method doc-string args)))))
 
 (defun fundoc (name &optional string &rest args)
   (declare (type symbol name) ((or null string) string))
@@ -84,7 +99,8 @@
 (defconst* *default-pathname-filename-ignorables* list
   ;; other possible values
   ;; "README" "CHANGELOG" "ChangeLog" "TAGS" "COPYING"
-  '(".gitignore" ".hgignore" ".bzrignore"))
+  '(".gitignore" ".hgignore" ".bzrignore"
+    ".BridgeCache" ".BridgeCacheT" "Thumbs.db"))
 
 (defconst* *standard-test-functions* list
   (list 'eq     #'eq
@@ -343,6 +359,7 @@ ARGS are format control specs, these are ignored if STRING is ommitted.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `mon:doc-set' `mon:fundoc', `mon:typedoc', `mon:classdoc'.~%▶▶▶")
 
+
 (fundoc 'type-specifier-p
         "Determine if OBJECT is a valid type specifier.~%~@
 :EXAMPLE~%
@@ -357,6 +374,27 @@ Optional arg STRING is a docstring possibly with format control specs.~%~@
 When STRING is ommitted the symbol with NAME will have its documentation property set to NIL.~%~@
 ARGS are format control specs, these are ignored if STRING is ommitted.~%~@
 :SEE-ALSO `mon:doc-set' `mon:fundoc', `mon:vardoc', `mon:classdoc'.~%▶▶▶")
+
+(fundoc 'method-doc
+"Set documentation for GENERIC-FUNCTION-DESIGNATOR with the format-control DOC-STRING and format-arguments ARGS.~%~@
+Arg GENERIC-FUNCTION-DESIGNATOR may be a setf function.~%~@
+When QUALIFERS is non-nil it is a quoted list with the the general format:~%
+ '\(:after\) '\(:before\) '\(:around\)~%
+When DOC-STRING is non-nil it is a documentation string and may be a `cl:format' control string.~%~@
+When ARGS is non-nil the objects are processed as arguments to DOC-STRING.~%~@
+Arglist has the following form:~%
+ \(method-doc #'<SYMBOL> <QUALIFERS> <SPECIALIZERS> <DOCSTRING> <ARGS>\)~%
+ \(method-doc #'\(setf <SYMBOL>\) <QUALIFERS> <SPECIALIZERS> <DOCSTRING> <ARGS>\)~%~@
+:SEE-ALSO `generic-doc', `fundoc', `vardoc', `typedoc'.~%▶▶▶")
+
+(fundoc 'generic-doc
+        "Set documentation for FUNCTION-DESIGNATOR  with the format-control DOC-STRING and format-arguments ARGS.~%~@
+Arg FUNCTION-DESIGNATOR may be a setf function.~%~@
+When QUALIFERS is non-nil it is a quoted list with the the general format:~%
+ '\(:after\) '\(:before\) '\(:around\)~%
+When DOC-STRING is non-nil it is a documentation string and may be a `cl:format' control string.~%~@
+When ARGS is non-nil the objects are processed as arguments to DOC-STRING.~%~@
+:SEE-ALSO `method-doc', `fundoc', `vardoc', `typedoc'.~%▶▶▶")
 
 ;;; ==============================
 ;;; :SPECIALS-MACROS-DOCUMENTATION

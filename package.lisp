@@ -66,6 +66,8 @@
    #:typedoc
    #:vardoc
    #:fundoc
+   #:method-doc
+   #:generic-doc
    #:defconst*
    #:defconst
    ;; #:%reevaluate-constant ;; don't export

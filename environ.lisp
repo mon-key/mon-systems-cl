@@ -2,6 +2,13 @@
 ;;; :FILE environ.lisp
 ;;; ==============================
 
+;; CL:MACHINE-TYPE 
+;; CL:MACHINE-VERSION
+;; CL:MACHINE-INSTANCE what a name for a symbol... 
+;; We have (make-pathname :host {...} ) not (make-pathname :machine-instance {...} )
+;;
+;; (osicat-posix:gethostname)
+
 
 (in-package #:mon)
 ;; *package*

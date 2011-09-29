@@ -518,18 +518,28 @@
     (delete-file pathname-to-delete)))
 
 ;; :SOURCE buildapp-1.1/utils.lisp
-;; :NOTE differs from `cl-fad:copy-file'
+;; :NOTE differs from `cl-fad:copy-file' element-type is always 'character
 ;; :NOTE what about an :external-format?
-(defun copy-file (input output &key (if-exists :supersede))
-  ;; (declare (type pathname-designator input outuput))
-  (with-open-file (input-stream input)
+(defun copy-file (input output &key (if-output-exists :supersede)  ;; overwrite
+                                    (external-format  :default))
+  (with-open-file (input-stream input
+                                :direction :input
+                                :if-does-not-exist :error
+                                :element-type 'character
+                                :external-format external-format) 
     (with-open-file (output-stream output
 				   :direction :output
-                                   :if-exists if-exists)
+                                   :if-exists if-output-exists
+                                   :element-type 'character
+                                   :external-format external-format)
       (loop
 	 for char = (read-char input-stream nil)
 	 while char
          do (write-char char output-stream)))))
+
+;; copy-file-character
+;; copy-file-unsigned-byte-8
+
 
 ;; :SOURCE mcclim/Apps/Listener/util.lisp :WAS `strip-filespec'
 (defun pathname-strip-filespec (pathname)

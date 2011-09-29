@@ -2,6 +2,51 @@
 ;;; :FILE mon-systems/types.lisp
 ;;; ==============================
 
+;;; ==============================
+;; LISPWORKS-COMPAT-NOTES
+;;
+;; lw:sb-char
+;; lw:sg-char
+;; lw:stchar
+;; lw:base-string-p
+;; lw:base-character
+;; lw:base-char-p
+;; lw:8-bit-string
+;; lw:16-bit-string
+;; lw:general-string
+;; lw:general-string-p
+;; lw:simple-char
+;; lw:simple-char-p
+;; lw:simple-base-string-p
+;; lw:simple-text-string
+;; lw:simple-text-string-p
+;;
+;; SBCL> (type-of (make-array 0 :element-type nil))
+;; => (simple-array nil (0))
+;;
+;; SBCL> (array-element-type (make-array 0 :element-type nil))
+;; => NIL
+;;
+;; SBCL> (upgraded-array-element-type  (array-element-type (make-array 0 :element-type nil)))
+;; => NIL
+;;
+;; LW> (array-element-type (make-array 0))
+;; => T
+;;
+;; LW> (upgraded-array-element-type  (array-element-type (make-array 0 :element-type 'null)))
+;; => T
+;;
+;; LW> (make-array 36 :element-type 'null)
+;;
+;; SBCL> (make-array 36 :element-type 'null)
+;; => #(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+;;
+;; LW> (make-array 36 :element-type 'null)
+;; => #(NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL
+;;     NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL)
+
+;;; ==============================
+
 
 (in-package #:mon)
 ;; *package*
@@ -829,17 +874,20 @@
 ;;; ==============================
 ;;; TYPE-EXPANDERS
 ;;; ==============================
-#+sbcl 
+#+(or sbcl clisp)
 (defun type-expand-all (type-specifier &optional env)
-  (sb-ext:typexpand-all type-specifier env))
+  #+sbcl (sb-ext:typexpand-all type-specifier env)
+  #+clisp (ext:type-expand type-specifier))
 
-#+sbcl 
+#+(or sbcl clisp)
 (defun type-expand (type-specifier &optional env)
-  (sb-ext:typexpand type-specifier env))
+  #+sbcl  (sb-ext:typexpand type-specifier env)
+  #+clisp (type-expand-all type-specifier))
 
-#+sbcl 
+#+(or sbcl clisp)
 (defun type-expand-1 (type-specifier &optional env)
-  (sb-ext:typexpand-1 type-specifier env))
+  #+clisp  (ext:type-expand type-specifier 1)
+  #+sbcl   (sb-ext:typexpand-1 type-specifier env))
 
 ;;; ==============================
 

@@ -56,9 +56,15 @@
 
 (in-package #:mon-build-system)
 
+(defvar *author-maintainer-contact* (format nil "MON KEY -- ~A"
+                                            (map 'string
+                                                 'code-char
+                                                 #(109 111 110 107 101 121 64 115 97 110 100 112 
+                                                   102 114 97 109 105 110 103 46 99 111 109))))
+
 (defsystem :mon
-  ;; :name ""
-  :author  "MON KEY"
+  :name "mon"
+  :author  #.*author-maintainer-contact*
   :maintainer "MON KEY"
   :license "MIT" 
   :description "MON agglomerated"
