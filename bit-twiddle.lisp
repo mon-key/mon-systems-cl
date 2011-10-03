@@ -45,6 +45,10 @@
 (in-package #:mon)
 ;; *package*
 
+;; :SOURCE (URL `http://tumblr.com/xon4ysenfw') :DATE 2011-09-29
+(defun bit-format (integer &optional (width 8) stream)
+  (format stream "~v,'0B" width integer))
+
 ;; 
 (defun number-to-bit-list (unsigned-integer) 
   (declare (type (integer 0 *) unsigned-integer)
@@ -745,6 +749,13 @@ The elts of array are indexed by their octet value as generated with `mon:octet-
  => \(1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\)~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(fundoc 'bit-format
+"Print INTEGER padded to WIDTH to STREAM.~%~@
+\(bit-format 42\)
+ => 00101010~%
+ \(bit-format 42 16\)
+  => 0000000000101010~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

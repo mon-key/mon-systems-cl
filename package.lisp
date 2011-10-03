@@ -800,6 +800,7 @@
  ;;
    ;; bit-twiddle.lisp
    ;;
+   #:bit-format
    #:number-to-bit-list
    #:number-to-bit-vector
    #:bit-vector-to-integer
