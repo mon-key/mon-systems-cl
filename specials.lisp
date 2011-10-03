@@ -22,7 +22,7 @@
 ;; :SOURCE SICL/Code/Docstrings/docstrings-en.lisp :WAS `fmt'
 
 (defun doc-set (name object-type string args) ;&rest args)
-  (declare (type (or standard-method standard-generic-function (and symbol (not-null)))  name) 
+  (declare (type (or standard-method standard-generic-function (and symbol (not null)))  name) 
            (type (member variable type function generic method) object-type)
            ((or null string) string))
   (let ((doc-or-null 
