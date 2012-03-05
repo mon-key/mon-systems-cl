@@ -68,6 +68,89 @@
     (setf new-dir (reverse new-dir))
     (make-pathname :name as-fname :directory new-dir)))
 
+(defun file-write-date-timestring (pathname-or-namestring)
+  (multiple-value-bind (sec min hr day mon yr wd dp zn) (decode-universal-time (file-write-date pathname-or-namestring))
+    (declare (ignore wd dp zn))
+    (format nil "~4,'0d-~2,'0d-~2,'0dT~2,'0d:~2,'0d:~2,'0d" 
+            ;;       yr     mon    day     hr    min   sec
+            yr mon day hr min sec)))
+
+;; set-file-write-date
+;; (+ SB-IMPL::UNIX-TO-UNIVERSAL-TIME
+;;    (sb-posix:stat-mtime (sb-posix:stat pathname-or-namestring)))
+;;
+;; (eql (sb-impl::truncate-to-unix-range (get-universal-time))
+;;      (- (get-universal-time) SB-IMPL::UNIX-TO-UNIVERSAL-TIME))
+;;
+;; (let ((unix-time-now (sb-impl::truncate-to-unix-range (get-universal-time))))
+;;   (set-file-write-date <FILE> unix-time-now unix-time-now))
+;; *features*
+
+;; (featurep 'SB-POSIX)
+#+sbcl
+(defun set-file-write-date (pathname-or-namestring access-time modification-time)
+  (declare (pathname-or-namestring pathname-or-namestring)
+           (unsigned-byte access-time modification-time))
+  (unless (probe-file pathname-or-namestring)
+    (error ":FUNCTION `set-file-write-date' -- arg PATHNAME-OR-NAMESTRING did not satisfy `cl:probe-file'~% got: ~S" 
+           pathname-or-namestring))
+  (values
+   (zerop (sb-posix:utime (sb-ext:native-namestring pathname-or-namestring) access-time modification-time))
+   (file-write-date pathname-or-namestring)))
+;;
+#+sbcl
+(defun set-file-write-date-using-file (target-pathname-or-namestring source-pathname-or-namestring)
+  (declare (pathname-or-namestring target-pathname-or-namestring source-pathname-or-namestring))
+  (unless (probe-file source-pathname-or-namestring)
+    (error ":FUNCTION `set-file-write-date' -- arg SOURCE-PATHNAME-OR-NAMESTRING did not satisfy `cl:probe-file'~% got: ~S" 
+           source-pathname-or-namestring))
+  (let* ((source-stat  (sb-posix:stat (sb-ext:native-namestring source-pathname-or-namestring)))
+         (source-atime (sb-posix:stat-atime source-stat))
+         (source-mtime (sb-posix:stat-mtime source-stat)))
+    (set-file-write-date (sb-ext:native-namestring target-pathname-or-namestring) source-atime source-mtime)))
+
+(defun timestamp-for-file-with (&key 
+                                (prefix  (make-string 0))
+                                (suffix  (make-string 0))
+                                (universal-time nil))
+  (declare (string prefix suffix)
+           (boolean universal-time)
+           (optimize (speed 3)))
+  (and (zerop (string-length prefix))
+       (zerop (string-length suffix))
+       (error ":FUNCTION `timestamp-for-file-with' -- keys PREFIX and SUFFIX ~
+                were not provided or both the empty string."))
+  (flet ((trim-key-strings (key-string)
+           (declare (string key-string))
+           (let ((rtn (string-trim `(#\_ #\- ,@*whitespace-chars*) key-string)))
+             (if (zerop (string-length rtn))
+                 nil
+                 rtn))))
+    (let ((maybe-pfx (trim-key-strings prefix))
+          (maybe-sfx (trim-key-strings suffix))
+          (tstamp (timestamp-for-file :universal-time universal-time)))
+      (declare (string-or-null maybe-sfx maybe-pfx tstamp))
+      (and (null maybe-pfx)
+           (null maybe-sfx)
+           (error ":FUNCTION `timestamp-for-file-with' -- keys PREFIX and SUFFIX were or became null~% ~
+                 prefix: ~S became: ~S ~% suffix: ~S became: ~S~%" prefix maybe-pfx suffix maybe-sfx))
+      (and prefix 
+           (null maybe-pfx) 
+           (zerop (length maybe-sfx))
+           (error ":FUNCTION `timestamp-for-file-with' -- key PREFIX became null~% ~
+                 prefix: ~S became: ~S ~%" prefix maybe-pfx))
+      (and suffix 
+           (null maybe-sfx)
+           (zerop (length maybe-pfx))
+           (error ":FUNCTION `timestamp-for-file-with' -- key SUFFIX became null~% ~
+                 suffix: ~S became: ~S ~%" suffix maybe-sfx))
+      (cond ((and maybe-pfx maybe-sfx)
+             (concatenate 'string maybe-pfx "-" tstamp "-" maybe-sfx))
+            (maybe-pfx
+             (concatenate 'string maybe-pfx "-" tstamp))
+            (maybe-sfx
+             (concatenate 'string tstamp "-" maybe-sfx ))))))
+
 ;;; ==============================
 ;; :COURTESY Nikodemus Siivola
 ;; :SEE (URL `git://github.com/nikodemus/fsdb.git')
@@ -1837,6 +1920,48 @@ merged with DIRECTORY.~%~@
 :EMACS-COMPAT~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(fundoc 'file-write-date-timestring
+        "Return the file-write-date of PATHNAME-OR-NAMESTRING as a string.~%~@
+Return value has the form:~%
+ \"yyyy-mm-ddThh:mm:ss\"~%~@
+:EXAMPLE~%
+ \(file-write-date-timestring *default-pathname-defaults*\)~%~@
+:SEE-ALSO `set-file-write-date', `set-file-write-date-using-file', `timestamp-for-file'.~%▶▶▶")
+
+(fundoc 'timestamp-for-file-with
+"Return a string containing a timestamp suitable for use as argument to name
+key for cl:make-pathname.~%~@
+Keyword PREFIX when non-nil is a string to prepend with the character #\\-
+followed by the timestamp.~%~@
+Keyword SUFFIX when non-nil is a string to append with the timestamp followed
+by the character #\\-.~%~@
+If neither PREFIX or SUFFIX is supplied an error is signalled.~%~@
+When supplied both PREFIX and SUFFIX are trimmed of any leading/trailing
+character occurences of:~%
+ #\\- #\\_ #\Space #\Newline #\Tab #\Return #\NO-BREAK_SPACE #\Page #\Vt~%~@
+An error is signalled if after trimming it is not possible to concatenate either
+PREFIX, SUFFIX or both PREFIX and SUFFIX such that the return value is other
+than the string equivalent of `mon:timestamp-for-file'.~%~@
+Keyword UNIVERSAL-TIME is as per `mon:timestamp-for-file'.~%~@
+ :EXAMPLE~%
+ \(timestamp-for-file-with :prefix \"bubba\"\)~%
+ \(timestamp-for-file-with :prefix \"bubba\" :universal-time t\)~%
+ \(timestamp-for-file-with :prefix \"bubba\" :suffix \"bar\"\)~%
+ \(timestamp-for-file-with :prefix \"bubba\" :suffix \"bar\" :universal-time t\)~%
+ \(timestamp-for-file-with :suffix \"bubba\"\)~%
+ \(timestamp-for-file-with :suffix \"bubba\" :universal-time t\)~%
+ \(timestamp-for-file-with :prefix \"bubba\" :suffix \" _\"\)~%
+ \(timestamp-for-file-with :prefix \"__\" :suffix \"bar\"\)~%
+ \(timestamp-for-file-with :prefix \"__\" :suffix \"bar-\"\)~%~@
+Following error successfully:~%
+ \(timestamp-for-file-with\)~%
+ \(timestamp-for-file-with :universal-time t\)~%
+ \(timestamp-for-file-with :prefix \"-\" :suffix \"-\"\)~%
+ \(timestamp-for-file-with :prefix \"_-\" :suffix \"-_\"\)~%
+ \(timestamp-for-file-with :prefix \"\" :suffix \"- _ -\"\)~%
+ \(timestamp-for-file-with :prefix \"\" :suffix \"- _ -\"\)~%
+ \(timestamp-for-file-with :prefix \" \" :suffix \" _\"\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================
@@ -2077,7 +2202,7 @@ merged with DIRECTORY.~%~@
 ;; |      Time of last access.
 ;; |
 ;; |    * `mtime' :initarg `:mtime' :reader `sb-posix:stat-mtime'
-;; |      Time of last data modification.
+;; |      Time of last data modification. Corresponds with `cl:file-write-date'.
 ;; |
 ;; |    * `ctime' :initarg `:ctime' :reader `sb-posix:stat-ctime'
 ;; |      Time of last status change

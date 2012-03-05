@@ -62,6 +62,10 @@
    ;;
  ;; specials.lisp
    ;;
+   ;; #:*sldb-bitvector-length-no-miser-me*
+   ;; #:*sldb-string-length-no-miser-me*
+   ;; #:*sldb-printer-bindings-no-miser-me*
+   ;; 
    #:doc-set
    #:typedoc
    #:vardoc
@@ -82,6 +86,11 @@
    #:*standard-test-functions*
    #:*error-table*
    #:*time-zones*
+   #:*iso-8601-format*
+   #:*rfc3339-format*
+   #:*timestamp-for-file-header-format*
+   #:*timestamp-for-file-format*
+   #:*timestamp-for-file-gmt-no-colon-offset-format*
    #:*week-days*
    #:*month-names*
    #:*roman-numeral-map*
@@ -117,15 +126,14 @@
    #:ref-it-if
    #:if-not
    ;;
-   #:unitl
+   #:until
    #:while
    #:for
+   #:map-do-list
    #:dosublists 
    #:dosequence
    #:doenumerated
    #:dorange
-   #:do-until
-   #:do-while
    ;;
    #:popn
    #:list-sift
@@ -264,6 +272,7 @@
    #:null-or-nil
    #:not-t
    #:not-boolean
+   ;; #:bool
    #:boolean-integer
    #:boolean-or-boolean-integer
    #:not-boolean-integer
@@ -339,6 +348,21 @@
    #:unsigned-byte-8
    #:octet
    #:nibble
+   #:signed-byte-64
+   #:signed-byte-32
+   #:signed-byte-16
+   #:signed-byte-8
+   #:uint64
+   #:uint32
+   #:uint16
+   #:uint8
+   #:int64
+   #:int32
+   #:int16
+   #:int8
+   ;; #:i64
+   ;; #:i32
+   ;; #:i16
    #:unsigned-byte-128-integer-length
    #:unsigned-byte-96-integer-length
    #:unsigned-byte-64-integer-length
@@ -531,6 +555,7 @@
    #:plist-deletef  ;; `define-modify-macro'
    #:plist-keys
    #:plist-vaules
+   #:plist-hide
    ;;
  ;; hash.lisp
    ;;
@@ -540,6 +565,7 @@
    ;; #:define-hash-cache
    ;; #:define-cached-synonym
    ;; #:defun-cached
+   #:make-hash-table-keyed-by-string
    #:prime-plusp
    #:prime-or-next-greatest
    #:hash-merge
@@ -560,7 +586,7 @@
    ;; :NOTE `hash-resize' requires the following:
    ;; sb-thread::with-recursive-system-spinlock, sb-impl::hash-table-spinlock
    ;; sb-impl::hash-table-next-vector, sb-impl::rehash-size, sb-impl::hash-table-rehash-size
-   #+sbcl #:hash-resize 
+   ;; #+sbcl #:hash-resize 
    ;;
  ;; seqs.lisp
    ;;
@@ -621,6 +647,7 @@
    #:group-by-w-hash
    #:group-by-w-list
    #:list-group-by
+   #:disjoint-sets
    #:mapcar-sharing
    #:%sharing-cons
    ;;
@@ -638,8 +665,8 @@
    #:parse-integer-list
    #:value-in-range-p
    #:random-number-pairs
-   #:average-number-seq
-   #:average-number-seq-simple
+   #:number-average-seq
+   #:number-average-seq-simple
    #:number-power-of-two-ceiling
    #:bits-set-p
    ;; 
@@ -722,6 +749,7 @@
    #:substring
    #:string-insert-char
    #:string-insert-char-3b
+   #:nstring-insert-char
    #:string-to-number
    #:mapconcat
    #:string-map
@@ -739,6 +767,8 @@
    #:char-or-char-code-integer-or-string-1-p
    #:char-or-char-code-integer-or-simple-string-1-p
    #:string-lines-to-array
+   #:string-subdivide
+   #:string-call-with-substrings
    #+sbcl #:string-remove-backslashes ;; sb-impl::remove-backslashes
    ;;
  ;; file-dir.lisp
@@ -751,6 +781,10 @@
    #:file-truename
    #:file-directory-p
    #:file-name-directory
+   #:file-write-date-timestring
+   #+sbcl #:set-file-write-date
+   #+sbcl #:set-file-write-date-using-file
+   #:timestamp-for-file-with
    #:namestring-directory
    #:namestring-file
    #:directory-parent
@@ -883,6 +917,8 @@
    #:time-zone-to-string
    #:timestamp
    #:timestamp-for-file
+   #:time-string-get-universal-time
+   #:get-universal-time-string ;; alias of `time-string-get-universal-time'
    ;;
  ;; compose.lisp
    ;; :NOTE Don't export the `%compose' macro its only needed by `class-slot-list' and

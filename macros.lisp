@@ -306,7 +306,7 @@
 
 ;; :SOURCE cxml-20101107-git/test/domtest.lisp
 (defmacro string-case (keyform &rest case-clauses)
-  (let ((key (gensym "key")))
+  (let ((key (gensym "KEY")))
     ;; Don't bother mapping when keyform is T|NIL
     (when (typep keyform 'boolean) (return-from string-case nil))
     (labels ((chk-keys (keys-seq ky) 
@@ -493,7 +493,7 @@
 	      (,(car new) ,getter))
 	 (prog1
 	     (or (assoc ,object ,(car new))
-		 ;; :WAS (first (setq ,(car new) (cons (list ,object) ,(car new)))))
+		 ;; :was (first (setq ,(car new) (cons (list ,object) ,(car new)))))
 		 (car (setq ,(car new) (cons (list ,object) ,(car new)))))
 	   ,setter)))))
 ;;
@@ -518,14 +518,7 @@
        ,@body)))
 
 ;;; ==============================
-;;; until/while using `loop'
-(defmacro do-until (form test)
-  `(loop ,form (when ,test (return))))
-;;
-(defmacro do-while (form test)
-  `(loop ,form (unless ,test (return))))
 
-;;; ==============================
 ;;; until/while using `do'
 (defmacro until (test &body body)
   `(do () (,test) ,@body))
@@ -534,6 +527,50 @@
 ;;;   `(do () ((not ,test)) ,@body))
 (defmacro while (test &body body)
   `(until (not ,test) ,@body))
+
+;;; ==============================
+;; (URL `http://paste.lisp.org/display/125328')
+;; hexstream's
+(defmacro while.hexstream (test &body body)
+  (let ((tag (gensym (string '#:while))))
+    `(block nil
+       (tagbody ,tag
+          (unless ,test
+            (return))
+          ,@body
+          (go ,tag)))))
+;;
+(defmacro until.hexstream (test &body body)
+  `(while (not ,test)
+     ,@body))
+;;
+;; (let ((a 0)) (while (> 3 a) (setq a (1+ a))))
+;; (let ((a 0)) (while.hexstream (> 3 a) (setq a (1+ a))) a)
+;;
+;; Francogrex's
+;; (defmacro while (condition &rest body)
+;;   (let ((var (gensym)))
+;;     `(do ((,var nil (progn ,@body)))
+;; 	 ((null ,condition) ,var))))
+;;
+;;; ==============================
+;; :PASTE-AUTHOR stassats
+;; :PASTE-DATE   2011-10-05
+;; :SOURCE (URL `http://paste.lisp.org/+2OIJ/2')
+(defmacro map-do-list ((var list &optional (result nil result-supplied-p)) &body body)
+  (multiple-value-bind (body declarations) (alexandria:parse-body body)
+    `(block nil
+       (mapc (lambda (,var)
+               ,@declarations
+               (tagbody
+                  ,@body))
+             ,list)
+       ,(if result-supplied-p
+            `(let (,var)
+               (declare (ignorable ,var))
+               ,@declarations
+               ,result)
+            nil))))
 
 ;;;  dosequence (based on James Anderson's mod of Thomas Burdick's version)
 ;;; :SOURCE GBBopen/source/tools/tools.lisp
@@ -937,29 +974,20 @@ until test returns nil.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :EMACS-LISP-COMPAT~%~@
-:SEE-ALSO `mon:until', `mon:do-while', `mon:do-until'.~%▶▶▶")
+:SEE-ALSO `mon:until'.~%▶▶▶")
 
 (fundoc 'for 
    "A curly-braced `for` style function.~%~@
 :EXAMPLE~%
  \(for \(i 0 8\) \(princ i\)\)~%~@
-:SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence',
-`mon:do-while', `mon:do-until', `mon:for'.~%▶▶▶")
+:SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence', `mon:for'.~%▶▶▶")
 
 (fundoc 'until 
  "Until TEST is non-nil do BODY.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
-:NOTE This macro uses `cl:do', the `mon:do-until' macro uses `cl:loop'.
-:SEE-ALSO `mon:while', `mon:do-while', `mon:for'.~%▶▶▶")
-
-(fundoc 'do-until
-"Do FORM until TEST evaluates non-nil.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:NOTE This macros uses `cl:loop' macro, the `mon:until' macro uses `cl:do'.~%~@
-:SEE-ALSO `mon:while', `mon:do-while', `mon:for', `dohash', `collect'
-`mon:dosublists', `mon:dosequence', `mon:do-while', `mon:do-until',.~%▶▶▶")
+:NOTE This macro uses `cl:do', the  macro uses `cl:loop'.
+:SEE-ALSO `mon:while',  `mon:for'.~%▶▶▶")
 
 (fundoc 'dosublists
 "<DOCSTR>~%~@
@@ -968,8 +996,7 @@ Arg DOLIST ~%~@
 Arg VARIANT ~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence',
-`mon:do-while', `mon:do-until', `mon:for'.~%▶▶▶")
+:SEE-ALSO `dohash', `collect', `mon:dosublists', `mon:dosequence', `mon:for'.~%▶▶▶")
 
 (fundoc 'doenumerated
 "Iterate over SEQUENCE while keeping track of an index.~%~@
@@ -1296,7 +1323,7 @@ including macros and lambdas.~%~@
 if the table is a synchronized table.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `collect' `mon:dosublists', `mon:dosequence', `mon:do-while', `mon:do-until'
+:SEE-ALSO `collect' `mon:dosublists', `mon:dosequence',
 `cl:with-hash-table-iterator'.~%▶▶▶"))
 
 ;;; ==============================

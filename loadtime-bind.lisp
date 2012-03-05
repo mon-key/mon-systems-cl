@@ -37,6 +37,18 @@
 
 (username-for-system-var-bind 'mon:*user-name*)
 
+#+IS-MON
+(rplacd (last *timestamp-for-file-header-format*) (list (cdr *user-name*) #\>))
+#-IS-MON
+(rplacd (last *timestamp-for-file-header-format*) (if (cdr *user-name*) 
+                                                      (list (cdr *user-name*) #\>)
+                                                      (list #\>)))
+;; (setq *timestamp-for-file-header-format*
+;;       `("<Timestamp: #{" 
+;;         (:year 4) #\- (:month 2) #\- (:day 2) #\T (:hour 2) #\: (:min 2) #\: (:sec 2) :gmt-offset 
+;;         "} - by " ,(cdr *user-name*)))
+
+
 ;;; ==============================
 
 

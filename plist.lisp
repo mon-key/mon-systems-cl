@@ -150,7 +150,27 @@
 (define-modify-macro plist-deletef (&rest keys)
   plist-delete)
 
+;; :EXAMPLE
+;; (progn
+;;   (defparameter *item-template* '())
+;;   (setf (getf (symbol-plist '*item-template*) 'bubba) "value")
+;;   (setf (getf (symbol-plist '*item-template*) :bubba) "valueb")
+;;   (prog1 
+;;       (equal (mon::%plist-keys-fast (symbol-plist '*item-template*))
+;;              '(:BUBBA BUBBA))
+;;     (unintern '*item-template*)))
+;;
+;; (ignore-errors 
+;;   (mon::%plist-keys-fast (cons nil nil)))
+(defun %plist-keys-fast (plist)
+  (declare ((or null proper-plist) plist))
+  (if (null plist)
+      plist
+      (loop
+         for key in plist by #'cddr collect key)))
+
 ;;; ==============================
+;; :NOTE called by `dbc::%print-sax-parsed-slots-calculate-padding-for-format-control'
 ;; :SOURCE sbcl/src/pcl/ctor.lisp
 (defun plist-keys (plist &key test)
   (declare (proper-plist plist))
@@ -159,15 +179,12 @@
           ()
           ":FUNCTION `plist-keys' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
-  (loop
-     :for (key . more) :on plist :by #'cddr
-     ;; :WAS
-     ;; :if (null more)
-     ;;  :do (error "Not a property list: ~S" plist)
-     ;; :else
-     :if (or (null test)
-             (funcall test key))
-     :collect key))
+  (if test 
+      (loop
+         for (key . more) on plist by #'cddr
+         if (funcall test key)
+          collect key)
+      (%plist-keys-fast plist)))
 
 ;; :SOURCE sbcl/src/pcl/ctor.lisp
 (defun plist-values (plist &key test)
@@ -178,14 +195,26 @@
           ":FUNCTION `plist-values' -- expected an object of type `mon:proper-plist'~%~
            got: ~S~%" plist)
   (loop
-     :for (key . more) :on plist :by #'cddr
-     ;; :WAS
-     ;; :if (null more)
-     ;; :do (error "Not a property list: ~S" plist)
-     ;; :else
-     :if (or (null test)
-             (funcall test (car more)))
-     :collect (car more)))
+     for (key . more) on plist by #'cddr
+     if (or (null test)
+            (funcall test (car more)))
+      collect (car more)))
+
+;; :PASTE-NUMBER 128074
+;; :PASTE-TITLE Hide in property list
+;; :PASTE-BY chr, stassats
+;; :PASTE-DATE 2012-03-01
+;; :PASTE-URL (URL `http://paste.lisp.org/+2QTM')
+;; :WAS `hide-in-plist'
+;;
+(defun plist-hide (plist secret-indicators obfuscate-with)
+  (loop 
+     with secrets = (alexandria:ensure-list secret-indicators)
+     for (key value) on plist by #'cddr collect key
+     if (member key secrets)
+     collect obfuscate-with
+     else 
+     collect value))
 
 
 ;;; ==============================
@@ -339,9 +368,26 @@ Keyword TEST is a function predicate applied to each key of PLIST.
 "Modify macro for `mon:plist-delete'.~%~@
 :SEE-ALSO `mon:plist-keys', `mon:plist-values' `mon:plist-eql' `mon:nplist-to-alist',
 `mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
-`mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist'
+`mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist',
 `cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
 `cl:symbol-plist'.~%▶▶▶")
+
+(fundoc 'plist-hide
+"Hide values of PLIST keys indicated by SECRET-INDICATORS using OBFUSCATE-WITH.~%~@
+Arg PLIST is a property list.~%~@
+Arg SECRET-INDICATORS is an atom or list of keys assosciated with a value in PLIST.~%~@
+Arg OBFUSCATE-WITH is a value to swap for existing plist values keyed by SECRET-INDICATORS.~%~@
+:EXAMPLE~%
+ \(plist-hide \(list :pass \"secret\" :user \"myid\" :ssid \"1234\" :height \"18\"\) \(list :pass :ssid\) '<hidden>\)
+  => \(:PASS <HIDDEN> :USER \"myid\" :SSID <HIDDEN> :HEIGHT \"18\"\)~%
+ \(plist-hide \(list :pass \"secret\" :user \"myid\" :ssid \"1234\" :height \"18\"\) :pass :hidden\)
+  => \(:PASS :HIDDEN :USER \"myid\" :SSID \"1234\" :HEIGHT \"18\"\)~%~@
+:SEE-ALSO `mon:plist-keys', `mon:plist-values' `mon:plist-eql' `mon:nplist-to-alist',
+`mon:plist-to-alist', `mon:plist-delete', `mon:plist-remove', `mon:plist-get',
+`mon:plist-put', `mon:putf', `mon:put', `mon:plist-proper-p', `mon:proper-plist',
+`cl:get-properties', `cl:get', `cl:getf', `cl:remf', `cl:remprop',
+`cl:symbol-plist'.~%▶▶▶")
+
 
 ;;; ==============================
 

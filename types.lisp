@@ -56,6 +56,9 @@
 ;;; :TYPES-DEFINITIONS
 ;;; ==============================
 
+(deftype bool ()
+  'boolean)
+
 (deftype not-null ()
   '(not null))
 
@@ -336,7 +339,7 @@
 ;;;     (and (listp object) (proper object (cons nil object)))))
 ;;; ==============================
 ;;;
-;;; :SOURCE alexandria/lists.lisp :WAS `proper-list-p'
+;;; :SOURCE alexandria/lists.lisp :WAS `alexandria:proper-list-p'
 (declaim (inline list-proper-p))
 (defun list-proper-p (object)
   (declare (inline sequencep)
@@ -356,7 +359,8 @@
                  (return (the boolean nil)))))
             (t nil)))))
 
-;;; :SOURCE alexandria/lists.lisp
+;; 
+;;; :SOURCE alexandria/lists.lisp `alexandria:proper-list'
 (deftype proper-list ()
   `(and list (satisfies list-proper-p)))
 
@@ -570,6 +574,9 @@
   ;; #b1111111111111111111111111111111111111111111111111111111111111111
   '(unsigned-byte 64))
 
+(deftype uint64 () 
+  'unsigned-byte-64)
+
 (deftype unsigned-byte-56 ()
   ;; 56 bits
   ;; 7 octets
@@ -595,6 +602,9 @@
   ;; #o37777777777
   ;; #b11111111111111111111111111111111
   '(unsigned-byte 32))
+
+(deftype uint32 () 
+  'unsigned-byte-32)
 
 (deftype unsigned-byte-29 ()
   ;; 29 bits
@@ -623,6 +633,9 @@
   ;; #b1111111111111111
   '(unsigned-byte 16))
 
+(deftype uint16 () 
+  'unsigned-byte-16)
+
 (deftype unsigned-byte-8 ()
   ;; 8 bits
   ;; 1 octet
@@ -631,6 +644,9 @@
   ;; #o377
   ;; #b11111111
   '(unsigned-byte 8))
+
+(deftype uint8 () 
+  'unsigned-byte-8)
 
 ;; :SOURCE flexi-streams-1.0.7/mapping.lisp
 (deftype octet ()
@@ -648,6 +664,46 @@
   ;; 15
   ;; #b1111  
   '(unsigned-byte 4))
+
+;;; Lisp integer types with the same numeric range as C++ ints.
+;; :SOURCE (URL `https://github.com/brown/base/blob/master/type.lisp')
+(deftype signed-byte-64 ()
+  '(signed-byte 64))
+
+(deftype signed-byte-32 () 
+  '(signed-byte 32))
+
+(deftype signed-byte-16 () 
+  '(signed-byte 16))
+
+(deftype signed-byte-8 () 
+  '(signed-byte 8))
+
+(deftype int64 () 
+  'signed-byte-64)
+
+(deftype int32 () 
+  'signed-byte-32) 
+
+(deftype int16 () 
+  'signed-byte-16)
+
+(deftype int8 () 
+  'signed-byte-8)
+
+;; Apache Thrift types:
+(deftype i64 ()
+  'signed-byte-64)
+
+(deftype i32 ()
+  'signed-byte-32)
+
+(deftype i16 ()
+  'signed-byte-16)
+
+;; :NOTE A bad idea on their part :)
+;; (deftype byte () 
+;;   'signed-byte-16)
 
 (deftype unsigned-byte-128-integer-length ()
   '(mod 129))
@@ -2349,9 +2405,9 @@ Octets:        16
 Bits:          128
 Hex value:     #xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 Decimal value: 340282366920938463463374607431768211455
-Octal value:   #o3777777777777777777777777777777777777777777
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+Octal value:   #o3777777777777777777777777777777777777777777~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF 'unsigned-byte-128\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2361,10 +2417,11 @@ Octets:        12 octets
 Bits:          96 bits
 Hex value:     #xFFFFFFFFFFFFFFFFFFFFFFFF
 Decimal value: 79228162514264337593543950335
-Octal value:   #o77777777777777777777777777777777
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
+Octal value:   #o77777777777777777777777777777777~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFFFFFFFFFFFFFFFFFF 'unsigned-byte-96\)~%~@
+:SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-64
 "An object of type: \(unsigned-byte 64\)~%~@
@@ -2374,8 +2431,9 @@ Hex value:     #xFFFFFFFFFFFFFFFF
 Decimal value: 18446744073709551615
 Octal value:   #o1777777777777777777777
 Binary value:  #b1111111111111111111111111111111111111111111111111111111111111111~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+Equivalent to C++'s `uint64'.~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFFFFFFFFFF 'unsigned-byte-64\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2385,10 +2443,11 @@ Octets:        7
 Bits:          56
 Hex value:     #xFFFFFFFFFFFFFF
 Decimal value: 72057594037927935
-Octal value:   #o3777777777777777777
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
+Octal value:   #o3777777777777777777~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFFFFFFFF 'unsigned-byte-56\)~%~@
+:SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
+`unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-48
 "An object of type: \(unsigned-byte 48\)~%~@
@@ -2398,8 +2457,8 @@ Hex value:     #xFFFFFFFFFFFF
 Decimal value: 281474976710655
 Octal value:   #o7777777777777777
 Binary value: #b111111111111111111111111111111111111111111111111~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFFFFFF 'unsigned-byte-48\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2411,8 +2470,9 @@ Hex value:     #xFFFFFFFF
 Decimal value: 4294967295
 Octal value:   #o37777777777
 Binary value:  #b11111111111111111111111111111111~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+Equivalent to C++'s `uint32'.~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFFFF 'unsigned-byte-32\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2423,7 +2483,7 @@ Bits:          29
 Hex value:     #x1FFFFFFF
 Decimal value: 536870911 
 Octal value:   #o3777777777
-Binary value:  #b00011111111111111111111111111111
+Binary value:  #b00011111111111111111111111111111~%~@
 :EXAMPLE~%
  \(typep most-positive-fixnum 'unsigned-byte-29\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
@@ -2437,8 +2497,8 @@ Hex value:      #xFFFFFF
 Decimal value:  16777215
 Octal value:    #o77777777
 Binary value:   #b111111111111111111111111~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+:EXAMPLE~%
+ \(typep #xFFFFFF 'unsigned-byte-24\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2450,8 +2510,9 @@ Hex value:      #xFFFF
 Decimal value:  65535
 Octal value:    #o177777
 Binary value:   #b1111111111111111~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
+Equivalent to C++'s `uint16'.~%~@
+:EXAMPLE~%
+ \(typep #xFFFF 'unsigned-byte-16\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
 `unsigned-byte-29', `unsigned-byte-16', `unsigned-byte-8'.~%▶▶▶")
 
@@ -2463,6 +2524,7 @@ Hex value:      #xFF
 Decimal value:  255
 Octal value:    #o377
 Binary value:   #b11111111~%~@
+Equivalent to C++'s `uint8'.~%~@
 :EXAMPLE~%~@
  \(typep 88 'unsigned-byte-8\)~%~@
 :SEE-ALSO `unsigned-byte-64', `unsigned-byte-48', `unsigned-byte-32',
@@ -2476,6 +2538,7 @@ Hex value:      #xFF
 Decimal value:  255
 Octal value:    #o377
 Binary value:   #b11111111~%~@
+Equivalent to C++'s `uint8'.~%~@
 :EXAMPLE~%
  \(typep 88 'octet\)~%~@
 :SEE-ALSO `nibble', `unsigned-byte-128', `unsigned-byte-64', `unsigned-byte-48',
@@ -2497,6 +2560,125 @@ Equivalent to \(mod 16\)~%
 :SEE-ALSO `octet', `unsigned-byte-128', `unsigned-byte-64', `unsigned-byte-48',
 `unsigned-byte-32', `unsigned-byte-29', `unsigned-byte-16',
 `unsigned-byte-8'.~%▶▶▶")
+
+(typedoc 'signed-byte-64 
+"A signed 16-bit integer.~%~@
+An integer in the range [-9223372036854775808, 9223372036854775807].~%~@
+Equivalent to C++'s `int64'.~%~@
+:EXAMPLE~%
+ \(typep -9223372036854775808 'signed-byte-64\)~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'signed-byte-32 
+"A signed 16-bit integer.~%~@
+An integer in the range [-2147483648, 2147483647].
+Equivalent to C++'s `int32'.~%~@
+:EXAMPLE~%
+ \(typep 2147483647 'signed-byte-32\)~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'signed-byte-16 
+"A signed 16-bit integer.~%~@
+An integer in the range [-32768, 32767].~%~@
+Equivalent to C++'s `int16'.~%~@
+:EXAMPLE~%
+ \(typep 32767 'signed-byte-16\)~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'signed-byte-8 
+"A signed 8-bit integer.~%~@
+;; An integer in the range [-129, 127].~%~@
+Equivalent to C++'s `int8'.~%~@
+:EXAMPLE~%
+ \(typep 127 'signed-byte-8\)~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'int8 
+"A signed 8-bit integer.~%~@
+Equivalent to C++'s `int8'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'int16 
+"A signed 16-bit integer.~%~@
+Equivalent to C++'s `int16'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'int32 
+"A signed 32-bit integer.~%~@
+Equivalent to C++'s `int32'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'int64 
+"A signed 64-bit integer. Equivalent to C++'s `int64'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'uint8 
+         "An unsigned 8-bit integer.~%~@
+Equivalent to C++'s `uint8'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'uint16 
+"An unsigned 16-bit integer.~%~@
+Equivalent to C++'s `uint16'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'uint32 
+"An unsigned 32-bit integer.~%~@
+Equivalent to C++'s `uint32'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
+
+(typedoc 'uint64 
+"An unsigned 64-bit integer.~%~@
+Equivalent to C++'s `uint64'.~%~@
+:SEE-ALSO `mon:unsigned-byte-64', `mon:unsigned-byte-32',
+`mon:unsigned-byte-16', `mon:unsigned-byte-8', `mon:signed-byte-64',
+`mon:signed-byte-32', `mon:signed-byte-16', `mon:signed-byte-8', `mon:int64',
+`mon:int32', `mon:int16', `mon:int8', `mon:uint64', `mon:uint32',
+`mon:uint16', `mon:uint8'.~%▶▶▶")
 
 (typedoc 'unsigned-byte-128-integer-length
 "The `cl:integer-length' of an object of type `mon:unsigned-byte-128'.~%~@
@@ -2949,7 +3131,7 @@ satisfies `mon:digit-char-0-or-1-p'.~%~@
 `mon:each-a-sequence-proper-or-character-p',
 `mon:each-a-sequence-proper-p'.~%▶▶▶")
 
-(typedoc 'each-a-string-of-length-1-p
+(typedoc 'each-a-string-of-length-1
          "An object which is a proper list with each element satisfying `mon:string-of-length-1-p'.
 :EXAMPLE~%
  \(typep '\(\"a\"\)  'each-a-string-of-length-1\)~%

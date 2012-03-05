@@ -404,7 +404,33 @@ compared with elements in VECTOR using TEST, which defaults to EQL."
              (list (subseq vector start end)))))))
 
 
-
+;; Paste number 127037
+;; SBCL: cast octet simple-array to simple-bit-vector
+;; Pasted by: 	pkhuong
+;; 2012-01-13
+;; http://paste.lisp.org/+2Q0T
+;; Channel:	#lisp
+;;
+;; :EXAMPLE
+;; CL-USER> (pun-vector (make-array 7 :element-type '(unsigned-byte 8)
+;;                                    :initial-element 42))
+;; #*01010100010101000101010001010100010101000101010001010100
+;;
+(defun pun-vector (vector)
+  (declare (type (simple-array (unsigned-byte 8) 1) vector))
+  (sb-sys:with-pinned-objects (vector)
+    (let* ((sap (sb-sys:int-sap
+                 (logandc2 (sb-kernel:get-lisp-obj-address vector)
+                           sb-vm:lowtag-mask)))
+           (header (sb-sys:sap-ref-word sap 0))
+           (length (sb-sys:sap-ref-word sap sb-vm:n-word-bytes)))
+      (setf (ldb (byte sb-vm:n-widetag-bits 0) header)
+            sb-vm:simple-bit-vector-widetag
+            length (* 8 length))
+      (assert (typep length 'sb-ext:word))
+      (setf (sb-sys:sap-ref-word sap 0) header
+            (sb-sys:sap-ref-word sap sb-vm:n-word-bytes) length)))
+  vector)
 
 
 

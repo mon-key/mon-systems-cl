@@ -191,33 +191,34 @@
 	     hash-b)))
 
 ;; :COURTESY GBBopen/source/tools/tools.lisp :WAS 
-#+sbcl 
-(defun hash-resize (hash-table new-size)
-  (sb-thread::with-recursive-system-spinlock
-      ((sb-impl::hash-table-spinlock hash-table) :without-gcing t)
-    (when (> new-size (hash-table-size hash-table))
-      (let ((old-rehash-size (hash-table-rehash-size hash-table))
-	    (old-size (length (sb-impl::hash-table-next-vector hash-table))))
-	;; SBCL's compiler (starting ~10.0.35) has problems compiling the
-	;; (setf slot-value) with the UNWIND-PROTECT.  This FLET addresses
-	;; that:
-	(flet ((set-rehash-size (hash-table size)
-		 (setf (slot-value hash-table 'sb-impl::rehash-size) size)))
-	  (unwind-protect
-	       (progn (set-rehash-size
-		       hash-table 
-		       ;; Compute the incremental value (to be added back to
-		       ;; old-size in REHASH):
-		       ;;
-		       ;; :NOTE :WAS (-& new-size old-size))
-		       ;; This was an inline type coercion around fixnum using the `defdn' macro.
-		       ;; Lets just use `-' and assume that `-&' was an
-		       ;; optimization that won't affect/impact thread
-		       ;; spinlocking/concurrency
-		       (- new-size old-size))
-		      (sb-impl::rehash hash-table))
-	    (set-rehash-size hash-table old-rehash-size))))
-      't)))
+;; #+sbcl 
+;; (defun hash-resize (hash-table new-size)
+;;   ;; (sb-thread::with-recursive-system-spinlock
+;;   (sb-thread:with-recursive-lock
+;;       ((sb-impl::hash-table-spinlock hash-table) :without-gcing t)
+;;     (when (> new-size (hash-table-size hash-table))
+;;       (let ((old-rehash-size (hash-table-rehash-size hash-table))
+;; 	    (old-size (length (sb-impl::hash-table-next-vector hash-table))))
+;; 	;; SBCL's compiler (starting ~10.0.35) has problems compiling the
+;; 	;; (setf slot-value) with the UNWIND-PROTECT.  This FLET addresses
+;; 	;; that:
+;; 	(flet ((set-rehash-size (hash-table size)
+;; 		 (setf (slot-value hash-table 'sb-impl::rehash-size) size)))
+;; 	  (unwind-protect
+;; 	       (progn (set-rehash-size
+;; 		       hash-table 
+;; 		       ;; Compute the incremental value (to be added back to
+;; 		       ;; old-size in REHASH):
+;; 		       ;;
+;; 		       ;; :NOTE :WAS (-& new-size old-size))
+;; 		       ;; This was an inline type coercion around fixnum using the `defdn' macro.
+;; 		       ;; Lets just use `-' and assume that `-&' was an
+;; 		       ;; optimization that won't affect/impact thread
+;; 		       ;; spinlocking/concurrency
+;; 		       (- new-size old-size))
+;; 		      (sb-impl::rehash hash-table))
+;; 	    (set-rehash-size hash-table old-rehash-size))))
+;;       't)))
 
 ;; (make-list size &key initial-element)
 ;; (function ((integer 0) &key (:initial-element t)) list)
@@ -343,6 +344,23 @@
          default)
      foundp)))
 
+;; :COURTESY Zach Beane's usenet-legend/utils.lisp 
+;; :WAS `make-string-table'
+(defun make-hash-table-keyed-by-string (&key case-sensitive 
+                                        #-:sbcl size
+                                        #+:sbcl (size sb-impl::+min-hash-table-size+)
+                                        (rehash-size 1.5)
+                                        (rehash-threshold 1)
+                                        ;; hash-function
+                                        (weakness nil)
+                                        synchronized)
+  (let ((test (if case-sensitive 'equal 'equalp)))
+    (make-hash-table :test test 
+                     :size size 
+                     :rehash-size rehash-size 
+                     :rehash-threshold rehash-threshold
+                     :weakness weakness 
+                     :synchronized synchronized)))
 
 
 ;;; ==============================
@@ -559,17 +577,6 @@ If MAYBE-HASH-TABLE is NULL or T return a newly generated hash-table object.~%~@
 :SEE-ALSO `hash-or-symbol-p', `mon:hash-table-or-symbol',
 `mon:hash-table-or-symbol-with-hash'.~%▶▶▶")
 
-#+sbcl 
-(setf (documentation 'hash-resize 'function)
-      #.(format nil
-"Resize \(grow\) a hash-table per NEW-SIZE.~%~@
-As with SIZE argument to `cl:make-hash-table', NEW-SIZE's actual value may
-be larger than value supplied.~%~@
-:EXAMPLE~%~@
- { ... <EXAMPLE> ... } ~%~@
-:SEE-ALSO `hash-map-sorted', `hash-merge', `hash-pop', `hash-get-keys',
-`hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%▶▶▶"))
-
 (fundoc 'hash-found-p
 "Like `cl:gethash' but `cl:nth-value' 0 is a closure if KEY was found.~%~@
 :EXAMPLE~%
@@ -578,6 +585,17 @@ be larger than value supplied.~%~@
    \(values \(hash-found-p \"bubba\" tt-ht\)
            \(hash-found-p \"no-bubba\" tt-ht \"can't find bubba\"\)\)\)~%
 :SEE-ALSO `<XREF>'.~%▶▶▶")
+
+;; #+sbcl 
+;; (setf (documentation 'hash-resize 'function)
+;;       #.(format nil
+;; "Resize \(grow\) a hash-table per NEW-SIZE.~%~@
+;; As with SIZE argument to `cl:make-hash-table', NEW-SIZE's actual value may
+;; be larger than value supplied.~%~@
+;; :EXAMPLE~%~@
+;;  { ... <EXAMPLE> ... } ~%~@
+;; :SEE-ALSO `hash-map-sorted', `hash-merge', `hash-pop', `hash-get-keys',
+;; `hash-car', `hash-to-alist', `hash-print', `hash-mapcar'.~%▶▶▶"))
 
 ;;; ==============================
 

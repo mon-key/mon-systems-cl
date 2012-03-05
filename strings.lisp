@@ -459,16 +459,19 @@
 ;;                         for o upfrom index below newlen
 ;;                         do (setf (char result o) (char string (1- o)))
 ;;                         finally (return result)))))))
-
-(defun string-insert-char (string char index)
+;;
+;; 
+(defun string-insert-char (string insert-char index)
   (declare (type string string)
-           (type character char)
-           ;; SBCL x86-32
-           ((mod 536870910) index)
+           (type character insert-char)
+           ;; :NOTE on SBCL x86-32 this is (mod 536870910)
+           (index index)
            (optimize speed))
+  #-SBCL (check-type string vector)
+  #-SBCL (check-type index index)
   (let* ((oldlen (length string))
          (newlen (if (zerop oldlen)
-                     (return-from string-insert-char (string char))
+                     (return-from string-insert-char (string insert-char))
                      (1+ oldlen)))
          (result (make-array newlen :element-type 'character)))
     (declare ((simple-array character (*)) result))
@@ -494,38 +497,89 @@
       (declare (inline copy))
       (typecase string
         ((simple-array character (*))
-         (funcall #'copy string char index oldlen newlen result))
+         (funcall #'copy string insert-char index oldlen newlen result))
         ((simple-base-string)
-         (funcall #'copy string char index  oldlen newlen result))
-        (t (funcall #'copy string char index  oldlen newlen result))))))
-      
+         (funcall #'copy string insert-char index  oldlen newlen result))
+        (t (funcall #'copy string insert-char index  oldlen newlen result))))))
 
-;; 3b's version (URL `http://paste.lisp.org/+2LC4/5') :WAS `push-in-place2'
-(defun string-insert-char-3b (word letter place)
-  (declare (string word) 
-           (character letter) 
-           (fixnum place)
+;; 3b's version 
+;; :PASTE-URL (URL `http://paste.lisp.org/+2LC4/5') 
+;; :WAS `push-in-place2'
+(defun string-insert-char-3b (string insert-char index)
+  (declare (string string) 
+           (character insert-char) 
+           ;; (fixnum index)
+           (index index)
            (optimize speed))
-  (let ((ret (make-string (1+ (length word)))))
+  #-SBCL (check-type string vector)
+  #-SBCL (check-type index index)
+  (let ((ret (make-string (1+ (length string)))))
     (flet ((copy ()
-             (when (plusp place)
-               (replace ret word :end1 place))
-             (setf (char ret place) letter)
-             (when (< place (length word))
-               (replace ret word :start1 (1+ place) :start2 place))))
+             (when (plusp index)
+               (replace ret string :end1 index))
+             (setf (char ret index) insert-char)
+             (when (< index (length string))
+               (replace ret string :start1 (1+ index) :start2 index))))
       (declare (inline copy))
-      (typecase word
+      (typecase string
         ((simple-array character (*))
          (copy))
         ((simple-base-string)
          (copy))
         (t (copy)))
       ret)))
+
+;;; ==============================
+;; pjb's version which mutates.
+;; :PASTE-TITLE what a programmer can do
+;; :PASTE-NUMBER 127742
+;; :PASTE-BY 	pjb
+;; :PASTE-DATE	2012-01-13
+;; :PASTE-URL (URL `http://paste.lisp.org/+2QKE')
+;; :WAS `nstring-insert-char'
+;; ,---- #lisp 2013-02-13 @ 09:18
+;; | <francogrex> (defparameter *string* "ABCD1234") What is a *most straightforward
+;; |              way* to insert a character in that string without reconsitituting
+;; |              using concatenations... is it possible?
+;; | <Xach> francogrex: use an adjustable string with a fill pointer.
+;; | <pjb> francogrex: it's not possible because this is a literal string => immutable.
+;; | <pjb> (defparameter *string* (make-array 8 :element-type 'character :adjustable t :fill-pointer 8 :initial-contents "ABCD1234"))
+;; | <francogrex> and then use vector-push?
+;; | <pjb> francogrex: not to insert in the middle. adjust-array, replace and (setf aref).
+;; | <francogrex> ok
+;; | <pjb> francogrex: adjust-array is O(n) unless you use a geometric series of
+;; |       size (in which case it's amortized O(1)). replace is O(n). so insert
+;; |       in the middle of an adjustable string is costly. Better use concatenate.
+;; | <flip214> francogrex, pjb: but see http://common-lisp.net/project/cl-rope/
+;; | <pjb> Sure, if you do that a lot on big strings, ropes are better.
+;; | <pjb> francogrex: actually, better use make-array and replace.
+;; | <francogrex> but replace in itself, just replaces , it doesn't insert
+;; | <francogrex> suppose I want *string* to become "ABCDZ1234" I see no other way that subseq and coincatenate
+;; | <pjb> francogrex: http://paste.lisp.org/+2QKE
+;; `----
 ;;
-;; (string-insert-char "" #\a 0)
-;; (string-insert-char "m" #\a 1)
-;; (string-insert-char "mb" #\a 0)
-;; (string-insert-char "vmamb" #\a 5)
+(defun nstring-insert-char (string insert-char index)
+  (declare (character insert-char)
+           (index index)
+           ;; (string string)
+           )
+  #-SBCL (check-type string vector)
+  #-SBCL (check-type index index)
+  (if (and (array-has-fill-pointer-p string)
+           (< (fill-pointer string) (array-dimension string 0)))
+      (progn
+        (incf (fill-pointer string))
+        (replace string string :start1 (1+ index) :start2 index
+                 :end2 (fill-pointer string))
+        (setf (aref string index) insert-char)
+        string)
+      (let ((string (adjust-array string (1+ (length string))
+                                  :element-type (array-element-type string))))
+        (replace string string :start1 (1+ index) :start2 index
+                 :end2 (length string))
+        (setf (aref string index) insert-char)
+        string)))
+
 
 ;;; ==============================
 ;;; :NOTE lice/fns.lisp had this which arnesi says is slow.
@@ -1034,6 +1088,42 @@
                    (and (string-not-equal string-or-symbol "nil")
                         (string-first-char string-or-symbol))))
       (symbol         (string-first-char (symbol-name string-or-symbol))))))
+
+;; :PASTE-TITLE call-with-substrigns
+;; :PASTED-BY stassats
+;; :PASTE-DATE 2012-02-25
+;; :PASTE-URL (URL `http://paste.lisp.org/+2QQM/4')
+;; :WAS `call-with-substrigns'
+;; (defun call-with-substrigns (function string chunk-size)
+;;   (loop for i below (length string) by chunk-size
+;;      do (funcall function i (min (+ chunk-size i) (length string)))))
+(defun string-call-with-substrings (function string chunk-size)
+  (declare (string string)
+           (array-length chunk-size))
+  (let ((str-len (string-length string)))
+    (declare (array-length str-len))
+    (unless (<= chunk-size str-len)
+      (error ":FUNCTION `string-call-with-substrings' -- arg CHUNK-SIZE is greater than length of STRING.~% ~
+              string-length: ~D~% chunk-size: ~D" str-len chunk-size)) 
+    (if (= str-len chunk-size)
+        (progn 
+          (funcall function string)
+          nil)
+        (loop 
+           for i below str-len by chunk-size
+           do (funcall function (substring string i (min (+ chunk-size i) str-len)))))))
+
+(defun string-subdivide (string chunk-size)
+  (declare (string string)
+           (array-length chunk-size))
+  (let ((substrings (if (= (string-length string) chunk-size)
+                        (return-from string-subdivide (list (copy-seq string)))
+                        '())))
+    (flet ((divider (sub)
+             (push sub substrings)))
+      (string-call-with-substrings #'divider string chunk-size))
+    (nreverse substrings)))
+
 
 
 ;;; ==============================
@@ -1573,6 +1663,77 @@ an error if not. When ommitted default to value of `cl:*readtable*'.~%~@
  \(string-split-on-column 
   \(format nil \"Hello World~%How do yo do?~%Comment ça va?~%\"\) 8\)~%~@
 :SEE-ALSO `mon:string-split-newline', `mon:string-split-multi'.~%▶▶▶")
+
+(fundoc 'string-insert-char
+"Insert character INSERT-CHAR at INDEX in string STRING.~%~@
+INDEX is should be of type `mon:index'.~%~@
+:EXAMPLE~%
+ \(string-insert-char \"\" #\\z 0\)~%
+ \(string-insert-char \"m\" #\\z 1\)~%
+ \(string-insert-char \"mb\" #\\z 0\)~%
+ \(string-insert-char \"vmamb\" #\\z 5\)~%~@
+Following errors succesfully:~%
+ \(string-insert-char \"vmamb\" #\\a -1\)~%~@
+:SEE-ALSO `mon:nstring-insert-char', `mon:string-insert-char-3b',
+`mon-test::string-insert-char', `mon-test::string-insert-char-test',
+`mon-test::string-insert-char-test-vals', `mon-test::string-insert-char-3b'.~%▶▶▶")
+
+(fundoc 'nstring-insert-char
+        "Like `mon:string-insert-char' but destructively mutates STRING when it is an
+adjustable vector rather than returning a string (e.g. as per cl:copy-seq).~%~@
+:EXAMPLE~%
+ \(let* \(\(target-string1 \(make-array 8 :element-type 'character :adjustable t :fill-pointer 8 :initial-contents \"ABCD1234\"\)\)
+        \(target-string2 \"ABCD1234\"\)
+       ;; :NOTE Illustrating differences we don't use cl:copy-seq we must be explicit
+        \(target-string1b 
+         \(make-array 8 :element-type 'character :adjustable t :fill-pointer 8 :initial-contents \"ABCD1234\"\)\)
+        \(target-string2b \"ABCD1234\"\)
+        \(mutated-types `\(\(target-string1 \(,\(type-of target-string1\)\)\)
+                         \(target-string2 \(,\(type-of target-string2\)\)\)\)\)
+        \(copied-types `\(\(target-string1b \(,\(type-of target-string1b\)\)\)
+                        \(target-string2b \(,\(type-of target-string2b\)\)\)\)\)\)
+   \(push \(type-of \(nstring-insert-char target-string1 #\\Z 4\)\) \(cdadr \(assoc 'target-string1 mutated-types\)\)\)
+   \(push \(type-of \(nstring-insert-char target-string2 #\\Z 4\)\) \(cdadr \(assoc 'target-string2 mutated-types\)\)\)
+   \(push \(type-of \(string-insert-char target-string1b #\\Z 4\)\) \(cdadr \(assoc 'target-string1b copied-types\)\)\)
+   \(push \(type-of \(string-insert-char target-string2b #\\Z 4\)\) \(cdadr \(assoc 'target-string2b copied-types\)\)\)
+   `\(nstring-insert-char ,mutated-types string-insert-char ,copied-types\)\)~%~@
+:SEE-ALSO `mon:string-insert-char-3b', `mon-test::string-insert-char',
+`mon-test::string-insert-char-test', `mon-test::string-insert-char-test-vals',
+`mon-test::string-insert-char-3b'.~%▶▶▶")
+
+(fundoc 'string-subdivide
+"Return a list containing substrings of STRING split to size CHUNKSIZE.~%~@
+If STRING has cl:length CHUNK-SIZE return a list containing a copy of STRING.~%~@
+An error is signaled if CHUNK-SIZE is greater than cl:length of STRING.~%~@
+:EXAMPLE~%
+ \(string-subdivide \"34328248350527230592375\" 3\)~%
+ \(string-subdivide \"34328248350527230592375\" 23\)~%
+ \(string-subdivide \"IMG_5840\" 4\)~%
+ \(string-subdivide \"IMG_5840.JPG\" 4\)~%~@
+Following signals an error:~%
+ \(string-subdivide \"34328248350527230592375\" 24\)~%~@
+:SEE-ALSO `string-call-with-substrings'.~%▶▶▶")
+
+(fundoc 'string-call-with-substrings
+ "Evaluate FUNCTION for each substring of CHUNK-SIZE in STRING.~%~@
+Function should accept one argument a substring of STRING where substring
+will always have a length cl:<= CHUNK-SIZE.~%~@
+An error is signaled if CHUNK-SIZE is greater than length of STRING.~%~@
+:EXAMPLE~%
+ \(let \(\(string \"34328248350527230592375\"\)
+       \(string-bag '\(\)\)\)
+    \(string-call-with-substrings #'\(lambda \(sub\)
+                                     \(push \(parse-integer sub\) string-bag\)\)
+                           string 3\)
+    \(nreverse string-bag\)\)
+ ;=> (343 282 483 505 272 305 923 75)~%
+ \(string-call-with-substrings #'\(lambda \(x\) \(print \(parse-integer x\)\)\) \"34328248350527230592375\" 13\)
+ ;=> 3432824835052
+ ;   7230592375~%
+ \(string-call-with-substrings #'\(lambda \(x\) \(parse-integer x\)\) \"34328248350527230592375\" 13\)~%~@
+Following signals an error:
+ \(string-call-with-substrings #'identity \"34328248350527230592375\" 24\)~%~@
+:SEE-ALSO `string-subdivide'.~%▶▶▶")
 
 ;;; ==============================
 

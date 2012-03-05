@@ -606,6 +606,43 @@
        :do (setf (row-major-aref arr i) el))
     arr))
 
+
+		
+;; :COURTESY Kaz Kylheku   	
+;; :NEWSGROUP comp.lang.lisp
+;; :DATE Wed, 4 Jan 2012 05:53:52 +0000 (UTC)
+;; :SUBJECT Re: rather simple list/set operation
+;; 
+;; (fundoc 'disjoint-sets
+;; "Given a list of lists return members of intersecting lists grouped into the same sublist.~%~@
+;; :EXAMPLE~%
+;;  \(disjoint-sets '\(\(0\) \(1 3\) \(1 2\) \(4 6\) \(5 7\) \(7 8\)\)\)~% ~
+;;  => \(\(0\) \(1 2 3\) \(4 6\) \(5 7 8\)\)
+;; :SEE-ALSO `<XREF>'.~%▶▶▶"))
+(defun disjoint-sets (sets &key (test #'eql))
+  (let ((disj-sets-hash (make-hash-table :test test)))
+    (labels ((get-set (elem)
+               ;; get the set/partition that the element belongs to
+               ;; creating a new one if necessary
+               (let ((partition (gethash elem disj-sets-hash)))
+                 (or partition (setf (gethash elem disj-sets-hash)
+                                     (cons (cons elem nil) nil)))))
+             (merge-set (from-set to-set)
+               ;; migrate all members of from-set to to-set
+               ;; and update their (get-set ...) pointer to the new set also.
+               (unless (eq from-set to-set) ; is this right cl:eq or cl:eql
+                 (dolist (each-elem (car from-set))
+                   (setf (gethash each-elem disj-sets-hash) to-set))
+                 (setf (car to-set) (union (car from-set) (car to-set))))))
+      (dolist (set sets)
+        (let ((fs (get-set (first set))))
+          (dolist (elem (rest set))
+            (merge-set (get-set elem) fs))))
+      (loop 
+         for x being the hash-values of disj-sets-hash
+         collecting x into partitions
+         finally (return (mapcar #'car (remove-duplicates partitions)))))))
+
 ;; (defparameter *tt--array* (make-array '(2 3) :initial-contents '((a b c) (1 2 3))))
 ;; *tt--array* ;=> #2A((A B C) (1 2 3))
 ;;   

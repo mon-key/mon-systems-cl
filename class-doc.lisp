@@ -66,43 +66,20 @@
 ;;;
 ;;; ==============================
 
-;;; ==============================
-;;; Symbols required for implementation:
-;;
-;;; list-proper-p, plist-proper-not-null-p, hash-or-symbol-p, plist-to-alist, memq,
-;;; symbol-not-null-or-error, proper-list-error, proper-list-error, simple-error-mon,
-;;; plist-not-null-error,
-;;;
-;;; ==============================
-
-
 
 (in-package #:mon)
 ;; *package*
 
-(defgeneric documented-class-doc (named-class &key)
-  (:documentation 
-   #.(format nil
-   "Return a class documentation structure for NAMED-CLASS.~%~@
-:SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
-`mon:documented-class-with-docs', `mon:make-documented-class',
-`mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%▶▶▶")))
+(defgeneric documented-class-doc (named-class &key))
 
-(defgeneric documented-class-slot-doc (named-class documented-slot &key)
-(:documentation 
-   #.(format nil
-"Return docstring for DOCUMENTATED-SLOT from documentation structure of NAMED-CLASS.~%~@
-:SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
-`mon:documented-class-with-docs', `mon:make-documented-class',
-`mon:documented-class-verify-init',
-`mon:*default-class-documentation-table*'.~%▶▶▶")))
+(defgeneric documented-class-slot-doc (named-class documented-slot &key))
 
 (defclass documented-class-with-docs ()
   ((documented-class
     :initarg :documented-class
     :initform (error ":CLASS `documented-class-with-docs' ~
                       -- slot DOCUMENTED-CLASS must not be null"))))
+
 ;; initialize-instance
 (defmethod initialize-instance :after ((named-class documented-class-with-docs) &key doc-hash-table)
   (let ((verify (when (and (slot-boundp named-class 'documented-class))
@@ -112,11 +89,12 @@
 
 (defmethod documented-class-doc ((named-class t) &key doc-hash-table)
   (gethash named-class (%verify-hash-table-for-documented-class doc-hash-table)))
-      
+
 (defmethod documented-class-slot-doc ((named-class t) documented-slot 
                                       &key doc-hash-table slot-doc-default)
   (declare ((or null string) slot-doc-default))
-  (multiple-value-bind  (if-docs present) (documented-class-doc named-class :doc-hash-table doc-hash-table)
+  (multiple-value-bind  (if-docs present) (documented-class-doc named-class 
+                                                                :doc-hash-table doc-hash-table)
     (if present 
         (or (cdr (assoc documented-slot if-docs)) slot-doc-default)
         slot-doc-default)))
@@ -125,10 +103,12 @@
                                       &key doc-hash-table class-doc-default)
   (declare ((or null string) class-doc-default))
   (let ((chk-hash (%verify-hash-table-for-documented-class doc-hash-table)))
-    (multiple-value-bind (if-docs present) (documented-class-doc named-class :doc-hash-table chk-hash)
+    (multiple-value-bind (if-docs present) (documented-class-doc named-class 
+                                                                 :doc-hash-table chk-hash)
       (if present 
           (prog1 
-              (or (cdr (assoc :class-doc if-docs)) class-doc-default)
+              (or (cdr (assoc :class-doc if-docs)) 
+                  class-doc-default)
             ;; Access to class-doc should occur last in a class' definition.
             ;; So, we can now remove the key from the hash-table.
             (remhash named-class chk-hash))
@@ -142,7 +122,7 @@
                               :w-type 'function 
                               :error-args `(initform ,initform)
                               :signal-or-only nil))
-       (or (= (length initform) 2) 
+       (or (= (length initform) 2)
            (simple-error-mon :w-sym 'documented-class-verify-init
                              :w-type 'function
                              :w-spec "arg INITFORM not of length 2"
@@ -151,19 +131,19 @@
                              :signal-or-only nil))       
        (symbol-not-null-or-error (car initform) :w-locus 'initform :signal-or-only nil)
        (or (plist-proper-not-null-p (cadr initform))
-           (plist-not-null-error
-            :w-sym 'documented-class-verify-init
-            :w-type 'method
-            :w-spec "arg INITFORM not suitable for plist construction~%~%~
-                     INITFORM must contain at least one key/value pair of the form:~% ~
-                      <:SLOT-NAME>/<DOCSTRING> or :CLASS-DOC/<DOCSTRING>~%~%"
-            :w-obj-locus 'initform 
-            :signal-or-only nil))
+           (plist-not-null-error :w-sym 'documented-class-verify-init
+                                 :w-type 'method
+                                 :w-spec "arg INITFORM not suitable for plist construction~%~%~
+                                          INITFORM must contain at least one key/value pair of the form:~% ~
+                                          <:SLOT-NAME>/<DOCSTRING> or :CLASS-DOC/<DOCSTRING>~%~%"
+                                 :w-obj-locus 'initform 
+                                 :signal-or-only nil))
        initform))
        
 (defun %verify-hash-table-for-documented-class (&optional doc-hash-table)
   ;; (or (and doc-hash-table (hash-or-symbol-p doc-hash-table))
-  (or (and doc-hash-table (hash-or-symbol-p doc-hash-table :w-no-error t))
+  (or (and doc-hash-table 
+           (hash-or-symbol-p doc-hash-table :w-no-error t))
       (or (and (hash-table-p *default-class-documentation-table*)
                *default-class-documentation-table*)
           (setq *default-class-documentation-table* (make-hash-table)))))
@@ -195,6 +175,20 @@
 ;;; ==============================
 ;;; :CLASS-DOC-DOCUMENTATION
 ;;; ==============================
+
+(generic-doc #'documented-class-doc
+             "Return a class documentation structure for NAMED-CLASS.~%~@
+:SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
+`mon:documented-class-with-docs', `mon:make-documented-class',
+`mon:documented-class-verify-init',
+`mon:*default-class-documentation-table*'.~%▶▶▶")
+
+(generic-doc #'documented-class-slot-doc
+"Return docstring for DOCUMENTATED-SLOT from documentation structure of NAMED-CLASS.~%~@
+:SEE-ALSO `mon:classdoc', `mon:documented-class-slot-doc',
+`mon:documented-class-with-docs', `mon:make-documented-class',
+`mon:documented-class-verify-init',
+`mon:*default-class-documentation-table*'.~%▶▶▶")
 
 (fundoc 'make-documented-class
 "Add the documentation data structure to default documentation table.~%~@

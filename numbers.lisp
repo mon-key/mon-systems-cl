@@ -150,7 +150,7 @@
   ;; END is an index into FLOAT-STRING designating where parse should stop.
   ;; TYPE is a cl float specifier. Default is single-float
   ;; Keyword DECIMAL-CHARACTER designates the mantissa delimiter. Default is #\\.
-  ;; `mon:parse-integer-list' `mon:average-number-seq' `cl:most-positive-double-float', `cl:most-positive-long-float',
+  ;; `mon:parse-integer-list' `mon:number-average-seq' `cl:most-positive-double-float', `cl:most-positive-long-float',
   ;; `cl:most-positive-short-float', `cl:most-positive-single-float'
   (declare (type character decimal-character)
 	   (type string-not-empty float-string)
@@ -300,9 +300,137 @@
       (length-unit-get unit))
    unit))
 
+;;; ==============================
+;; :PASTE-NUMBER 125253
+;; :PASTE-BY pjb
+;; :PASTE-DATE 2011-10-11
+;; :PASTE-URL (URL `http://paste.lisp.org/+2ON9')
+;; :WAS `best-fit' 
+;; (defun best-fit (target sizes)
+;;   (let ((candidates (member target sizes :test (function >=))))
+;;     (cond
+;;       ((null candidates)           nil)
+;;       ((= (car candidates) target) (list target))
+;;       (t (cons (car candidates)
+;;                (best-fit (- target (car candidates)) (cdr candidates)))))))
+;; modifications to pjb's `best-fit':
+;;  - Added declarations/assertions.
+;;  - Added early exit when TARGET-NUMBER is cl:zerop
+;;  - No longer necessary to reverse NUMBER-BAG.
+;;  - Now accepts vectors as argument to NUMBER-BAG.
+;;  - Now with different semantics w/r/t floats and negatives
+;;  - Now with different semantics when TARGET-NUMBER is outside the set represented by NUMBER-BAG
+(defun number-nearest-seq (target-number number-bag)
+  (declare (type mon:proper-sequence number-bag)
+           (type real target-number))
+  #-:sbcl (assert (typep number-bag 'mon:proper-sequence))
+  #-:sbcl (assert (typep target-number 'number))
+  ;; :NOTE cl:length of (1 . 2) should signal an error, so even where NUMBER-BAG
+  ;; is not a proper-sequence we would bail here.
+  (unless (and (not (zerop (length number-bag)))
+               (every #'realp number-bag))
+    (error "Arg NUMBER-BAG must be a proper-sequence with each element satisfying `cl:numberp'~% got: ~S" number-bag))
+  (let ((ensured-list (etypecase number-bag
+                        (list  number-bag) 
+                        (vector (coerce number-bag 'list)))))
+    (declare (list ensured-list)
+             (optimize (speed 3)))
+    (labels ((num-near-seq (target bag)
+               (declare (real target) (list bag))
+               (let* ((candidates      (member target bag :test #'>=))
+                      (first-candidate (car candidates)))
+                 (cond ((null first-candidate) nil)
+                       ((= first-candidate target) (list target))
+                       (t (cons (car candidates)
+                                (num-near-seq (- target first-candidate) (cdr candidates)))))))
+             (rtn-check (rtn-value)
+               (case (list-length rtn-value)
+                 ;; lets assume we never get a consed pair
+                 (0 (setf rtn-value (reduce #'min ensured-list)
+                          rtn-value (if (and (plusp target-number)
+                                             (minusp rtn-value))
+                                        (list rtn-value (abs (- target-number rtn-value)))
+                                        (list rtn-value (- target-number rtn-value)))))
+                 ;; we found a negative number
+                 (1 (push (abs (- target-number (car rtn-value))) rtn-value)
+                    (nreverse rtn-value))
+                 (2 (if (= (reduce #'+ rtn-value) target-number)
+                        rtn-value
+                        (list (car rtn-value)
+                              (- target-number (car rtn-value)))))
+                 ;; we have a number larger than all others.
+                 (t (setf rtn-value (reduce #'max ensured-list)
+                          rtn-value (list rtn-value
+                                          (if (and (minusp target-number)
+                                                   (minusp rtn-value))
+                                              (abs (- target-number rtn-value))
+                                              (- target-number rtn-value))))))))
+      (when (member target-number ensured-list :test #'=)
+        (return-from number-nearest-seq (list target-number 0)))
+      (rtn-check (num-near-seq target-number (delete-duplicates (sort ensured-list #'>)))))))
+
+;;; ==============================
+;; NOPE
+;; (defun number-nearest-seq (target-number number-bag)
+;;   (declare (type mon:proper-sequence number-bag)
+;;            (type real target-number))
+;;   #-:sbcl (assert (typep number-bag 'mon:proper-sequence))
+;;   #-:sbcl (assert (typep target-number 'number))
+;;   ;; :NOTE cl:length of (1 . 2) should signal an error, so even where
+;;   ;; alexandria:proper-list isn't in the environment we would bail here.
+;;   (unless (and (not (zerop (length number-bag)))
+;;                (every #'realp number-bag))
+;;     (error "Arg NUMBER-BAG must be a proper-sequence with each element satisfying `cl:numberp'~% got: ~S" number-bag))
+;;   (let* ((list-ensured
+;;           (etypecase number-bag
+;;             (list  (copy-seq number-bag)) 
+;;             (vector (coerce number-bag 'list))))
+;;          (early-candidate-check 
+;;           (cond ((member target-number list-ensured :test (function =))
+;;                  (return-from number-nearest-seq (list target-number 0)))
+;;                 ((zerop target-number)
+;;                  (return-from number-nearest-seq
+;;                    (if (member-if #'zerop list-ensured)
+;;                        (list target-number target-number)
+;;                        (if (some #'minusp list-ensured)
+;;                            (if (some #'plusp list-ensured)
+;;                                (loop 
+;;                                   for x in list-ensured
+;;                                   if (plusp x) minimizing x into plus
+;;                                   else
+;;                                   maximizing x into minus
+;;                                   finally (return (if (>= (abs minus) plus)
+;;                                                       plus
+;;                                                       minus)))
+;;                                (apply #'max list-ensured))
+;;                            (apply #'min list-ensured)))))
+;;                 (t (mapcar #'(lambda (x) 
+;;                                (list (- target-number x) x))
+;;                            list-ensured)))))
+;;     ;; (declare (list list-ensured early-candidate-check)
+;;     ;;          (optimize (speed 3)))
+;;     (setf list-ensured 
+;;           (assoc (reduce (if (plusp target-number)
+;;                              ;; #'min #'max)
+;;                              #'max #'min)
+;;                          early-candidate-check :key #'car)
+;;                  early-candidate-check))
+;;     (rotatef (car list-ensured) (cadr list-ensured))
+;;     (list list-ensured early-candidate-check)))
+;; (setf list-ensured 
+;;           (list 
+;;            (reduce (if (plusp target-number)
+;;                        #'max #'min)
+;;                          early-candidate-check :key #'car)
+;;            (reduce (if (plusp target-number)
+;;                        #'max #'min)
+;;                    early-candidate-check :key #'cadr)
+;;            early-candidate-check
+;;           ))))
+;;; ==============================
 
 ;; :SOURCE (URL `http://paste.lisp.org/display/118915') :COURTESY mathrick :WAS `average'
-(defun average-number-seq (seq &key key (weighting-key (constantly 1))
+(defun number-average-seq (seq &key key (weighting-key (constantly 1))
                            weights large-sum-p)
   (when (and weighting-key weights)
     (error "WEIGHTS and WEIGHTING-KEY might not be given at the same time."))
@@ -327,7 +455,7 @@
                           avg
                           (/ sum-avg (max sum-weight 1))))))
 
-(defun average-number-seq-simple (seq)
+(defun number-average-seq-simple (seq)
   (declare (sequence seq))
   (or (every #'numberp seq)
       (error "element of arg SEQ not `cl:numberp', got: ~S" seq))
@@ -467,7 +595,7 @@ UNIT is a key in `mon:*length-unit*'.~%~@
  \(length-unit-convert 1.03 nil\)~%~@
 :SEE-ALSO `mon:length-unit-get', `mon:*length-unit*'.~%▶▶▶")
 
-(fundoc 'average-number-seq
+(fundoc 'number-average-seq
   "Calculate the average \(arithmetic mean\) value of numbers in sequence SEQ.~%~@
 KEY has the standard meaning.~%~@
 WEIGHTING-KEY should be a function of one argument returning a number denoting
@@ -483,26 +611,26 @@ since it will perform a multiplication on the average on every step.~%~@
  \(let \(\(seq \(loop 
 	       for i from 1.13332 to 1000.0 by 0.769
 	       collect i\)\)\)
-   \(abs \(- \(average-number-seq seq :large-sum-p t\)
-	   \(average-number-seq seq :large-sum-p nil\)\)\)\)
+   \(abs \(- \(number-average-seq seq :large-sum-p t\)
+	   \(number-average-seq seq :large-sum-p nil\)\)\)\)
  ;=> 2.1362305e-4~%~@
-:SEE-ALSO `mon:average-number-seq-simple', `cl:most-positive-double-float',
+:SEE-ALSO `mon:number-average-seq-simple', `cl:most-positive-double-float',
 `cl:most-positive-long-float', `cl:most-positive-short-float',
 `cl:most-positive-single-float'.~%▶▶▶")
 
-(fundoc 'average-number-seq-simple
+(fundoc 'number-average-seq-simple
         " Return the average of all elts of SEQ.~%~@
 SEQ is must be of tyep `cl:sequence' with every elt satisfying `cl:numberp'.~%~@
 :EXAMPLE~%
- \(average-number-seq-simple '\(1 2 3 4\)\)
- \(average-number-seq-simple #\(17/18 2.33\)\)
- \(average-number-seq-simple \(make-array 4 :element-type 'bit :initial-contents '\(1 1 0 1\)\)\)
- \(average-number-seq-simple '\( #c\(1.3 -1.2\) #c\(1.1 -1.4\)\)\)
- (average-number-seq-simple #*01011101000000101)
+ \(number-average-seq-simple '\(1 2 3 4\)\)
+ \(number-average-seq-simple #\(17/18 2.33\)\)
+ \(number-average-seq-simple \(make-array 4 :element-type 'bit :initial-contents '\(1 1 0 1\)\)\)
+ \(number-average-seq-simple '\( #c\(1.3 -1.2\) #c\(1.1 -1.4\)\)\)
+ (number-average-seq-simple #*01011101000000101)
 ;; Following fail succesfully:~%
- \(average-number-seq-simple '\( 8 \"8\"\)\)~%
- \(average-number-seq-simple #\(1 2 3\) \(make-array '\(2 2\) :initial-contents '\(\(1 1\) \(2 2\)\)\)\)~%~@
-:SEE-ALSO `mon:average-number-seq'.~%▶▶▶")
+ \(number-average-seq-simple '\( 8 \"8\"\)\)~%
+ \(number-average-seq-simple #\(1 2 3\) \(make-array '\(2 2\) :initial-contents '\(\(1 1\) \(2 2\)\)\)\)~%~@
+:SEE-ALSO `mon:number-average-seq'.~%▶▶▶")
 
 (fundoc 'number-power-of-two-ceiling
         "The smallest power of two that is equal to or greater than UNSIGNED-INT.~%~@
@@ -510,6 +638,42 @@ UNSIGNED-INT should be of type `mon:index'.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `prime-plusp', `prime-or-next-greatest'.~%▶▶▶")
+
+(fundoc 'number-nearest-seq
+        "Return a list indicating the number of NUMBER-BAG nearest TARGET-NUMBER.~%~@
+TARGET-NUMBER is an object of type `cl:real', an error is signaled if not.~%~@
+NUMBER-BAG is a proper-sequence of type `cl:list' or `cl:vector' with each
+element of type `cl:real', an error is signaled if not.~%~@
+ is an object of type `cl:number' an error is signaled if not.~%~@
+Return value has the form:~%
+ \( <NEAREST-NUMBER> <DISTANCE-TO-TARGET-NUMBER> \)~%
+ - <NEAREST-NUMBER> is a nearest number to TARGET-NUMBER~%
+ - <DISTANCE-TO-TARGET-NUMBER> is a value representing a distance from TARGET-NUMBER.~%~@
+It should be the case that following will return true:~%~@
+ \(= \(apply #'+  \( <NEAREST-NUMBER> <DISTANCE-TO-TARGET-NUMBER> \)\) <TARGET-NUMBER>\)~%
+:EXAMPLE~%
+ \(number-nearest-seq  12   '\(1 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq  12   #\(1 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq  15   '\(1.8 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq  13.1 '\(1.8 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq -13.1 '\(1.8 -3 5 -7 11 -13 17\)\)~%
+ \(number-nearest-seq  1    '\(1.1 1.0 1.3 1\)\)~%
+ \(number-nearest-seq  1.0  '\(1.1 1.0 1.3 1\)\)~%
+ \(number-nearest-seq  1    '\(0 0 0 0\)\)~%
+ \(number-nearest-seq -1    '\(0 0 0 0\)\)~%
+ \(number-nearest-seq -15   '\(-1.8 -3 -5 -7 -11 -13 -17\)\)~%
+ \(number-nearest-seq -13.1 '\(1.8 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq   3   '\(11 13 17\)\)~%
+ \(number-nearest-seq -18   '\(-4 -1 -3 -5 -7 -11 -13 -17\)\)~%
+ \(number-nearest-seq  16.9 '\(1 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq  16.9 '\(3 5 7 11 16.8 16.95 17\)\)~%
+ \(number-nearest-seq  16.9 '\(3 5 7 11 16.8 17\)\)~%
+ \(number-nearest-seq  16.9 '\(3 5 7 11 16.8 17\)\)~%
+ \(number-nearest-seq  17.1  #\(1 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq  1    '\(3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq -1    '\(1 3 5 7 11 13 17\)\)~%
+ \(number-nearest-seq 0.1   '\(1 3 5 7 11 13 17\)\)~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 
 ;;; ==============================

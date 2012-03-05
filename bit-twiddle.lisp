@@ -751,6 +751,10 @@ The elts of array are indexed by their octet value as generated with `mon:octet-
 
 (fundoc 'bit-format
 "Print INTEGER padded to WIDTH to STREAM.~%~@
+<<<<<<< HEAD
+=======
+:EXAMPLE~%
+>>>>>>> refs/remotes/github/i3-devel
 \(bit-format 42\)
  => 00101010~%
  \(bit-format 42 16\)

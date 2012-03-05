@@ -22,7 +22,7 @@
 ;; :SOURCE SICL/Code/Docstrings/docstrings-en.lisp :WAS `fmt'
 
 (defun doc-set (name object-type string args) ;&rest args)
-  (declare (type (or standard-method standard-generic-function (and symbol (not null)))  name) 
+  (declare (type (or standard-method standard-generic-function (and symbol (not null)))  name)
            (type (member variable type function generic method) object-type)
            ((or null string) string))
   (let ((doc-or-null 
@@ -87,6 +87,7 @@
 ;;; :VARIABLES-CONSTANTS
 ;;; ==============================
 
+;; 
 (defvar *user-name*  ())
 
 (defvar *search-path* ())
@@ -174,6 +175,28 @@
 (defconst* *week-days* (simple-array simple-string (7))
   (make-array 7 :initial-contents '("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun")))
 
+(defvar *iso-8601-format* local-time:+iso-8601-format+)
+
+(defvar *rfc3339-format* local-time:+rfc3339-format+)
+
+;; *user-name* doesn't have a value until after the system is loaded so we set
+;; *value of variable below from loadtime-bind.lisp with:
+;; (rplacd (last *timestamp-for-file-header-format*) (list (cdr *user-name*)))
+;; (setf   *timestamp-for-file-header-format* 
+(defvar *timestamp-for-file-header-format* '("<Timestamp: #{" 
+                                             (:year 4) #\- (:month 2) #\- (:day 2) 
+                                             #\T 
+                                             (:hour 2) #\: (:min 2) #\: (:sec 2) 
+                                             :gmt-offset 
+                                             "} - by " ))
+
+(defvar *timestamp-for-file-format*
+  '((:year 4) #\- (:month 2) #\- (:day 2) #\T (:hour 2) (:min 2) (:sec 2)))
+
+
+(defvar *timestamp-for-file-gmt-no-colon-offset-format*
+  '((:year 4) #\- (:month 2) #\- (:day 2) #\T (:hour 2) (:min 2) (:sec 2)
+    :gmt-offset-no-colon))
 
 ;; :SOURCE cl-docutils-20101006-git/utilities.lisp :WAS `*length-units*'
 (defconst* *length-unit* list 
