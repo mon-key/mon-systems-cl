@@ -7,7 +7,7 @@
 ;; *package*
 
 (defun string-delimited-to-list (string &optional (separator #\space)
-                                 skip-terminal)
+                                                  skip-terminal)
   (declare
    (type string string)
    (type character separator)) 
@@ -22,7 +22,7 @@
         (if (< pos len)
             (push (subseq string pos) output)
             (when (or (not skip-terminal) (zerop len))
-              (push "" output)))
+              (push (make-string 0) output)))
         (nreverse output))
     (declare (type fixnum pos len)
              (type (or null fixnum) end))
@@ -33,7 +33,7 @@
   (format nil (concatenate 'string "~{~A~^" (string separator) "~}") list))
 
 (defun simple-string-ensure (thing)
-;; Signals an error if THING cannot be coerced with `cl:string'.
+  ;; Signals an error if THING cannot be coerced with `cl:string'.
   (let ((s (string thing)))
     (make-array (length s)
                 :element-type 'character
@@ -42,8 +42,8 @@
 (defun string-explode (str)
   (declare (type string str))
   (loop 
-     :for i :across (the string str)
-     :collect (format nil "~a" i)))
+    for i across str ;(the string str)
+    collect (format nil "~A" i)))
 
 ;;; :SOURCE clocc/src/onlisp-util.lisp
 ;; (defun symbol-name-explode-string (explode-sym)
@@ -58,12 +58,12 @@
   (or 
    (and (booleanp explode-sym) explode-sym)
    (loop
-      :with expld-sym = (symbol-name explode-sym)
-      :for expld :across (the string expld-sym)
-      :if as-chars
-       :collect expld
-      :else 
-       :collect (make-string 1 :initial-element expld))))
+     with expld-sym = (symbol-name explode-sym)
+     for expld across (the string expld-sym)
+     if as-chars
+     collect expld
+     else 
+     collect (make-string 1 :initial-element expld))))
 
 ;;; :COURTESY Drew Mcdermott's ytools/nilscompat.lisp
 (defun string-elt (str idx) 
@@ -103,7 +103,7 @@
     (character (string x))
     (number (princ-to-string x))
     (symbol (symbol-name x))
-    (t (format nil "~a" x))))
+    (t (format nil "~A" x))))
 
 (defun string-to-char (string &key (w-code-char nil))
   (declare (type string string))
@@ -122,53 +122,99 @@
   ;; (declare (optimize (speed 0) (safety 3) (compilation-speed 0) (debug 3)))
   (with-output-to-string (out) 
     (loop 
-       :with part-length = (length from-string) 
-       :for old-pos = 0 :then (+ pos part-length) 
-       :for pos = (search from-string string  :start2 old-pos :test test) 
-       :do (write-string  string out :start old-pos :end (or pos (length string))) 
-       :when pos 
-       :do  ;; (break "POS was ~S" pos)
-           (write-string to-string out) :while pos)))
+      with part-length = (length from-string) 
+      for old-pos = 0 then (+ pos part-length) 
+      for pos = (search from-string string  :start2 old-pos :test test) 
+      do (write-string string out :start old-pos :end (or pos (length string))) 
+      when pos 
+      do  ;; (break "POS was ~S" pos)
+         (write-string to-string out) 
+      while pos)))
+
+;;; ==============================
+;;; :SOURCE texinfo-docstrings/colorize.lisp
+;; (defun strcat (&rest strings)
+;;   (apply #'concatenate 'string strings))
+;;
+;;; :SOURCE s-sql.lisp :WAS strcat
+(defun string-cat (string-sequence)
+  (declare (sequence string-sequence)
+           (optimize (speed 3)))
+  (etypecase string-sequence
+    (null (make-string 0))
+    (string string-sequence)
+    ((or vector cons)
+     (if (not (or (vectorp string-sequence) 
+                  (listp (cdr string-sequence))))
+         (error ":FUNCTION `string-cat' ~
+                -- arg STRING-SEQUENCE is `cl:consp' with cdr not `listp'~% got: ~S" string-sequence)
+         (let* ((maybe-coerce-string-sequence 
+                  (locally 
+                      (declare (type (or list vector) string-sequence))
+                    (if (some #'characterp string-sequence)
+                        (flet ((%reduce-chars (string-or-char)
+                                 (declare ((or string character) string-or-char))
+                                 (etypecase string-or-char
+                                   (string string-or-char)
+                                   (character (string string-or-char)))))
+                          (declare (type (or list vector) string-sequence))
+                          (map 'vector
+                               #'%reduce-chars
+                               (or (and (vectorp string-sequence)
+                                        (the vector string-sequence))
+                                   (the list string-sequence))))
+                        (if (vectorp string-sequence)
+                            string-sequence
+                            (make-array (length (the list string-sequence))
+                                        :initial-contents (the list string-sequence))))))
+                (result (make-string (reduce #'+ maybe-coerce-string-sequence :initial-value 0 :key #'length))))
+           (declare (vector maybe-coerce-string-sequence)
+                    (string result))
+           (loop
+             for pos = 0 then (+ pos (length arg))
+             for arg across maybe-coerce-string-sequence
+             do (replace result arg :start1 pos))
+           result)))))
 
 ;;; ==============================
 ;;; :SOURCE s-sql.lisp :WAS `implode'
 (defun string-implode (sep list)
   (declare (type string sep))
   (string-cat (loop
-		 :for element :on list
-		 :collect (car element)
-		 :if (cdr element)
-		 :collect sep)))
+                for element on list
+                collect (car element)
+                if (cdr element)
+                collect sep)))
 
 ;;; :SOURCE s-sql.lisp :WAS reduce-strings
-(defun string-reduce (list)
-  (let ((accum ())
-        (span ""))
-    (dolist (part list)
-      (cond ((stringp part) (setf span (concatenate 'string span part)))
-            (t (when (not (string= "" span))
-                 (push span accum)
-                 (setf span ""))
-               (push part accum))))
-    (if (not (string= "" span))
-        (push span accum))
-    (nreverse accum)))
-
-;;; :SOURCE texinfo-docstrings/colorize.lisp
-;; (defun strcat (&rest strings)
-;;   (apply #'concatenate 'string strings))
-;;
-;;; :SOURCE s-sql.lisp :WAS strcat
-(defun string-cat (args)
-  (let ((result (make-string (reduce #'+ args :initial-value 0 :key 'length))))
-    (loop
-       :for pos = 0 :then (+ pos (length arg))
-       :for arg :in args
-       :do (replace result arg :start1 pos))
-    result))
-;;;
-;;; (string-cat '("a" "b" "c"))
-;;; (reduce #'+ '("a" "b" "c") :initial-value 0 :key 'length)
+(defun string-reduce (string-or-list)
+  (declare ((or null cons string) string-or-list)
+           (optimize (speed 3)))
+  (etypecase string-or-list
+    (null string-or-list)
+    (string (list string-or-list))
+    (cons
+     (unless (listp (cdr string-or-list))
+       (error ":FUNCTION `string-reduce' ~
+                -- arg STRING-OR-LIST is `cl:consp' with cdr not `listp'~% got: ~S" string-or-list))
+     (let ((accum ())
+           (span (make-string 0))
+           (cmpr-str (make-string 0)))
+       (declare (type (simple-array character (0)) cmpr-str))
+       (flet ((%cmpring-str (string)
+                (declare (string string))
+                (string/= cmpr-str string)))
+         (dolist (part string-or-list)
+           (cond ((stringp part)
+                  (setf span (concatenate 'string span part)))
+                 (t 
+                  (when (%cmpring-str span)
+                    (push span accum)
+                    (setf span (make-string 0)))
+                  (push part accum))))
+         (and (%cmpring-str span)
+              (push span accum)))
+       (nreverse accum)))))
 
 ;;; :SOURCE xit/cl-utilities/cl-utilities.lisp :WAS `convert-to-readable-string'
 (defun string-convert-to-readable (value)
@@ -260,7 +306,7 @@
 	       (every #'null args)))
 	 ;; (make-string* 0 "x" "y" "z") ;=> ""
 	 (and (typep (car args) '(integer 0 0))))
-	"")
+        (make-string 0))
    (let ((num (or (and (typep (car args) '(integer 1))
 		       (or 
 			;; Its irrelevant how many times we multiply
@@ -283,8 +329,8 @@
 	    (result-length (* (length string) num))
 	    (result (make-string result-length)))
        (loop 
-	  :for index :by (length string) :below result-length
-	  :do (replace result string :start1 index))
+         for index by (length string) below result-length
+	 do (replace result string :start1 index))
        result))))
 
 ;;; :NOTE Has sb-rt test `string-split-on-chars-TEST'
@@ -319,18 +365,18 @@
              (array-index strlen)
              (array chunks))
     (loop 
-       :while (< position strlen)
-       :do (loop 
-              :while (and (< nextpos strlen)
-                          (not (position (char string nextpos) separators)))
-              ;; :NOTE Don't change this to:  :do (incf nextpos))
-              :do (setq nextpos (1+ nextpos)))
-       (vector-push-extend (subseq string position nextpos) chunks)
-       ;; :NOTE Don't change this to:  (incf position (1+ nextpos))
-       (setq position (1+ nextpos))
-       (setq nextpos  position)
-       ;; :finally (return (coerce (the array chunks) 'list))
-       :finally (return (map 'list #'identity (the array chunks))))))
+      while (< position strlen)
+      do (loop 
+           while (and (< nextpos strlen)
+                      (not (position (char string nextpos) separators)))
+           ;; :NOTE Don't change this to:  :do (incf nextpos))
+           do (setq nextpos (1+ nextpos)))
+         (vector-push-extend (subseq string position nextpos) chunks)
+         ;; :NOTE Don't change this to:  (incf position (1+ nextpos))
+         (setq position (1+ nextpos))
+         (setq nextpos  position)
+         ;; :finally (return (coerce (the array chunks) 'list))
+      finally (return (map 'list #'identity (the array chunks))))))
 
 ;; mon:string-trim-whitespace
 ;; (map 'list #'identity #(a b c)) 
@@ -394,10 +440,10 @@
 (defun string-split-newline (string)
   (declare (type string string))
   (loop 
-     :for i = 0 :then (1+ j)
-     :as j = (position #\newline string :start i)
-     :collect (subseq string i j)
-     :while j))
+    for i = 0 then (1+ j)
+    as j = (position #\newline string start i)
+    collect (subseq string i j)
+    while j))
 
 ;; :COURTESY PJB :SOURCE (URL `http://paste.lisp.org/display/120998')
 (defun string-split-on-column (string column)
@@ -406,10 +452,10 @@
            (type index column))
   (mapcan (lambda (line)
             (loop
-               with i = 0
-               while (< (+ i column) (length line))
-               collect (subseq line i (min (length line) (incf i column))) into result
-               finally (return (nconc result (list (subseq line i))))))
+              with i = 0
+              while (< (+ i column) (length line))
+              collect (subseq line i (min (length line) (incf i column))) into result
+              finally (return (nconc result (list (subseq line i))))))
           ;; :WAS (split-sequence:split-sequence  #\newline string)
           (string-split-newline string)))
 
@@ -480,20 +526,20 @@
     (flet ((copy (str chr idx old new rslt)
              (if (or (zerop idx) (= idx old))
                  (loop
-                    initially (setf (char rslt idx) chr)
-                    for x across str
-                    for y upfrom (if (zerop idx) 1 0) below (if (zerop idx) new old)
-                    do (setf (char rslt y) x)
-                    finally (return rslt))
+                   initially (setf (char rslt idx) chr)
+                   for x across str
+                   for y upfrom (if (zerop idx) 1 0) below (if (zerop idx) new old)
+                   do (setf (char rslt y) x)
+                   finally (return rslt))
                  (loop 
-                    for n from 0 below idx
-                    do (setf (char rslt n) (char str n))
-                    finally (return 
-                              (loop 
-                                 initially (setf (char rslt (1- idx)) chr)
-                                 for o upfrom idx below new
-                                 do (setf (char rslt o) (char string (1- o)))
-                                 finally (return rslt)))))))
+                   for n from 0 below idx
+                   do (setf (char rslt n) (char str n))
+                   finally (return 
+                             (loop 
+                               initially (setf (char rslt (1- idx)) chr)
+                               for o upfrom idx below new
+                               do (setf (char rslt o) (char string (1- o)))
+                               finally (return rslt)))))))
       (declare (inline copy))
       (typecase string
         ((simple-array character (*))
@@ -599,24 +645,24 @@
   (declare (each-a-sequence-proper-or-character strings)
            (optimize (speed 3)))
   (let* ((strings-cln   
-          (if (or (null strings) (every #'null strings))
-              (return-from concat (make-string 0))
-              (string-seqs-convert-chars-if
-               (if (some #'null strings)
-                   (remove-if #'null strings)
-                   (copy-seq strings)))))
+           (if (or (null strings) (every #'null strings))
+               (return-from concat (make-string 0))
+               (string-seqs-convert-chars-if
+                (if (some #'null strings)
+                    (remove-if #'null strings)
+                    (copy-seq strings)))))
          (length (reduce #'+ strings-cln :key #'length))
          (result (make-string length)))
     (declare ((integer 0 *) length)
              ((simple-array character (*)) result)
              (each-a-sequence strings-cln))
     (loop
-       :for string :in strings-cln
-       :for start = 0 :then end
-       :for end = (+ start (the array-length (length string)))
-       :while string
-       :do (replace result string :start1 start :end1 end)
-       :finally  (return result))))
+      for string in strings-cln
+      for start = 0 then end
+      for end = (+ start (the array-length (length string)))
+      while string
+      do (replace result string :start1 start :end1 end)
+      finally  (return result))))
 
 ;;; ==============================
 ;; Initial version used a stepping iterator over each elt
@@ -637,12 +683,12 @@
   (if (notany #'characterp string-seq)
       string-seq
       (loop 
-         for char-psn = (position-if #'characterp string-seq)
-         then (position-if #'characterp string-seq :start char-psn)
-         for char = (and char-psn (string (elt string-seq char-psn)))   
-         while char
-         do (setf (elt string-seq char-psn) char)
-         finally (return string-seq))))
+        for char-psn = (position-if #'characterp string-seq)
+        then (position-if #'characterp string-seq :start char-psn)
+        for char = (and char-psn (string (elt string-seq char-psn)))   
+        while char
+        do (setf (elt string-seq char-psn) char)
+        finally (return string-seq))))
 
 ;;; ==============================
 ;;; :COURTESY PJB 
@@ -743,36 +789,69 @@
 ;;; 1- mon_key on irc://irc.freenode.org/#lisp signaled that nil are
 ;;;    substituted by empty strings in emacs mapconcat.
 ;;; 2- Factorized out the processing for both vectors and lists in JOIN.
-(defun mapconcat (function sequence separator)
-  (labels ((process-item (item)
-             (let ((sitem (funcall function item)))
-               (cond
-                 ((stringp sitem) sitem)
-                 ((null sitem)    "")
-                 (t               (princ-to-string sitem)))))
-           (join (items)
-             (let* ((ssepa (if (stringp separator)
-                               separator
-                               (princ-to-string separator)))
-                    (size   (+ (reduce (function +) items :key (function length))
-                               (* (length ssepa) (1- (length items)))))
-                    (result (make-string size :element-type 'character))
-                    (start  0))
-               (replace result  (first items) :start1 start)
-               (incf start (length (first items)))
-               (dolist (item (rest items))
-                 (replace result ssepa :start1 start) (incf start (length ssepa))
-                 (replace result item  :start1 start) (incf start (length item)))
-               result)))
-    (etypecase sequence
-      (list
-       (if sequence
-           (join (mapcar (function process-item) sequence))
-           ""))
-      (vector
-       (if (plusp (length sequence))
-           (join (map 'list (function process-item) sequence))
-           "")))))
+;;
+(defun mapconcat (function sequence separator &key (char-code-as-integer nil))
+  (declare (sequence sequence)
+           (type (or null string character char-code-integer) separator)
+           (boolean char-code-as-integer)
+           (optimize (speed 3)))
+  (if (null sequence)
+      (make-string 0)
+      (labels ((convert-sep-or-item (sep-or-item initial)
+                 (etypecase sep-or-item
+                   (null
+                    (make-string 0))
+                   (string
+                    sep-or-item)
+                   (character
+                    (string sep-or-item))
+                   (char-code-integer 
+                    (if char-code-as-integer
+                        (string (code-char sep-or-item))
+                        (princ-to-string sep-or-item)))
+                   (t
+                    (if initial
+                        (error ":function `mapconcat' -- arg SEPARATOR not a reasoanble delimeter~% got: ~S~%"
+                               sep-or-item)
+                        (princ-to-string sep-or-item)))))
+               
+               (process-item (item)
+                 (let ((sitem (funcall function item)))
+                   (convert-sep-or-item sitem nil)))
+               
+               (joiner (items sep sep-len)
+                 (declare (string sep)
+                          (mon:array-index sep-len))
+                 (let* ((size   (+ (reduce (function +) items :key (function length))
+                                   (* sep-len (1- (length items)))))
+                        (result (make-string size :element-type 'character))
+                        (start  0))
+                   (declare (simple-string result)
+                            (unsigned-byte start size))
+                   (replace result  (first items) :start1 start)
+                   (incf start (length (first items)))
+                   (dolist (item (rest items) result)
+                     (replace result sep :start1 start) 
+                     (incf start sep-len)
+                     (replace result item :start1 start)
+                     (incf start (length item)))))
+               
+               (join (items)
+                 (let* ((ssepa (convert-sep-or-item separator t))
+                        (ssepa-len (length ssepa)))
+                   (declare (string ssepa)
+                            (mon:array-index ssepa-len))
+                   (joiner items ssepa ssepa-len))))
+        (etypecase sequence
+          (cons
+           (if (listp (cdr sequence))
+               (join (mapcar (function process-item) sequence))
+               (error ":FUNCTION `mapconcat' -- arg SEQUENCE is `cl:consp' with cdr not `cl:listp'~% got: ~S"
+                      sequence)))
+          (vector
+           (if (plusp (length sequence))
+               (join (map 'list (function process-item) sequence))
+               (make-string 0)))))))
 
 ;; :SOURCE cl-data-format-validation-20101006-git/validation.lisp :WAS `join-strings'
 (defun string-join-strings (strings  &optional (separator #\space))
@@ -1008,7 +1087,7 @@
   (locally (declare (each-a-string strings))
     (flet ((common-prefix (s1 s2)
              (declare (string s1 s2))
-             (let ((diff-pos (mismatch s1 s2)))
+             (let ((diff-pos (mismatch s1 s2 :test #'char=)))
                (if diff-pos (subseq s1 0 diff-pos) s1))))
       (reduce #'common-prefix strings))))
 
@@ -1023,8 +1102,8 @@
   (declare (type simple-string string))  
   (coerce (with-input-from-string (s string)
             (loop
-               :for line = (read-line s nil nil)
-               :while line :collect line))
+              for line = (read-line s nil nil)
+              while line collect line))
           'vector))
 
 ;;; :COURTESY Larry Hunter. Obtained from Google.
@@ -1032,8 +1111,8 @@
   (declare (type string string substring replacement-string))
   (assert (> (length substring) 0))
   (let ((substring-length (length substring))
-    (last-end 0)
-    (new-string ""))
+        (last-end 0)
+        (new-string ""))
     (do ((next-start (search substring string) (search substring string :start2 last-end)))
 	((null next-start)
 	 (concatenate 'string new-string (subseq string last-end)))
@@ -1042,6 +1121,7 @@
       (setq last-end (+ next-start substring-length)))))
 
 (defun string-last-word (string)
+  ;; (declare (string string))
   (let ((pos (position #\space string :from-end t)))
     (if pos
 	(substring string (1+ pos))
@@ -1053,23 +1133,23 @@
   (unless (null tabby-str)
     (with-output-to-string (stream)
       (loop 
-         :for char :across (the string tabby-str)
-	 :for col :from 0
-	 :for i :from 0
-	 :do (if (eql char #\Tab)
-                 (loop 
-                    :repeat (- 8 (mod col 8))
-                    :do (write-char #\Space stream)
-                    :do      (incf (the fixnum-exclusive col))  ;;fixnum col))
-                    :finally (decf (the fixnum-exclusive col))) ;; fixnum col)))
-                 (progn
-                   (when (eql char #\Newline)
-                     ;; Filter out empty last line
-                     (when (and omit-last-newline 
-                                (eql (the index i) (1- (length (the string tabby-str)))))
-                       (return))
-                     (setf col -1))
-                   (write-char char stream)))))))
+        for char across (the string tabby-str)
+        for col from 0
+        for i from 0
+        do (if (eql char #\Tab)
+               (loop 
+                 repeat (- 8 (mod col 8))
+                 do (write-char #\Space stream)
+                 do      (incf (the fixnum-exclusive col))  ;;fixnum col))
+                 finally (decf (the fixnum-exclusive col))) ;; fixnum col)))
+               (progn
+                 (when (eql char #\Newline)
+                   ;; Filter out empty last line
+                   (when (and omit-last-newline 
+                              (eql (the index i) (1- (length (the string tabby-str)))))
+                     (return))
+                   (setf col -1))
+                 (write-char char stream)))))))
 
 (defun string-is-nil-like (string)
   (declare (type string-or-null string))
@@ -1110,8 +1190,8 @@
           (funcall function string)
           nil)
         (loop 
-           for i below str-len by chunk-size
-           do (funcall function (substring string i (min (+ chunk-size i) str-len)))))))
+          for i below str-len by chunk-size
+          do (funcall function (substring string i (min (+ chunk-size i) str-len)))))))
 
 (defun string-subdivide (string chunk-size)
   (declare (string string)
@@ -1123,6 +1203,24 @@
              (push sub substrings)))
       (string-call-with-substrings #'divider string chunk-size))
     (nreverse substrings)))
+
+;; adapted from the cl-ppcre example function entitled `url-encode' but which
+;; fails to correctly encode utf-8 characters outside the ASCII range correctly.
+;; :SOURCE (URL `http://weitz.de/cl-ppcre/')
+(let ((url-regex (cl-ppcre:create-scanner "[^a-zA-Z0-9_\\-.]")))
+  (defun string-percent-encode (string)
+    (declare (string string))
+    (flet ((convert (target-string start end match-start match-end reg-starts reg-ends)
+             (declare (string target-string)
+                      (ignore start end reg-starts reg-ends)
+                      (optimize (speed 3)))
+             (format nil "~{%~2,'0x~}" 
+                     ;; (char-code (char target-string match-start)))))
+                     #+sbcl
+                     (coerce (sb-ext:string-to-octets target-string :external-format :utf-8 :start match-start :end match-end) 'list)
+                     #-sbcl
+                     (coerce (flexi-streams:string-to-octets target-string :external-format :utf-8 :start match-start :end match-end) 'list))))
+      (cl-ppcre:regex-replace-all url-regex string  #'convert))))
 
 
 
@@ -1145,12 +1243,6 @@ When keyword W-CODE-CHAR is supplied convert car.~%~@
 `alpha-char-p',`digit-char-p', `alphanumericp', `upper-case-p', `lower-case-p',
 `both-case-p', `char=', `char/=', `char<', `char>', `char<=', `char>=',
 `char-equal', `char-not-equal+'.~%▶▶▶")
-
-(fundoc 'string-cat
- "Concatenate a list of strings into a single one.~%~@
-:EXAMPLE~%~@
- { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'concat
         "Concatenate all the arguments and make the result a string.~%~@
@@ -1301,20 +1393,33 @@ If CHR is not found or is the last character of STR return whole string.~%~@
 
 (fundoc 'mapconcat
  "Apply FUNCTION to each elt of SEQUENCE, and concatenate the results as strings.~%~@
-SEPARATOR is a string or char interspersed between values returned by FUNCTION.~%~@
+SEPARATOR is a string or character interspersed between values returned by FUNCTION.~%~@
+Keyword CHAR-CODE-AS-INTEGER (a boolean) when non-nil indicates that when
+SEPARATOR or an element of SEQUENCE satsifies `cl:characterp' then it should be
+converted to its string representation.~%~@
 :EXAMPLE~%
  \(values \(mapconcat \(function 1+\) '\(1 2 3 4\) #\\-\)
 	 \(mapconcat \(function 1+\) #\(1 2 3 4\) #\\-\)\)~%
- \(mapconcat #'identity 
-	    \(lambda \(x\) \(format nil \"~~d~~%\" \(1+ x\)\)\) #\\Newline\)~%
  \(mapconcat #'identity '\(1 2 3 4\) #\\Newline\)~%
- \(mapconcat #'identity '\(1 2 3 4 #\\newline\) \"\"\)
+ \(mapconcat #'identity '\(1 2 3 4 #\\newline\) \"\"\)~%
  \(mapconcat #'identity '\(1 2 3 4\) \"-\"\)~%
  \(mapconcat #'identity '\(\"a\" \"b\" \"c\" \"d\"\) #\\-\)~%
  \(mapconcat #'identity '\(#\\a #\\b #\\c #\\d\) #\\-\)~%
  \(mapconcat #'identity '\(#\\a #\\b #\\c #\\d\) \"-\"\)~%
  \(mapconcat #'identity '\(#\\a 8 #\\c 9\) \"-\"\)~%
- \(mapconcat #'identity #\(#\\a 8 #\\c 9\) \"-\"\)~%~@
+ \(mapconcat #'identity #\(#\\a 8 #\\c 9\) \"-\"\)~%
+ \(mapconcat #'identity \(list \"string\" \"foo\"\) #\\a\)~%
+ \(mapconcat #'identity \(list \"string\" \"foo\"\) \"----\"\)~%
+ \(mapconcat #'identity \(list \"string\" \"foo\"\) nil\)~%
+ \(mapconcat #'identity \(cons \"string\" \"foo\"\) 341\)~%
+ \(mapconcat #'identity nil #\\a\)~%
+ \(mapconcat #'identity \"string\" nil\)~%
+ \(mapconcat #'identity \"string\" 45\)~%
+ \(mapconcat #'identity \"string\" 45 :char-code-as-integer t\)~%
+ \(mapconcat #'identity #\(#\\s c #\\r #\\i #\\n #\\g\) \"-\"\)~%
+ \(mapconcat #'identity #\(#\\s 1 #\\r #\\i #\\n #\\g\) \"-\"\)~%
+ \(mapconcat #'identity #\(#\\s 1 #\\r #\\i #\\n #\\g\) 45 :char-code-as-integer t\)~%
+ \(mapconcat #'identity #\(#\\s 1 #\\r #\\i #\\n #\\g\) \"-\" :char-code-as-integer t\)~%~@
 :EMACS-LISP-COMPAT~%~@
 :SEE-ALSO `cl:concatenate', `mon:concat'.~%▶▶▶")
 
@@ -1331,11 +1436,42 @@ separating each string with a SEPARATOR character or string
  { ... EXAMPLE ... }~%~@
 :SEE-ALSO `<XREF>'.~%▶▶▶")
 
+(fundoc 'string-cat
+        "Concatenate STRING-SEQUENCE into a single string.~%~@
+STRING-SEQUENCE is proper-sequence the elements of which are either `cl:stringp'
+or `cl:characterp' with any character elements converted to their string equivalent.~%~@
+If STRING-SEQUENCE is `cl:stringp' it is returned as if by (list <STRING>).~%
+If STRING-SEQUENCE is null return value is the empty string.~%
+If STRING-SEQUENCE is not a proper-list an error is signaled.~%
+:EXAMPLE~%
+ \(string-cat nil\)~%
+ \(string-cat \"string\"\)~%
+ \(string-cat #\(\"a\" \"b\" \"c\" \"foo\"\)\)~%
+ \(string-cat '\(\"a\" \"b\" \"c\" \"foo\"\)\)~%
+ \(string-cat #\(\"a\" \"b\" #\\C \"foo\"\)\)~%
+ \(string-cat '\(\"a\" \"b\" #\\C \"foo\"\)\)~%~@
+Following error succesfully:~%
+ \(string-cat \(cons \"a\" \"b\"\)\)~%
+ \(string-cat \(list* #\(\"a\" \"b\" #\\C\) \"foo\"\)\)~%~@
+:SEE-ALSO `mon:concat', `mon:mapconcat', `mon:string-reduce' .~%▶▶▶")
+
 (fundoc 'string-reduce
-  "Join adjacent strings in a list, leave other values intact.~%~@
-:EXAMPLE~%~@
- { ... EXAMPLE ... }~%~@
-:SEE-ALSO `<XREF>'.~%▶▶▶")
+        "Join adjacent strings in LIST, leave other values intact.~%~@
+LIST is either a proper-list or a string.
+If LIST is `cl:stringp' it is returned as if by (list <STRING>).
+If LIST is not a proper-list an error is signaled.~%
+:EXAMPLE~%
+ \(string-reduce \"string\"\)~%
+ \(string-reduce \(list \"string\" \"foo\"\)\)~%
+ \(string-reduce \(list \"a\" \"b\" t \"c\" #\\, \"d\" nil #\\SPACE\)\)~%
+ \(string-reduce nil\)~%
+ \(string-reduce \(cdr \(cons \"string\" \"foo\"\)\)\)~%
+ \(string-reduce \(car \(cons \"string\" \"foo\"\)\)\)~%
+ \(string-reduce \(cons t nil\)\)~%
+ \(string-reduce \(cons nil nil\)\)~%~@
+:FOLLOWING errors succesfully:~%
+ \(string-reduce \(cons \"string\" \"foo\"\)\)~%~@
+:SEE-ALSO `mon:string-cat', `mon:string-explode' `mon:string-implode'.~%▶▶▶")
 
 (fundoc 'string-implode
   "Reduce a string-list of to a single string, inserting separator SEP between them.~%~@
@@ -1734,6 +1870,13 @@ An error is signaled if CHUNK-SIZE is greater than length of STRING.~%~@
 Following signals an error:
  \(string-call-with-substrings #'identity \"34328248350527230592375\" 24\)~%~@
 :SEE-ALSO `string-subdivide'.~%▶▶▶")
+
+
+(fundoc 'string-percent-encode
+        "percent-encode a STRING.~%
+:EXAMPLE~%
+ \(string-percent-encode \"A la poupée prints\"\)~%
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 ;;; ==============================
 

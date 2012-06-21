@@ -95,7 +95,7 @@ ensure_readme ()
 {
  if [ ! -e $MON_SYSTEM_GIT/README ]
   then
-     echo "Creaating empty README file: $MON_SYSTEM_GIT/README"
+     echo "Creating empty README file: $MON_SYSTEM_GIT/README"
      echo 
      touch $MON_SYSTEM_GIT/README
   fi
@@ -106,7 +106,7 @@ ensure_loadtime_bind ()
 {
  if [ ! -e $MON_SYSTEM_GIT/loadtime-bind ]
   then
-     echo "Creaating template file: $MON_SYSTEM_GIT/loadtime-bind"
+     echo "Creating template file: $MON_SYSTEM_GIT/loadtime-bind"
      printf "\n(\"<USERNAME>\" . \"<MONIKER>\")\n\n" > $MON_SYSTEM_GIT/loadtime-bind
   fi
 }

@@ -434,6 +434,8 @@ compared with elements in VECTOR using TEST, which defaults to EQL."
 
 
 
+
+
 
 ;;; ==============================
 ;;; :ARRAYS-DOCUMENTATION

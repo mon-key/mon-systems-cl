@@ -58,6 +58,7 @@
 	  (ldb (byte 16 0)  secs) ;; lo-bit
 	  usec)))
 
+
 ;; :SOURCE CLOCC-cllib/port/sys.lisp :WAS `tz->string'
 ;; 
 ;; we want -0500 (EST) and -0400 (EDT) and aren't getting them.
@@ -94,15 +95,13 @@
             (format nil "-0500~A" (or (and long " (EST)") "")))
     (time-zone-to-string tz dst long))))
 
-;;; :SOURCE Zach Beane's use-net-legend/utils.lisp :WAS `pretty-time-string'
 (defun time-string-yyyy-mm-dd (&optional universal-time stream)
   (declare (stream-or-boolean-or-string-with-fill-pointer stream))
-  (unless universal-time 
-    (setf universal-time (get-universal-time)))
-  (multiple-value-bind (second minute hour day month year)
-      (decode-universal-time universal-time)
-    (declare (ignore second minute hour))
-    (format stream "~4,'0D-~2,'0D-~2,'0D" year month day)))
+  (format-timestring stream
+                     (if universal-time
+                         (local-time:universal-to-timestamp universal-time)
+                         (local-time:now))
+                     :format *timestamp-yyyy-mm-dd-format*))
 
 (defun time-string-get-universal-time ()
   (declare (optimize (speed 3)))
@@ -135,9 +134,8 @@
   ;;                         (cdr *user-name*))
   ;;                    "")))
   ;;   (format stream "<Timestamp: #{~A} - by ~A>" (time-string-right-now) chk-usr))
-  (format-timestring stream (local-time:now)  :format *timestamp-for-file-header-format*))
+  (format-timestring stream (local-time:now) :format *timestamp-for-file-header-format*))
 
-;; 
 ;; (format-timestring nil (local-time:now) :format )
 
 ;; "<Timestamp: #{2012-03-03T18:32:03-0500Z} - by MON>"
@@ -191,8 +189,8 @@
                         (zerop offset))
                    (princ #\Z result)
                    (format result (if (eql fmt :gmt-offset-no-colon)
-                                      "~c~2,'0d~2,'0d"
-                                      "~c~2,'0d:~2,'0d")
+                                      "~C~2,'0D~2,'0D"
+                                      "~C~2,'0D:~2,'0D")
                            (if (minusp offset-hours) #\- #\+)
                            (abs offset-hours)
                            (truncate (abs offset-secs)
@@ -233,12 +231,12 @@
                  ((atom fmt)
                   (princ val result))
                  ((minusp val)
-                  (format result "-~v,vd"
+                  (format result "-~V,VD"
                           (second fmt)
                           (or (third fmt) #\0)
                           (abs val)))
                  (t
-                  (format result "~v,vd"
+                  (format result "~V,VD"
                           (second fmt)
                           (or (third fmt) #\0)
                           val)))))))))))
@@ -251,6 +249,32 @@
     (when stream
       (write-string result stream))
     result))
+
+;; :SOURCE dhs-db/dhs-db-api/timestamp.lisp
+;; :WAS `make-database-timestamp'
+(defun timestamp-from-database-convert (v)
+  (multiple-value-bind (matched values) (cl-ppcre:scan-to-strings "^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.[0-9]+)?$" v)
+    (unless matched (error "Can't parse ~S as a timestamp" v))
+    ;;(make-instance 'database-timestamp :value 
+    (encode-universal-time  (parse-integer (aref values 5))
+                           (parse-integer (aref values 4))
+                           (parse-integer (aref values 3))
+                           (parse-integer (aref values 2))
+                           (parse-integer (aref values 1))
+                           (parse-integer (aref values 0)));)
+    ))
+;; :SOURCE dhs-db/dhs-db-api/timestamp.lisp
+;; :WAS `make-database-date'
+(defun date-from-database-convert (v)
+  (multiple-value-bind (matched values) (cl-ppcre:scan-to-strings "^([0-9]{4})-([0-9]{2})-([0-9]{2})$" v)
+    (unless matched
+      (error "Can't parse ~S as a date" v))
+    ;;(make-instance 'database-date :value 
+    (encode-universal-time 0 0 0
+                           (parse-integer (aref values 2))
+                           (parse-integer (aref values 1))
+                           (parse-integer (aref values 0))) ;)
+    ))
 
 ;;; ==============================
 

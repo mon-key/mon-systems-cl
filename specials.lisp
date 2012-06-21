@@ -193,10 +193,12 @@
 (defvar *timestamp-for-file-format*
   '((:year 4) #\- (:month 2) #\- (:day 2) #\T (:hour 2) (:min 2) (:sec 2)))
 
-
 (defvar *timestamp-for-file-gmt-no-colon-offset-format*
   '((:year 4) #\- (:month 2) #\- (:day 2) #\T (:hour 2) (:min 2) (:sec 2)
     :gmt-offset-no-colon))
+
+(defvar *timestamp-yyyy-mm-dd-format*
+  '((:year 4) #\- (:month 2) #\- (:day 2)))
 
 ;; :SOURCE cl-docutils-20101006-git/utilities.lisp :WAS `*length-units*'
 (defconst* *length-unit* list 

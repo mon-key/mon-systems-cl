@@ -518,7 +518,6 @@
        ,@body)))
 
 ;;; ==============================
-
 ;;; until/while using `do'
 (defmacro until (test &body body)
   `(do () (,test) ,@body))
@@ -987,7 +986,7 @@ until test returns nil.~%~@
 :EXAMPLE~%~@
  { ... <EXAMPLE> ... }~%~@
 :NOTE This macro uses `cl:do', the  macro uses `cl:loop'.
-:SEE-ALSO `mon:while',  `mon:for'.~%▶▶▶")
+:SEE-ALSO `mon:while', `mon:for'.~%▶▶▶")
 
 (fundoc 'dosublists
 "<DOCSTR>~%~@

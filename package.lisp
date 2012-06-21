@@ -91,6 +91,7 @@
    #:*timestamp-for-file-header-format*
    #:*timestamp-for-file-format*
    #:*timestamp-for-file-gmt-no-colon-offset-format*
+   #:*timestamp-yyyy-mm-dd-format*
    #:*week-days*
    #:*month-names*
    #:*roman-numeral-map*
@@ -241,6 +242,7 @@
    #:class-subclasses ;; sb-mop:class-direct-subclasses
    #:class-name-of
    #:find-class-name-as-string
+   #:find-class-slot-instance
    #:slot-definition-and-name ;; sb-mop:class-finalized-p, sb-mop:slot-definition-name
    #:class-bound-slot-names
    #+sbcl #:copy-instance-of-class-shallowly ;; sb-mop:class-slots sb-mop:slot-value-using-class sb-mop:slot-boundp-using-class
@@ -730,6 +732,7 @@
    #:string-coerce-from
    #:string-replace-all
    #:string-cat
+   #:string-reduce
    #:string-convert-to-readable
    #:string-to-char
    #:string-upto-char
@@ -769,6 +772,7 @@
    #:string-lines-to-array
    #:string-subdivide
    #:string-call-with-substrings
+   #:string-percent-encode
    #+sbcl #:string-remove-backslashes ;; sb-impl::remove-backslashes
    ;;
  ;; file-dir.lisp

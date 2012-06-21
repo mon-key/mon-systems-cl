@@ -276,7 +276,12 @@
        :when (closer-mop:slot-boundp-using-class class object slotd)
        :collect (closer-mop:slot-definition-name slotd))))
 
-
+;; :COURTESY lokedhs dhs-db/persistmetaclasses.lisp
+;; :WAS `find-slot-instance'
+(defun find-class-slot-instance (class slot-name)
+  (dolist (s (closer-mop:class-slots class))
+    (when (eql (closer-mop:slot-definition-name s) slot-name)
+      (return s))))
 
 ;;; ==============================
 ;; (sb-mop:class-slots (find-class 'dbc:base-description))
@@ -290,6 +295,12 @@
 ;;; ==============================
 ;;; :CLASS-UTILS-DOCUMENTATION
 ;;; ==============================
+
+(fundoc 'find-class-slot-instance
+        "Return the effective slot-definition-name for SLOT-NAME of class.
+:EXAMPLE~%~@
+ { ... <EXAMPLE> ... } ~%~@
+:SEE-ALSO `<XREF>'.~%▶▶▶")
 
 (fundoc 'slot-definition-and-name
         "Return SLOT-DEFINITION-NAME object of CLASS.~%~@

@@ -639,6 +639,7 @@ UNSIGNED-INT should be of type `mon:index'.~%~@
  { ... <EXAMPLE> ... } ~%~@
 :SEE-ALSO `prime-plusp', `prime-or-next-greatest'.~%▶▶▶")
 
+
 (fundoc 'number-nearest-seq
         "Return a list indicating the number of NUMBER-BAG nearest TARGET-NUMBER.~%~@
 TARGET-NUMBER is an object of type `cl:real', an error is signaled if not.~%~@

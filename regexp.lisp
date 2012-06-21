@@ -252,6 +252,93 @@
                                                             slashes-8)
                                 "\\^")))
 
+ 
+;;; ==============================
+;;; :NOTE `regex-when' `regex-case' macros are probably a bad idea b/c they can fail in
+;;; bad ways when the index into the match array doesn't match the bindings.
+;;; ==============================
+;; :COURTESY Julian Stecklina's gdb-remote
+;; :SOURCE (URL `https://github.com/blitz/gdb-remote/blob/master/utility-macros.lisp')
+;; (defmacro regex-when ((regex string &rest submatches) &body body)
+;;   (alexandria:with-unique-names (match? submatch-vector)
+;;     `(multiple-value-bind (,match? ,submatch-vector)
+;;          (cl-ppcre:scan-to-strings ,regex ,string)
+;;        ;; (declare (ignorable ,submatch-vector))
+;;        ;; Following is from Stecklina' orignal definition which failed when the match
+;;        ;; was for simple regexes like "FOO". e.g.:
+;;        ;;  (cl-ppcre:scan-to-strings "FOO" "string-FOO") => "FOO", #()
+;;        ;; returns a vector we can't meaningfully index into b/c its length is zerop!
+;;        ;; 
+;;        ;; :WAS 
+;;        ;; (when ,match?
+;;        ;;  (let ,(loop
+;;        ;;         for index upfrom 0
+;;        ;;         for var-name in submatches
+;;        ;;         collect `(,var-name (aref ,submatch-vector ,index)))
+;;        ;;   ,@body)))))
+;;        ;;
+;;        (when ,match?
+;;          (if (zerop (length ,submatch-vector))
+;;              (let ((,(or (car submatches) (gensym))  ,match?))
+;;                ,@body)
+;;              ;; :NOTE this fails when the length of submatches is greater than that of submatch-vector
+;;              (let ,(loop
+;;                      for index upfrom 0
+;;                      for var-name in submatches
+;;                      collect `(,var-name (aref ,submatch-vector ,index)))
+;;                ,@body))))))
+;;             
+;; (regex-when ("FOO" "string-FOO" foo-part more-part again) again)
+;; (regex-when ("(.*)(-FOO)" "string-FOO" string-part foo-part) (downcase foo-part))
+;; (regex-when ("((.*)(-FOO))" "string-FOO" string-part foo-part more-part) (list string-part foo-part more-part))
+;; (regex-when ("(.*)(-FOO)" "string-FOO" string-part foo-part error-part) error-part) => error
+;;
+;; :COURTESY Julian Stecklina's gdb-remote
+;; :SOURCE (URL `https://github.com/blitz/gdb-remote/blob/master/utility-macros.lisp')
+;; (defmacro regex-case (string &body clauses)
+;;   (alexandria:with-unique-names (the-string block-name)
+;;     `(let ((,the-string ,string))
+;;        (block ,block-name
+;;          ,@(loop
+;;               for (condition . body) in clauses
+;;               collect (if (eq condition 't)
+;;                           `(return-from ,block-name
+;;                              (progn ,@body))
+;;                           (destructuring-bind (regex &rest vars)
+;;                               condition
+;;                             `(regex-when (,regex ,the-string ,@vars)
+;;                                (return-from ,block-name
+;;                                  (progn ,@body))))))))))
+;;
+;; (fundoc 'regex-case
+;; "Match STRING with a regular expression in CLAUSES.~%~@
+;; CLAUSES is a list each element of which is a list with one of the following formats:~%
+;;  \(\(<REGEX>\) <FORMS>\)~%
+;;  \(\(<REGEX> <MATCH-VARS>\) <FORMS>\)~%~@
+;; <REGEX> is a regular expression suitable for use with `cl-ppcre:scan-to-strings'.~%~@
+;; <MATCH-VARS> are any one or more symbols bound to a corresponding index of the
+;; vector at nth-value 1 returned by `cl-ppcre:scan-to-strings'. It is an error if
+;; the number of MATCH-VARS exceeds the indexable range of the returned match vector.~%~@
+;; <FORMS> is zero or more forms to be executed. When <FORMS> are present these are
+;; executed as an implicit progn with <MATCH-VARS> bindings active in the dynamic
+;; scope of the progn.~%~@
+;; :EXAMPLE~% 
+;;  \(regex-case \"string-FOO\"
+;;    \(\(\"^-FOO\"\) \"you'll never-see-this\"\)
+;;    \(\(\"\(.*\)\(-FOO\)\" string-part foo-part\)
+;;     \(list
+;;      \(string-capitalize string-part\)
+;;      \(string-downcase foo-part\)\)\)\)~%~@
+;; :NOTE The following signals an out-of-bounds error b/c the local wont-match var is
+;; outside the bounds of the vector returned by `cl-ppcre:scan-to-strings'
+;; nth-value 1:~%
+;;  \(regex-case \"string-FOO\"
+;;    \(\(\"^-FOO\"\) \"you'll never-see-this\"\)
+;;    \(\(\"\(.*\)\(-FOO\)\" string-part foo-part wont-match\)
+;;     wont-match\)\)~%~@
+;; :SEE-ALSO `regex-when', `cl-ppcre:register-groups-bind', `string-case:string-case'.~%▶▶▶")
+;;; ==============================
+
 
 ;;; ==============================
 ;; :NOTE Following functions: `do-all-lines', `with-lines-from-files', `file-grep'
